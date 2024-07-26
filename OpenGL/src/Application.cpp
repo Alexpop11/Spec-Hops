@@ -114,14 +114,16 @@ int main(void)
 
     /* Loop until the user closes the window */
 
-    float positions[12] = {
+    float positions[] = {
         -0.5f, -0.5f,
          0.5f, -0.5f,
-         0.5f, 0.5f,
-         
-         0.5f, 0.5f,
+         0.5f, 0.5f,   
          -0.5f, 0.5f,
-         -0.5f, -0.5f
+    };
+
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
     };
 
     unsigned int buffer;
@@ -131,6 +133,12 @@ int main(void)
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
     ShaderProgramSource source = ParseShader("res/shaders/shader.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
@@ -144,10 +152,17 @@ int main(void)
 
     while (!glfwWindowShouldClose(window))
     {
+        int timeLocation = glGetUniformLocation(shader, "u_time");
+        int resolutionLocation = glGetUniformLocation(shader, "u_resolution");
+
         /* Render here */
+        float currentTime = glfwGetTime(); // Or any other method to get the elapsed time
+        glUniform1f(timeLocation, currentTime);
+        glUniform2f(resolutionLocation, 2560, 1440);
+
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
