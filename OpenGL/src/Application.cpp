@@ -9,6 +9,7 @@
 #include "Renderer.h"
 
 #include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
@@ -99,8 +100,9 @@ int main(void)
     vb.Unbind();
     ib.Unbind();
     shader.Unbind();
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    
+
+    Renderer renderer;
 
     float r = 0.0f;
     float increment = 0.05f;
@@ -109,18 +111,13 @@ int main(void)
     {
 
         /* Render here */
+        renderer.Clear();
         float currentTime = glfwGetTime(); // Or any other method to get the elapsed time
 
-        GLCall(glClear(GL_COLOR_BUFFER_BIT));
-
-        shader.Bind();
+        shader.Bind(); //mby remove
         shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-        
-        va.Bind();
-        ib.Bind();
 
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
-
+        renderer.Draw(va, ib, shader);
         if (r > 1.0f) 
         {
             increment = -0.05f;
