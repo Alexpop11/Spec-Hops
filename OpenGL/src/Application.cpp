@@ -109,13 +109,18 @@ int main(void)
 
     while (!glfwWindowShouldClose(window))
     {
+        int width, height;
+        glfwGetWindowSize(window, &width, &height); // Get the current window size
+        glViewport(0, 0, width, height);
 
         /* Render here */
+
         renderer.Clear();
         float currentTime = glfwGetTime(); // Or any other method to get the elapsed time
 
         shader.Bind(); //mby remove
         shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+        shader.SetUniform1f("u_AspectRatio", float(width)/float(height));
 
         renderer.Draw(va, ib, shader);
         if (r > 1.0f) 
