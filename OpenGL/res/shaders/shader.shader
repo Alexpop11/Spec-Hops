@@ -4,10 +4,13 @@
 layout(location = 0) in vec4 position;
 
 uniform float u_AspectRatio;
+uniform vec2 u_Position;
+
 
 void main()
 {
     vec4 adjustedPosition = position;
+    adjustedPosition.xy += u_Position;
     adjustedPosition.y *= u_AspectRatio;
     gl_Position = adjustedPosition;
 }
@@ -17,6 +20,7 @@ void main()
 
 layout(location = 0) out vec4 color;
 uniform vec4 u_Color;
+
 
 void main()
 {

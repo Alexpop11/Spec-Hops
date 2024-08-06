@@ -121,6 +121,7 @@ int main(void)
         shader.Bind(); //mby remove
         shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
         shader.SetUniform1f("u_AspectRatio", float(width)/float(height));
+        shader.SetUniform2f("u_Position", r, 0.3f);
 
         renderer.Draw(va, ib, shader);
         if (r > 1.0f) 
