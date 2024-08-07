@@ -1,13 +1,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 
-#include "Renderer.h"
+#define STB_IMAGE_IMPLEMENTATION // for icon
+#include "stb_image.h"
 
+#include "Renderer.h"
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
@@ -34,9 +35,24 @@ static bool GLLogCall(const char* function, const char* file, int line)
     return true;
 }
 
+void setWindowIcon(GLFWwindow* window, const char* iconPath) {
+    int width, height, channels;
+    unsigned char* pixels = stbi_load(iconPath, &width, &height, &channels, 4);
+    if (pixels) {
+        GLFWimage images[1];
+        images[0].width = width;
+        images[0].height = height;
+        images[0].pixels = pixels;
+        glfwSetWindowIcon(window, 1, images);
+        stbi_image_free(pixels);
+    }
+    else {
+        std::cerr << "Failed to load icon: " << iconPath << std::endl;
+    }
+}
+
 int main(void)
 {
-    GLFWwindow* window;
 
     /* Initialize the library */
     if (!glfwInit())
@@ -46,13 +62,22 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-    if (!window)
-    {
+   
+
+    // Get the primary monitor
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+
+    // Create a fullscreen window
+    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "SpaceBoom", primaryMonitor, NULL);
+    if (!window) {
+        std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
+
+    // Set the window icon
+    setWindowIcon(window, "res/Images/Logo.png");
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
