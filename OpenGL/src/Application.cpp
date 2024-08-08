@@ -14,6 +14,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "GameObject.h"
 
 #define ASSERT(x) if (!(x)) __debugbreak(); // Remove this line if you are not using visual studio
 #define GLCall(x) GLClearError();\
@@ -51,6 +52,15 @@ void setWindowIcon(GLFWwindow* window, const char* iconPath) {
     }
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+        std::cout << "Escape key was pressed" << std::endl;
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+}
+
 int main(void)
 {
 
@@ -76,6 +86,8 @@ int main(void)
         return -1;
     }
 
+    glfwSetKeyCallback(window, key_callback);
+
     // Set the window icon
     setWindowIcon(window, "res/Images/Logo.png");
 
@@ -89,76 +101,21 @@ int main(void)
 
     std::cout << "current version of GL: " << glGetString(GL_VERSION) << std::endl;
 
-    /* Loop until the user closes the window */
-
-    float positions[] = {
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-         0.5f, 0.5f,   
-         -0.5f, 0.5f,
-    };
-
-    unsigned int indices[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
-
-    unsigned int vao;
-    GLCall(glGenVertexArrays(1, &vao));
-    GLCall(glBindVertexArray(vao));
-
-    VertexArray va;
-    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
-    VertexBufferLayout layout;
-    layout.Push<float>(2);
-    va.AddBuffer(vb, layout);
-
-
-    IndexBuffer ib(indices, 6);
-
-    Shader shader("res/shaders/shader.shader");
-    shader.Bind();
-    shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
-
-    va.Unbind();
-    shader.Unbind();
-    vb.Unbind();
-    ib.Unbind();
-    shader.Unbind();
-    
-
     Renderer renderer;
+    renderer.window = window;
 
     float r = 0.0f;
     float increment = 0.05f;
 
+    GameObject coolbox("Coolbox", 1, 0,0);
+
+    // LOOP
     while (!glfwWindowShouldClose(window))
     {
-        int width, height;
-        glfwGetWindowSize(window, &width, &height); // Get the current window size
-        glViewport(0, 0, width, height);
-
-        /* Render here */
-
         renderer.Clear();
-        float currentTime = glfwGetTime(); // Or any other method to get the elapsed time
 
-        shader.Bind(); //mby remove
-        shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-        shader.SetUniform1f("u_AspectRatio", float(width)/float(height));
-        shader.SetUniform2f("u_Position", r, 0.3f);
-
-        renderer.Draw(va, ib, shader);
-        if (r > 1.0f) 
-        {
-            increment = -0.05f;
-        }
-        else if (r < 0.0f)
-        {
-            increment = 0.05f;
-        }
-
-        r += increment;
+        coolbox.update();
+        coolbox.render(renderer);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

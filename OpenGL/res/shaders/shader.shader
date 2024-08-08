@@ -10,7 +10,9 @@ uniform vec2 u_Position;
 void main()
 {
     vec4 adjustedPosition = position;
+    adjustedPosition.xy /= 18;
     adjustedPosition.xy += u_Position;
+    adjustedPosition.xy -= 0.5;
     adjustedPosition.y *= u_AspectRatio;
     gl_Position = adjustedPosition;
 }
