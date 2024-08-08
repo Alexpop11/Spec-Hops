@@ -15,6 +15,7 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "GameObject.h"
+#include "Input.h"
 
 #define ASSERT(x) if (!(x)) __debugbreak(); // Remove this line if you are not using visual studio
 #define GLCall(x) GLClearError();\
@@ -113,6 +114,7 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
         renderer.Clear();
+        Input::updateKeyStates(window);
 
         coolbox.update();
         coolbox.render(renderer);

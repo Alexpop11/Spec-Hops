@@ -1,6 +1,7 @@
 
 
 #include "GameObject.h"
+#include "Input.h"
 
 
 GameObject::GameObject(const std::string& name, int drawPriority, float x, float y)
@@ -10,7 +11,22 @@ GameObject::GameObject(const std::string& name, int drawPriority, float x, float
 
 void GameObject::update() 
 {
-    x += 0.005;
+    if (Input::keys_pressed_down[GLFW_KEY_W])
+    {
+        y += 1;
+    }
+    if (Input::keys_pressed_down[GLFW_KEY_A])
+    {
+        x -= 1;
+    }
+    if (Input::keys_pressed_down[GLFW_KEY_S])
+    {
+        y -= 1;
+    }
+    if (Input::keys_pressed_down[GLFW_KEY_D])
+    {
+        x += 1;
+    }
 }
 
 void GameObject::render(Renderer& renderer) {
