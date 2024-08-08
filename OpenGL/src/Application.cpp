@@ -73,7 +73,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-   
+
 
     // Get the primary monitor
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
@@ -108,7 +108,9 @@ int main(void)
     float r = 0.0f;
     float increment = 0.05f;
 
-    GameObject coolbox("Coolbox", 1, 0,0);
+    std::vector<std::unique_ptr<GameObject>> gameobjects;
+    gameobjects.push_back(std::make_unique<GameObject>(GameObject("Coolbox", 1, 0, 0)));
+    gameobjects.push_back(std::make_unique<GameObject>(GameObject("Coolbox2", 1, 2, 0)));
 
     // LOOP
     while (!glfwWindowShouldClose(window))
@@ -116,8 +118,15 @@ int main(void)
         renderer.Clear();
         Input::updateKeyStates(window);
 
-        coolbox.update();
-        coolbox.render(renderer);
+        for (auto &gameobject : gameobjects) 
+        {   
+            gameobject->update();
+        }
+
+        for (auto& gameobject : gameobjects)
+        {
+            gameobject->render(renderer);
+        }
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

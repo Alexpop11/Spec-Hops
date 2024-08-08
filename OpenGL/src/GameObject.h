@@ -16,8 +16,8 @@ class GameObject {
 public:
     GameObject(const std::string& name, int drawPriority, float x, float y);
 
-    void render(Renderer& renderer);
-    void update();
+    virtual void render(Renderer& renderer);
+    virtual void update();
 
     std::string name;
     int drawPriority;
