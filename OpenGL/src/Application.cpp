@@ -14,8 +14,9 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
-#include "GameObject.h"
+#include "game_objects/GameObject.h"
 #include "Input.h"
+#include "game_objects/Player.h"
 
 #define ASSERT(x) if (!(x)) __debugbreak(); // Remove this line if you are not using visual studio
 #define GLCall(x) GLClearError();\
@@ -109,8 +110,8 @@ int main(void)
     float increment = 0.05f;
 
     std::vector<std::unique_ptr<GameObject>> gameobjects;
-    gameobjects.push_back(std::make_unique<GameObject>(GameObject("Coolbox", 1, 0, 0)));
-    gameobjects.push_back(std::make_unique<GameObject>(GameObject("Coolbox2", 1, 2, 0)));
+    gameobjects.push_back(std::make_unique<Player>(Player("Coolbox", 0, 0)));
+    gameobjects.push_back(std::make_unique<Player>(Player("Coolbox2", 2, 0)));
 
     // LOOP
     while (!glfwWindowShouldClose(window))

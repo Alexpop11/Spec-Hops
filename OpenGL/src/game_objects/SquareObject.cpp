@@ -1,39 +1,13 @@
+#include "SquareObject.h"
 
+SquareObject::SquareObject(const std::string& name, int drawPriority, float x, float y)
+    : GameObject(name, drawPriority, x, y) {}
 
-#include "GameObject.h"
-#include "Input.h"
-
-
-GameObject::GameObject(const std::string& name, int drawPriority, float x, float y)
-    : name(name), drawPriority(drawPriority), x(x), y(y) {
-    // TODO: Add any additional initialization if needed
-}
-
-void GameObject::update() 
-{
-    if (Input::keys_pressed_down[GLFW_KEY_W])
-    {
-        y += 1;
-    }
-    if (Input::keys_pressed_down[GLFW_KEY_A])
-    {
-        x -= 1;
-    }
-    if (Input::keys_pressed_down[GLFW_KEY_S])
-    {
-        y -= 1;
-    }
-    if (Input::keys_pressed_down[GLFW_KEY_D])
-    {
-        x += 1;
-    }
-}
-
-void GameObject::render(Renderer& renderer) {
+void SquareObject::render(Renderer& renderer) {
     float positions[] = {
         -0.5f, -0.5f,
          0.5f, -0.5f,
-         0.5f, 0.5f,   
+         0.5f, 0.5f,
          -0.5f, 0.5f,
     };
 
@@ -73,5 +47,8 @@ void GameObject::render(Renderer& renderer) {
 
     renderer.Draw(va, ib, shader);
 
-    // This function should handle drawing the GameObject
+}
+
+void SquareObject::update() {
+    // Update logic for SquareObject
 }

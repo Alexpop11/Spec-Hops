@@ -5,12 +5,12 @@
 #include <iostream>
 #include <string>
 
-#include "Renderer.h"
-#include "VertexBuffer.h"
-#include "VertexBufferLayout.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "Shader.h"
+#include "../Renderer.h"
+#include "../VertexBuffer.h"
+#include "../VertexBufferLayout.h"
+#include "../IndexBuffer.h"
+#include "../VertexArray.h"
+#include "../Shader.h"
 
 class GameObject {
 public:
