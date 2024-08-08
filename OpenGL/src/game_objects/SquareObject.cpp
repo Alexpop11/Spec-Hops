@@ -1,7 +1,11 @@
 #include "SquareObject.h"
 
 SquareObject::SquareObject(const std::string& name, int drawPriority, float x, float y)
-    : GameObject(name, drawPriority, x, y) {}
+    : GameObject(name, drawPriority, x, y) {
+    r = 0.5;
+    g = 0.5;
+    b = 0.5;
+}
 
 void SquareObject::render(Renderer& renderer) {
     float positions[] = {
@@ -30,8 +34,6 @@ void SquareObject::render(Renderer& renderer) {
     IndexBuffer ib(indices, 6);
 
     Shader shader("res/shaders/shader.shader");
-    shader.Bind();
-    shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
 
     int width, height;
     glfwGetWindowSize(renderer.window, &width, &height); // Get the current window size
@@ -40,8 +42,8 @@ void SquareObject::render(Renderer& renderer) {
     /* Render here */
     float currentTime = glfwGetTime(); // Or any other method to get the elapsed time
 
-    shader.Bind(); //mby remove
-    shader.SetUniform4f("u_Color", 1, 0.3f, 0.8f, 1.0f);
+    shader.Bind(); 
+    shader.SetUniform4f("u_Color", r, g, b, 1.0f);
     shader.SetUniform1f("u_AspectRatio", float(width) / float(height));
     shader.SetUniform2f("u_Position", x, y);
 

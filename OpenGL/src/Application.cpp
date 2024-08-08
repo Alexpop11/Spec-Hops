@@ -1,5 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <algorithm>
+#include <memory>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -63,6 +65,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
+void sortGameObjectsByPriority(std::vector<std::unique_ptr<GameObject>>& gameObjects) {
+    std::sort(gameObjects.begin(), gameObjects.end(),
+        [](const std::unique_ptr<GameObject>& a, const std::unique_ptr<GameObject>& b) {
+            return a->drawPriority < b->drawPriority;
+        });
+}
+
 int main(void)
 {
 
@@ -111,11 +120,17 @@ int main(void)
 
     std::vector<std::unique_ptr<GameObject>> gameobjects;
     gameobjects.push_back(std::make_unique<Player>(Player("Coolbox", 0, 0)));
-    gameobjects.push_back(std::make_unique<Player>(Player("Coolbox2", 2, 0)));
+    gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 0, 0)));
+    gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 1, 0)));
+    gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 0, 1)));
+    gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 1, 1)));
+    
+
 
     // LOOP
     while (!glfwWindowShouldClose(window))
     {
+        sortGameObjectsByPriority(gameobjects);
         renderer.Clear();
         Input::updateKeyStates(window);
 
