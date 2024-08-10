@@ -78,6 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="res\maps\SpaceView.txt" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\game_objects\Character.cpp" />
     <ClCompile Include="src\game_objects\Enemy.cpp" />

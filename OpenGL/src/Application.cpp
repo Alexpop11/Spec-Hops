@@ -72,6 +72,24 @@ void sortGameObjectsByPriority(std::vector<std::unique_ptr<GameObject>>& gameObj
         });
 }
 
+std::vector<std::string> mapLoader(const std::string& filename) {
+    std::vector<std::string> lines;
+    std::ifstream file(filename);
+
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return lines;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        lines.push_back(line);
+    }
+
+    file.close();
+    return lines;
+}
+
 int main(void)
 {
 
@@ -117,15 +135,14 @@ int main(void)
 
     float r = 0.0f;
     float increment = 0.05f;
-
-    std::vector<std::unique_ptr<GameObject>> gameobjects;
-    gameobjects.push_back(std::make_unique<Player>(Player("Coolbox", 0, 0)));
-    gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 0, 0)));
-    gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 1, 0)));
-    gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 0, 1)));
-    gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 1, 1)));
     
-
+    //std::string MapToUse = "../res/maps/SpaceView.txt";
+    //std::vector<std::string> lines = mapLoader(MapToUse);
+    std::vector<std::unique_ptr<GameObject>> gameobjects;
+#include "../res/maps/SpaceView.txt"
+    //for (const auto& line : lines) {
+    //    std::cout << line << std::endl;
+    //}
 
     // LOOP
     while (!glfwWindowShouldClose(window))
