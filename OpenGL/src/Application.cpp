@@ -6,6 +6,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <AL/al.h>
+#include <AL/alc.h>
 
 #define STB_IMAGE_IMPLEMENTATION // for icon
 #include "stb_image.h"
@@ -168,6 +170,7 @@ int main(void)
         glfwPollEvents();
     }
 
+    //cleanupOpenAL();
     glfwTerminate();
     return 0;
 }

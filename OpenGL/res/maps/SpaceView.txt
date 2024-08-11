@@ -30,10 +30,18 @@ gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 2, 7)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 2, 8)));
 
+
 // Middle platform 
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 6, 6)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 7, 6)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 8, 6)));
+
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 5, 6)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 6, 5)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 7, 5)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 8, 5)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 9, 6)));
+
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 6, 7)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 6, 8)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 7, 8)));
@@ -41,6 +49,13 @@ gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 7, 8)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 8, 7)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 8, 8)));
+
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 5, 8)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 6, 9)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 7, 9)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 8, 9)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 9, 8)));
+
 
 // left Middle walkway
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 3, 7)));
@@ -58,3 +73,20 @@ gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 1, 14)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 2, 13)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 2, 14)));
+
+// Right middle platform 
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 12, 6)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 13, 6)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 14, 6)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 12, 7)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 12, 8)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 13, 8)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 13, 7)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 13, 8)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 14, 7)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 14, 8)));
+
+// left Middle walkway
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 9, 7)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 10, 7)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 11, 7)));

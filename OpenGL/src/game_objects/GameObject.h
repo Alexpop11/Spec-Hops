@@ -19,6 +19,8 @@ public:
     virtual void render(Renderer& renderer);
     virtual void update();
 
+    Shader shader;
+
     std::string name;
     int drawPriority;
     float x;
