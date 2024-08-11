@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <string>
+#include <optional>
 
 #include "../Renderer.h"
 #include "../VertexBuffer.h"
@@ -16,10 +17,11 @@ class GameObject {
 public:
     GameObject(const std::string& name, int drawPriority, float x, float y);
 
+    virtual void setUpShader(Renderer& renderer);
     virtual void render(Renderer& renderer);
     virtual void update();
 
-    Shader shader;
+    std::optional<Shader> shader;
 
     std::string name;
     int drawPriority;

@@ -33,7 +33,7 @@ float random(vec2 coord)
 
 void main()
 {
-    vec2 uv = gl_FragCoord.xy / u_Resolution;
+    vec2 uv = gl_FragCoord.xy / 1080;
     
     // Offset the stars to create a drifting effect
     float starX = fract(uv.x + u_Time * 0.05);

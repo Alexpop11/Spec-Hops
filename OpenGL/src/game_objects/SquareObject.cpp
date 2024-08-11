@@ -5,10 +5,19 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, float x, f
     r = 0.5;
     g = 0.5;
     b = 0.5;
-    shader = Shader("res/shaders/shader.shader");
+    shader = std::move(std::make_optional<Shader>("res/shaders/stars.shader"));
+}
+
+void SquareObject::setUpShader(Renderer& renderer)
+{
+    GameObject::setUpShader(renderer);
+    shader->SetUniform4f("u_Color", r, g, b, 1.0f);
 }
 
 void SquareObject::render(Renderer& renderer) {
+    
+    GameObject::render(renderer);
+
     float positions[] = {
         -0.5f, -0.5f,
          0.5f, -0.5f,
@@ -34,19 +43,7 @@ void SquareObject::render(Renderer& renderer) {
 
     IndexBuffer ib(indices, 6);
 
-    int width, height;
-    glfwGetWindowSize(renderer.window, &width, &height); // Get the current window size
-    glViewport(0, 0, width, height);
-
-    /* Render here */
-    float currentTime = glfwGetTime(); // Or any other method to get the elapsed time
-
-    shader.Bind(); 
-    shader.SetUniform4f("u_Color", r, g, b, 1.0f);
-    shader.SetUniform1f("u_AspectRatio", float(width) / float(height));
-    shader.SetUniform2f("u_Position", x, y);
-
-    renderer.Draw(va, ib, shader);
+    renderer.Draw(va, ib, shader.value());
 
 }
 

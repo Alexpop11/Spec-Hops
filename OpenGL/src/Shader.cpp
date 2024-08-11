@@ -16,7 +16,9 @@ Shader::Shader(const std::string& filepath)
 
 Shader::~Shader()
 {
-    GLCall(glDeleteProgram(m_RendererID));
+    if (m_RendererID != 0) {
+        GLCall(glDeleteProgram(m_RendererID));
+    }
 }
 
 
@@ -92,6 +94,33 @@ unsigned int Shader::CreateShader(const std::string& vertexShader, const std::st
     glDeleteShader(fs);
 
     return program;
+}
+
+Shader::Shader(Shader&& other) noexcept
+    : m_FilePath(std::move(other.m_FilePath)),
+    m_RendererID(other.m_RendererID),
+    m_UniformLocationCache(std::move(other.m_UniformLocationCache))
+{
+    // Transfer ownership of the shader program
+    other.m_RendererID = 0;
+}
+
+Shader& Shader::operator=(Shader&& other) noexcept
+{
+    if (this != &other)
+    {
+        // Delete current resources
+        GLCall(glDeleteProgram(m_RendererID));
+
+        // Transfer ownership
+        m_FilePath = std::move(other.m_FilePath);
+        m_RendererID = other.m_RendererID;
+        m_UniformLocationCache = std::move(other.m_UniformLocationCache);
+
+        // Reset other's m_RendererID
+        other.m_RendererID = 0;
+    }
+    return *this;
 }
 
 void Shader::Bind() const

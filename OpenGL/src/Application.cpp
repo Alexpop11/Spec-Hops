@@ -110,7 +110,7 @@ int main(void)
     const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
 
     // Create a fullscreen window
-    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "SpaceBoom", primaryMonitor, NULL);
+    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "SpaceBoom", NULL, NULL);
     if (!window) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -145,6 +145,8 @@ int main(void)
     //for (const auto& line : lines) {
     //    std::cout << line << std::endl;
     //}
+
+    Input::startTime = glfwGetTime();
 
     // LOOP
     while (!glfwWindowShouldClose(window))

@@ -7,6 +7,7 @@ class Input
 public:
     static bool keys_pressed[GLFW_KEY_LAST];
     static bool keys_pressed_down[GLFW_KEY_LAST];
+    static float startTime;
 private:
     static bool keys_pressed_last_frame[GLFW_KEY_LAST];
 

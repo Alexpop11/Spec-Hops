@@ -15,10 +15,14 @@ private:
 	std::string m_FilePath;
 	unsigned int m_RendererID;
 	std::unordered_map < std::string, int> m_UniformLocationCache;
-	// chaching for uniforms
+	// caching for uniforms
 
 public:
 	Shader(const std::string& filepath);
+	Shader(Shader&& other) noexcept;
+	Shader(const Shader&) = delete;
+	Shader& operator=(const Shader&) = delete;
+	Shader& operator=(Shader&& other) noexcept;
 	~Shader();
 
 	void Bind() const;
