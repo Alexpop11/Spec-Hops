@@ -8,7 +8,13 @@
 #include "Shader.h"
 
 
-#define ASSERT(x) if (!(x)) __debugbreak(); // Remove this line if you are not using visual studio
+#ifdef _MSC_VER
+#define ASSERT(x) if (!(x)) __debugbreak();
+#else
+#include <cassert>
+#define ASSERT assert
+#endif
+
 #define GLCall(x) GLClearError();\
     x;\
     ASSERT(GLLogCall(#x, __FILE__, __LINE__));
