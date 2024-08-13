@@ -1,8 +1,12 @@
 // player
 gameobjects.push_back(std::make_unique<Player>(Player("Coolbox", 1, 1)));
 
+// Background
+gameobjects.push_back(std::make_unique<Background>(Background("Background", 0, 0, 0)));
+
 // Bottom left platform
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 0, 0)));
+gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 1, 1)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 1, 0)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 2, 0)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 0, 1)));

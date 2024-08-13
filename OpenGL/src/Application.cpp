@@ -21,6 +21,7 @@
 #include "game_objects/GameObject.h"
 #include "Input.h"
 #include "game_objects/Player.h"
+#include "game_objects/Background.h"
 
 #define GLCall(x) GLClearError();\
     x;\

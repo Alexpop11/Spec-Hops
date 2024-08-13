@@ -28,6 +28,8 @@ void GameObject::setUpShader(Renderer& renderer)
         shader->SetUniform1f("u_StartTime", Input::startTime);
         shader->SetUniform1f("u_AspectRatio", float(width) / float(height));
         shader->SetUniform2f("u_Position", x, y);
+        shader->SetUniform2f("u_Resolution", width, height);
+
     }
 }
 

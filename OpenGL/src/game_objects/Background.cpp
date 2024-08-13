@@ -1,28 +1,24 @@
-#include "SquareObject.h"
+#include "Background.h"
 
-SquareObject::SquareObject(const std::string& name, int drawPriority, float x, float y)
+Background::Background(const std::string& name, int drawPriority, float x, float y)
     : GameObject(name, drawPriority, x, y) {
-    r = 0.5;
-    g = 0.5;
-    b = 0.5;
-    shader = std::move(std::make_optional<Shader>("res/shaders/shader.shader"));
+    shader = std::move(std::make_optional<Shader>("res/shaders/stars.shader"));
 }
 
-void SquareObject::setUpShader(Renderer& renderer)
+void Background::setUpShader(Renderer& renderer)
 {
     GameObject::setUpShader(renderer);
-    shader->SetUniform4f("u_Color", r, g, b, 1.0f);
 }
 
-void SquareObject::render(Renderer& renderer) {
-    
+void Background::render(Renderer& renderer) {
+
     GameObject::render(renderer);
 
     float positions[] = {
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-         0.5f, 0.5f,
-         -0.5f, 0.5f,
+        -1.0f, -1.0f,
+         1.0f, -1.0f,
+         1.0f, 1.0f,
+         -1.0f, 1.0f,
     };
 
     unsigned int indices[] = {
@@ -47,6 +43,6 @@ void SquareObject::render(Renderer& renderer) {
 
 }
 
-void SquareObject::update() {
-    // Update logic for SquareObject
+void Background::update() {
+    // Update logic for Background
 }
