@@ -154,7 +154,7 @@ unsigned int Shader::GetUniformLocation(const std::string& name)
         return m_UniformLocationCache[name];
     
     GLCall(int location = glGetUniformLocation(m_RendererID, name.c_str()));
-    if (location == -1 && name.find("u_StartTime") == std::string::npos && name.find("u_Color") == std::string::npos && name.find("u_Time") == std::string::npos) {
+    if (location == -1 && name.find("u_StartTime") == std::string::npos && name.find("u_Color") == std::string::npos && name.find("u_Time") == std::string::npos && name.find("u_Resolution") == std::string::npos) {
         
         std::cout << "Warning: uniform '" << name << "' doesn't exist!" << std::endl;
     }
