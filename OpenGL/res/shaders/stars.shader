@@ -21,10 +21,21 @@ float random(vec2 coord)
 
 float star(vec2 uv, vec2 center, float size)
 {
-    vec2 d = uv - center;
-    float r = length(d);
-    float brightness = 1.0 - smoothstep(0.0, size, r);
-    return brightness * brightness;
+    vec2 d = abs(uv - center);
+    float manhattanDist = d.x + d.y;
+    float euclideanDist = length(d);
+    float pointiness = 3;
+
+    float star = 1.0 - smoothstep(0.0, size / .25, euclideanDist);
+    
+    // Combine Manhattan and Euclidean distances
+    float flareR = mix(manhattanDist, euclideanDist, -pointiness);
+    float invertedflareR = size - flareR;
+    float flare = smoothstep(size+0.01, 0, flareR);
+
+    
+    // Combine the star and the aura
+    return max(flare, star);
 }
 
 vec3 starColor(float seed)
@@ -51,7 +62,7 @@ void main()
     // Adjust UV coordinates to maintain circular shape
     uv.x *= aspectRatio;
     
-    const int numStars = 1000;
+    const int numStars = 600;
     
     vec3 finalColor = vec3(0.0);
     
@@ -59,8 +70,8 @@ void main()
     {
         float seed = float(i) / float(numStars);
         
-        float starSpeed = mix(0.05, 0.2, random(vec2(seed, 0.1)));
-        float starSize = mix(0.002, 0.006, random(vec2(seed, 0.2)));
+        float starSpeed = mix(0.05, 0.15, random(vec2(seed, 0.1)));
+        float starSize = mix(0.0008, 0.002, random(vec2(seed, 0.2)));
         float starY = random(vec2(seed, 0.3));
         
         float starX = fract(seed + u_Time * starSpeed);
