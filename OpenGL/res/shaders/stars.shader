@@ -26,7 +26,7 @@ float star(vec2 uv, vec2 center, float size)
     float euclideanDist = length(d);
     float pointiness = 3;
 
-    float star = 1.0 - smoothstep(0.0, size / .25, euclideanDist);
+    float star = 1.0 - smoothstep(0.0, size / 1.5, euclideanDist);
     
     // Combine Manhattan and Euclidean distances
     float flareR = mix(manhattanDist, euclideanDist, -pointiness);
@@ -42,15 +42,18 @@ vec3 starColor(float seed)
 {
     float colorType = random(vec2(seed, 0.4));
     
-    if (colorType < 0.33) {
+    if (colorType < 0.7) {
+        // White
+        return vec3(1.0, 1.0, 1.0);
+    } else if (colorType < 0.8) {
         // Pale blue
-        return vec3(0.8, 0.9, 1.0);
-    } else if (colorType < 0.66) {
+        return vec3(0.7, 0.8, 1.0);
+    } else if (colorType < 0.9) {
+        // Pale red
+        return vec3(1.0, 0.75, 0.75);
+    } else {
         // Pale yellow
         return vec3(1.0, 1.0, 0.8);
-    } else {
-        // Pale red
-        return vec3(1.0, 0.8, 0.8);
     }
 }
 
@@ -61,7 +64,9 @@ void main()
     
     // Adjust UV coordinates to maintain circular shape
     uv.x *= aspectRatio;
-    
+    uv.x = floor(uv.x * 400)/400;
+    uv.y = floor(uv.y * 400)/400;
+
     const int numStars = 600;
     
     vec3 finalColor = vec3(0.0);
@@ -70,8 +75,9 @@ void main()
     {
         float seed = float(i) / float(numStars);
         
-        float starSpeed = mix(0.05, 0.15, random(vec2(seed, 0.1)));
-        float starSize = mix(0.0008, 0.002, random(vec2(seed, 0.2)));
+        float speedF = random(vec2(seed, 0.1));
+        float starSpeed = speedF < 0.995 ? (speedF < 0.975 ? mix(0.015, 0.05, speedF) : 0.23) : 0.8;
+        float starSize = mix(0.001, 0.005, random(vec2(seed, 0.2)));
         float starY = random(vec2(seed, 0.3));
         
         float starX = fract(seed + u_Time * starSpeed);
@@ -81,8 +87,8 @@ void main()
         finalColor += starTint * star(uv, starPos, starSize);
     }
     
-    float smallStarBrightness = random(vec2(uv.x / aspectRatio, uv.y) + u_Time * 0.1);
-    if (smallStarBrightness > 0.995)
+    float smallStarBrightness = random(vec2(uv.x / aspectRatio, uv.y));
+    if (smallStarBrightness > 0.985)
     {
         finalColor += vec3(0.3);
     }
