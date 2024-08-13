@@ -151,6 +151,11 @@ int main(void)
     // LOOP
     while (!glfwWindowShouldClose(window))
     {
+        // set the viewport size
+        auto [width, height] = renderer.WindowSize();
+        glViewport(0, 0, width, height);
+
+
         sortGameObjectsByPriority(gameobjects);
         renderer.Clear();
         Input::updateKeyStates(window);

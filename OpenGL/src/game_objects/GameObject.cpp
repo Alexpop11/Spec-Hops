@@ -17,9 +17,7 @@ void GameObject::update()
 void GameObject::setUpShader(Renderer& renderer)
 {
     if (shader.has_value()) {
-        int width, height;
-        glfwGetWindowSize(renderer.window, &width, &height); // Get the current window size
-        glViewport(0, 0, width, height);
+        auto [width, height] = renderer.WindowSize();
 
         /* Render here */
         shader->Bind();

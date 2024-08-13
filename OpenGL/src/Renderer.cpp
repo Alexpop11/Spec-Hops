@@ -34,3 +34,9 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
     GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 
 }
+
+std::tuple<float, float> Renderer::WindowSize() const {
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    return std::tuple<float, float>(width, height);
+}
