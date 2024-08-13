@@ -76,7 +76,7 @@ void main()
         float seed = float(i) / float(numStars);
         
         float speedF = random(vec2(seed, 0.1));
-        float starSpeed = speedF < 0.995 ? (speedF < 0.975 ? mix(0.015, 0.05, speedF) : 0.23) : 0.8;
+        float starSpeed = speedF < 0.995 ? (speedF < 0.975 ? mix(0.015, 0.075, speedF) : 0.23) : 0.8;
         float starSize = mix(0.001, 0.005, random(vec2(seed, 0.2)));
         float starY = random(vec2(seed, 0.3));
         
