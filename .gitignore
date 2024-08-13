@@ -395,4 +395,8 @@ FodyWeavers.xsd
 *.msp
 
 # JetBrains Rider
-*.sln.iml
+*.sln.
+
+.ninja_deps
+.ninja_log
+build

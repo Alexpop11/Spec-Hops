@@ -18,8 +18,8 @@ find_package(GLEW REQUIRED)
 
 add_executable(${PROJECT_NAME} ${cpp_files} ${header_files})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${OpenAL_INCLUDE_DIRS} ${GlFW_INCLUDE_DIRS} ${GlEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} )
+target_include_directories(${PROJECT_NAME} PRIVATE ${OPENAL_INCLUDE_DIR} ${GlFW_INCLUDE_DIRS} ${GlEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} Dependencies/OpenAL/include)
 
-target_link_libraries(${PROJECT_NAME} openal glfw3 GLEW::GLEW ${OPENGL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} -L${GLFW_LIBDIR} glfw GLEW::GLEW ${OPENGL_LIBRARIES} ${OPENAL_LIBRARY})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY PUBLIC_HEADER ${header_files})
