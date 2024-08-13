@@ -22,17 +22,16 @@
 #include "Input.h"
 #include "game_objects/Player.h"
 
-#define ASSERT(x) if (!(x)) __debugbreak(); // Remove this line if you are not using visual studio
 #define GLCall(x) GLClearError();\
     x;\
     ASSERT(GLLogCall(#x, __FILE__, __LINE__));
-
-static void GLClearError()
+#if 0
+void GLClearError)
 {
     while (glGetError() != GL_NO_ERROR);
 }
 
-static bool GLLogCall(const char* function, const char* file, int line)
+bool GLLogCall(const char* function, const char* file, int line)
 {
     while(GLenum error = glGetError())
     {
@@ -41,7 +40,7 @@ static bool GLLogCall(const char* function, const char* file, int line)
     }
     return true;
 }
-
+#endif
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
     int width, height, channels;
     unsigned char* pixels = stbi_load(iconPath, &width, &height, &channels, 4);
