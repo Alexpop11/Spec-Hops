@@ -34,7 +34,6 @@ gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 2, 7)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 2, 8)));
 
-
 // Middle platform 
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 6, 6)));
 gameobjects.push_back(std::make_unique<SquareObject>(SquareObject("squarebox", 0, 7, 6)));

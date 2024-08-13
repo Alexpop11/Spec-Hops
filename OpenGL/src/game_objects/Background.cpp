@@ -3,6 +3,7 @@
 Background::Background(const std::string& name, int drawPriority, float x, float y)
     : GameObject(name, drawPriority, x, y) {
     shader = std::move(std::make_optional<Shader>("res/shaders/stars.shader"));
+    drawPriority = 0;
 }
 
 void Background::setUpShader(Renderer& renderer)

@@ -4,7 +4,7 @@
 Player::Player(const std::string& name, float x, float y)
     : Character(name, x, y) 
     {
-    drawPriority = 2;
+    drawPriority = 3;
     r = 0.5;
     g = 0.8;
     b = 0.5;
