@@ -23,9 +23,10 @@
 #include "game_objects/Player.h"
 #include "game_objects/Background.h"
 
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__));
+#define GLCall(x)  \
+   GLClearError(); \
+   x;              \
+   ASSERT(GLLogCall(#x, __FILE__, __LINE__));
 #if 0
 void GLClearError)
 {
@@ -43,141 +44,134 @@ bool GLLogCall(const char* function, const char* file, int line)
 }
 #endif
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
-    int width, height, channels;
-    unsigned char* pixels = stbi_load(iconPath, &width, &height, &channels, 4);
-    if (pixels) {
-        GLFWimage images[1];
-        images[0].width = width;
-        images[0].height = height;
-        images[0].pixels = pixels;
-        glfwSetWindowIcon(window, 1, images);
-        stbi_image_free(pixels);
-    }
-    else {
-        std::cerr << "Failed to load icon: " << iconPath << std::endl;
-    }
+   int            width, height, channels;
+   unsigned char* pixels = stbi_load(iconPath, &width, &height, &channels, 4);
+   if (pixels) {
+      GLFWimage images[1];
+      images[0].width  = width;
+      images[0].height = height;
+      images[0].pixels = pixels;
+      glfwSetWindowIcon(window, 1, images);
+      stbi_image_free(pixels);
+   } else {
+      std::cerr << "Failed to load icon: " << iconPath << std::endl;
+   }
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    {
-        std::cout << "Escape key was pressed" << std::endl;
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+      std::cout << "Escape key was pressed" << std::endl;
+      glfwSetWindowShouldClose(window, GLFW_TRUE);
+   }
 }
 
 void sortGameObjectsByPriority(std::vector<std::unique_ptr<GameObject>>& gameObjects) {
-    std::sort(gameObjects.begin(), gameObjects.end(),
-        [](const std::unique_ptr<GameObject>& a, const std::unique_ptr<GameObject>& b) {
-            return a->drawPriority < b->drawPriority;
-        });
+   std::sort(gameObjects.begin(), gameObjects.end(),
+             [](const std::unique_ptr<GameObject>& a, const std::unique_ptr<GameObject>& b) {
+                return a->drawPriority < b->drawPriority;
+             });
 }
 
 std::vector<std::string> mapLoader(const std::string& filename) {
-    std::vector<std::string> lines;
-    std::ifstream file(filename);
+   std::vector<std::string> lines;
+   std::ifstream            file(filename);
 
-    if (!file.is_open()) {
-        std::cerr << "Failed to open file: " << filename << std::endl;
-        return lines;
-    }
+   if (!file.is_open()) {
+      std::cerr << "Failed to open file: " << filename << std::endl;
+      return lines;
+   }
 
-    std::string line;
-    while (std::getline(file, line)) {
-        lines.push_back(line);
-    }
+   std::string line;
+   while (std::getline(file, line)) {
+      lines.push_back(line);
+   }
 
-    file.close();
-    return lines;
+   file.close();
+   return lines;
 }
 
-int main(void)
-{
+int main(void) {
 
-    /* Initialize the library */
-    if (!glfwInit())
-        return -1;
+   /* Initialize the library */
+   if (!glfwInit())
+      return -1;
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 
-    // Get the primary monitor
-    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-    const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
 
-    // Create a fullscreen window
-    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "SpaceBoom", NULL, NULL);
-    if (!window) {
-        std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
+   // Get the primary monitor
+   GLFWmonitor*       primaryMonitor = glfwGetPrimaryMonitor();
+   const GLFWvidmode* mode           = glfwGetVideoMode(primaryMonitor);
 
-    glfwSetKeyCallback(window, key_callback);
+   // Create a fullscreen window
+   GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "SpaceBoom", NULL, NULL);
+   if (!window) {
+      std::cerr << "Failed to create GLFW window" << std::endl;
+      glfwTerminate();
+      return -1;
+   }
 
-    // Set the window icon
-    setWindowIcon(window, "res/Images/Logo.png");
+   glfwSetKeyCallback(window, key_callback);
 
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
+   // Set the window icon
+   setWindowIcon(window, "res/Images/Logo.png");
 
-    glfwSwapInterval(1);
+   /* Make the window's context current */
+   glfwMakeContextCurrent(window);
 
-    if (glewInit() != GLEW_OK)
-        std::cout << "Error!" << std::endl;
+   glfwSwapInterval(1);
 
-    std::cout << "current version of GL: " << glGetString(GL_VERSION) << std::endl;
+   if (glewInit() != GLEW_OK)
+      std::cout << "Error!" << std::endl;
 
-    Renderer renderer;
-    renderer.window = window;
+   std::cout << "current version of GL: " << glGetString(GL_VERSION) << std::endl;
 
-    float r = 0.0f;
-    float increment = 0.05f;
-    
-    //std::string MapToUse = "../res/maps/SpaceView.txt";
-    //std::vector<std::string> lines = mapLoader(MapToUse);
-    std::vector<std::unique_ptr<GameObject>> gameobjects;
+   Renderer renderer;
+   renderer.window = window;
+
+   float r         = 0.0f;
+   float increment = 0.05f;
+
+   // std::string MapToUse = "../res/maps/SpaceView.txt";
+   // std::vector<std::string> lines = mapLoader(MapToUse);
+   std::vector<std::unique_ptr<GameObject>> gameobjects;
 #include "../res/maps/SpaceView.txt"
-    //for (const auto& line : lines) {
-    //    std::cout << line << std::endl;
-    //}
+   // for (const auto& line : lines) {
+   //     std::cout << line << std::endl;
+   // }
 
-    Input::startTime = glfwGetTime();
+   Input::startTime = glfwGetTime();
 
-    // LOOP
-    while (!glfwWindowShouldClose(window))
-    {
-        // set the viewport size
-        auto [width, height] = renderer.WindowSize();
-        glViewport(0, 0, width, height);
+   // LOOP
+   while (!glfwWindowShouldClose(window)) {
+      // set the viewport size
+      auto [width, height] = renderer.WindowSize();
+      glViewport(0, 0, width, height);
 
 
-        sortGameObjectsByPriority(gameobjects);
-        renderer.Clear();
-        Input::updateKeyStates(window);
+      sortGameObjectsByPriority(gameobjects);
+      renderer.Clear();
+      Input::updateKeyStates(window);
 
-        for (auto &gameobject : gameobjects) 
-        {   
-            gameobject->update();
-        }
+      for (auto& gameobject : gameobjects) {
+         gameobject->update();
+      }
 
-        for (auto& gameobject : gameobjects)
-        {
-            gameobject->render(renderer);
-        }
+      for (auto& gameobject : gameobjects) {
+         gameobject->render(renderer);
+      }
 
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
+      /* Swap front and back buffers */
+      glfwSwapBuffers(window);
 
-        /* Poll for and process events */
-        glfwPollEvents();
-    }
+      /* Poll for and process events */
+      glfwPollEvents();
+   }
 
-    //cleanupOpenAL();
-    glfwTerminate();
-    return 0;
+   // cleanupOpenAL();
+   glfwTerminate();
+   return 0;
 }
