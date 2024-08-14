@@ -45,10 +45,10 @@ vec3 starColor(float seed)
     if (colorType < 0.79) {
         // White
         return vec3(1.0, 1.0, 1.0);
-    } else if (colorType < 0.92) {
+    } else if (colorType < 0.82) {
         // Pale blue
         return vec3(0.65, 0.73, 1.0);
-    } else if (colorType < 0.97) {
+    } else if (colorType < 0.90) {
         // Pale red
         return vec3(1.0, 0.75, 0.75);
     } else {
