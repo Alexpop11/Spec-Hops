@@ -42,18 +42,18 @@ vec3 starColor(float seed)
 {
     float colorType = random(vec2(seed, 0.4));
     
-    if (colorType < 0.7) {
+    if (colorType < 0.79) {
         // White
         return vec3(1.0, 1.0, 1.0);
-    } else if (colorType < 0.8) {
+    } else if (colorType < 0.92) {
         // Pale blue
-        return vec3(0.7, 0.8, 1.0);
-    } else if (colorType < 0.9) {
+        return vec3(0.65, 0.73, 1.0);
+    } else if (colorType < 0.97) {
         // Pale red
         return vec3(1.0, 0.75, 0.75);
     } else {
         // Pale yellow
-        return vec3(1.0, 1.0, 0.8);
+        return vec3(1.0, 0.95, 0.75);
     }
 }
 
@@ -76,7 +76,7 @@ void main()
         float seed = float(i) / float(numStars);
         
         float speedF = random(vec2(seed, 0.1));
-        float starSpeed = speedF < 0.995 ? (speedF < 0.975 ? mix(0.015, 0.075, speedF) : 0.23) : 0.8;
+        float starSpeed = speedF < 0.995 ? (speedF < 0.975 ? mix(0.01, 0.08, speedF) : 0.23) : 0.8;
         float starSize = mix(0.001, 0.005, random(vec2(seed, 0.2)));
         float starY = random(vec2(seed, 0.3));
         
