@@ -16,7 +16,7 @@ void GameObject::update()
 
 void GameObject::setUpShader(Renderer& renderer)
 {
-    if (shader.has_value()) {
+    if (shader) {
         auto [width, height] = renderer.WindowSize();
 
         /* Render here */

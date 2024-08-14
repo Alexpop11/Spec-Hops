@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <optional>
+#include <memory>
 
 #include "../Renderer.h"
 #include "../VertexBuffer.h"
@@ -16,12 +17,14 @@
 class GameObject {
 public:
     GameObject(const std::string& name, int drawPriority, float x, float y);
+    GameObject() = default;
+    virtual ~GameObject() = default;
 
     virtual void setUpShader(Renderer& renderer);
     virtual void render(Renderer& renderer);
     virtual void update();
 
-    std::optional<Shader> shader;
+    std::shared_ptr<Shader> shader;
 
     std::string name;
     int drawPriority;

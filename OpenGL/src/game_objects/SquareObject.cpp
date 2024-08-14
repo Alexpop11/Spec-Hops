@@ -5,7 +5,7 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, float x, f
     r = 0.5;
     g = 0.5;
     b = 0.5;
-    shader = std::move(std::make_optional<Shader>("res/shaders/shader.shader"));
+    shader = std::make_shared<Shader>("res/shaders/shader.shader");
 }
 
 void SquareObject::setUpShader(Renderer& renderer)
@@ -43,7 +43,7 @@ void SquareObject::render(Renderer& renderer) {
 
     IndexBuffer ib(indices, 6);
 
-    renderer.Draw(va, ib, shader.value());
+    renderer.Draw(va, ib, *shader);
 
 }
 
