@@ -22,7 +22,13 @@ Tile::Tile(const std::string& name, float x, float y)
 
 }
 
+void Tile::explode() {
+    wall = false;
+    r = 0.5;
+    g = 0.5;
+    b = 0.5;
+}
+
 void Tile::update() {
-    
     
 }

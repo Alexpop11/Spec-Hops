@@ -201,6 +201,16 @@ int main(void) {
          gameobject->update();
       }
 
+      World::gameobjects.erase(std::remove_if(World::gameobjects.begin(), World::gameobjects.end(),
+          [](const std::unique_ptr<GameObject>& gameobject) { return gameobject->ShouldDestroy; }),
+          World::gameobjects.end());
+
+
+      while (!World::gameobjectstoadd.empty()) {
+          World::gameobjects.push_back(std::move(World::gameobjectstoadd.back()));
+          World::gameobjectstoadd.pop_back();
+      }
+
       for (auto& gameobject : World::gameobjects) {
          gameobject->render(renderer);
       }

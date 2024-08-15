@@ -6,4 +6,5 @@
 class World {
 public:
 	static std::vector<std::unique_ptr<GameObject>> gameobjects;
+	static std::vector<std::unique_ptr<GameObject>> gameobjectstoadd;
 };

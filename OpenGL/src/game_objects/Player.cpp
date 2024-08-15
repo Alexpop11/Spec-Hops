@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "../World.h"
 #include "Tile.h"
+#include "Bomb.h"
 
 Player::Player(const std::string& name, float x, float y)
     : Character(name, x, y) 
@@ -32,6 +33,10 @@ void Player::update() {
     if (Input::keys_pressed_down[GLFW_KEY_D] || Input::keys_pressed_down[GLFW_KEY_RIGHT])
     {
         new_x += 1;
+    }
+    if (Input::keys_pressed_down[GLFW_KEY_SPACE])
+    {
+        World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", x, y)));
     }
     for (auto& gameobject : World::gameobjects) {
         auto tile = dynamic_cast<Tile*>(&*gameobject);

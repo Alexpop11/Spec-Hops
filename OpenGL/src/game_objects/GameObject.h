@@ -19,6 +19,8 @@ public:
     GameObject(const std::string& name, int drawPriority, float x, float y);
     GameObject() = default;
     virtual ~GameObject() = default;
+    float CreationTime = glfwGetTime();
+    bool ShouldDestroy = false;
 
     virtual void setUpShader(Renderer& renderer);
     virtual void render(Renderer& renderer);

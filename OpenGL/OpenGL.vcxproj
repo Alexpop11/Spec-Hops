@@ -80,6 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\game_objects\Bomb.cpp" />
     <ClCompile Include="src\World.cpp" />
     <Text Include="res\maps\SpaceView.txt" />
     <ClCompile Include="src\Application.cpp" />
@@ -101,6 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\game_objects\Background.h" />
+    <ClInclude Include="src\game_objects\Bomb.h" />
     <ClInclude Include="src\game_objects\Camera.h" />
     <ClInclude Include="src\game_objects\Character.h" />
     <ClInclude Include="src\game_objects\Enemy.h" />
