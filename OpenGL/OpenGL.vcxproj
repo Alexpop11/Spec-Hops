@@ -112,6 +112,7 @@
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\sound\SoundDevice.h" />
     <ClInclude Include="src\stb_image.h" />
     <ClInclude Include="src\VertexBuffer.h" />
     <ClInclude Include="src\VertexArray.h" />

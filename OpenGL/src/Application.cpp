@@ -93,6 +93,50 @@ std::vector<std::string> mapLoader(const std::string& filename) {
    return lines;
 }
 
+void createMap() {
+    std::string filename = "res/maps/SpaceShip.txt";
+    std::ifstream file(filename);
+
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+    }
+
+    std::vector<std::string> lines;
+    std::string line;
+
+    // Read all lines into a vector
+    while (std::getline(file, line)) {
+        lines.push_back(line);
+    }
+
+    int total_rows = lines.size();
+
+    for (int row = 0; row < total_rows; ++row) {
+        for (int x = 0; x < lines[row].length(); ++x) {
+            char c = lines[row][x];
+            int y = total_rows - row;
+            if (c != '\n') {
+                if (c == 'b') { // Background
+                    World::gameobjects.push_back(std::make_unique<Background>(Background("Background", 0, 0, 0)));
+                }
+                if (c == 'p') { // player
+                    World::gameobjects.push_back(std::make_unique<Player>(Player("Coolbox", x, y)));
+                    World::gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", x, y)));
+                }
+                if (c == 'f') { // floor
+                    World::gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", x, y)));
+                }
+                if (c == 'w') { // wall
+                    World::gameobjects.push_back(std::make_unique<Tile>(Tile("Wall", true, x, y)));
+                }
+            }
+
+        }
+    }
+
+    file.close();
+}
+
 int main(void) {
 
    /* Initialize the library */
@@ -120,7 +164,7 @@ int main(void) {
    glfwSetKeyCallback(window, key_callback);
 
    // Set the window icon
-   setWindowIcon(window, "res/Images/Logo.png");
+   setWindowIcon(window, "res/Images/Logo2.png");
 
    /* Make the window's context current */
    glfwMakeContextCurrent(window);
@@ -138,12 +182,7 @@ int main(void) {
    float r         = 0.0f;
    float increment = 0.05f;
 
-   // std::string MapToUse = "../res/maps/SpaceView.txt";
-   // std::vector<std::string> lines = mapLoader(MapToUse);
-#include "../res/maps/SpaceView.txt"
-   // for (const auto& line : lines) {
-   //     std::cout << line << std::endl;
-   // }
+   createMap();
 
    Input::startTime = glfwGetTime();
 
