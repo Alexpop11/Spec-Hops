@@ -83,6 +83,7 @@
     <Text Include="res\maps\SpaceView.txt" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\game_objects\Background.cpp" />
+    <ClCompile Include="src\game_objects\Camera.cpp" />
     <ClCompile Include="src\game_objects\Character.cpp" />
     <ClCompile Include="src\game_objects\Enemy.cpp" />
     <ClCompile Include="src\game_objects\GameObject.cpp" />
@@ -98,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\game_objects\Background.h" />
+    <ClInclude Include="src\game_objects\Camera.h" />
     <ClInclude Include="src\game_objects\Character.h" />
     <ClInclude Include="src\game_objects\Enemy.h" />
     <ClInclude Include="src\game_objects\GameObject.h" />

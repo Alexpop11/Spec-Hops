@@ -2,6 +2,7 @@
 
 #include "GameObject.h"
 #include "../Input.h"
+#include "Camera.h"
 
 
 GameObject::GameObject(const std::string& name, int drawPriority, float x, float y)
@@ -25,7 +26,7 @@ void GameObject::setUpShader(Renderer& renderer)
         shader->SetUniform1f("u_Time", currentTime);
         shader->SetUniform1f("u_StartTime", Input::startTime);
         shader->SetUniform1f("u_AspectRatio", float(width) / float(height));
-        shader->SetUniform2f("u_Position", x, y);
+        shader->SetUniform2f("u_Position", x - Camera::x + 9, y - Camera::y + 9);
         shader->SetUniform2f("u_Resolution", width, height);
 
     }

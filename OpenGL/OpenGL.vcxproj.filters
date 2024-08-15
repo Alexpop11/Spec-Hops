@@ -101,6 +101,9 @@
     <ClInclude Include="src\game_objects\Background.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\game_objects\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\maps\SpaceView.txt">

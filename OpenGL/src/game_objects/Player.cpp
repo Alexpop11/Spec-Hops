@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "../Input.h"
+#include "Camera.h"
 
 Player::Player(const std::string& name, float x, float y)
     : Character(name, x, y) 
@@ -27,4 +28,6 @@ void Player::update() {
     {
         x += 1;
     }
+    Camera::x = x;
+    Camera::y = y;
 }
