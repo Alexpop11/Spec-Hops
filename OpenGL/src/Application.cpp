@@ -13,6 +13,14 @@ struct Particle {
 // Shader sources
 const char* computeShaderSource = R"(
 #version 430 core
+
+struct Particle {
+    float x;
+    float y;
+    float vx;
+    float vy;
+};
+
 layout(local_size_x = 256) in;
 layout(std430, binding = 0) buffer ParticleBuffer {
     Particle particles[];
