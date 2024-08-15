@@ -2,22 +2,18 @@
 
 #include <iostream>
 
-#define GLCall(x)  \
-   GLClearError(); \
-   x;              \
-   ASSERT(GLLogCall(#x, __FILE__, __LINE__));
-
 void GLClearError() {
    while (glGetError() != GL_NO_ERROR)
       ;
 }
 
 bool GLLogCall(const char* function, const char* file, int line) {
+   bool ok = true;
    while (GLenum error = glGetError()) {
       std::cout << "[OpenGL Error] (" << error << ")" << function << " " << file << " " << std::endl;
-      return false;
+      ok = false;
    }
-   return true;
+   return ok;
 }
 
 void Renderer::Clear() const {
