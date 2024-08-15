@@ -88,7 +88,7 @@ void main()
         finalColor += starTint * star(uv, starPos, starSize);
     }
     
-    float smallStarBrightness = random(vec2(uv.x / aspectRatio, uv.y));
+    float smallStarBrightness = random(vec2(0.05 + uv.x / aspectRatio, uv.y));
     if (smallStarBrightness > 0.985)
     {
         finalColor += vec3(0.3);
