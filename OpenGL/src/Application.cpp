@@ -20,9 +20,11 @@
 #include "Shader.h"
 #include "game_objects/GameObject.h"
 #include "Input.h"
+#include "World.h"
 #include "game_objects/Player.h"
 #include "game_objects/Background.h"
 #include "game_objects/Camera.h"
+#include "game_objects/Tile.h"
 
 #define GLCall(x)  \
    GLClearError(); \
@@ -138,7 +140,6 @@ int main(void) {
 
    // std::string MapToUse = "../res/maps/SpaceView.txt";
    // std::vector<std::string> lines = mapLoader(MapToUse);
-   std::vector<std::unique_ptr<GameObject>> gameobjects;
 #include "../res/maps/SpaceView.txt"
    // for (const auto& line : lines) {
    //     std::cout << line << std::endl;
@@ -153,15 +154,15 @@ int main(void) {
       glViewport(0, 0, width, height);
 
 
-      sortGameObjectsByPriority(gameobjects);
+      sortGameObjectsByPriority(World::gameobjects);
       renderer.Clear();
       Input::updateKeyStates(window);
 
-      for (auto& gameobject : gameobjects) {
+      for (auto& gameobject : World::gameobjects) {
          gameobject->update();
       }
 
-      for (auto& gameobject : gameobjects) {
+      for (auto& gameobject : World::gameobjects) {
          gameobject->render(renderer);
       }
 

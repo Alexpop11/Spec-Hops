@@ -1,6 +1,8 @@
 #include "Player.h"
 #include "../Input.h"
 #include "Camera.h"
+#include "../World.h"
+#include "Tile.h"
 
 Player::Player(const std::string& name, float x, float y)
     : Character(name, x, y) 
@@ -12,22 +14,38 @@ Player::Player(const std::string& name, float x, float y)
 }
 
 void Player::update() {
+    float new_x = x;
+    float new_y = y;
+    bool new_spot_occupied = false;
     if (Input::keys_pressed_down[GLFW_KEY_W] || Input::keys_pressed_down[GLFW_KEY_UP])
     {
-        y += 1;
+        new_y += 1;
     }
     if (Input::keys_pressed_down[GLFW_KEY_A] || Input::keys_pressed_down[GLFW_KEY_LEFT])
     {
-        x -= 1;
+        new_x -= 1;
     }
     if (Input::keys_pressed_down[GLFW_KEY_S] || Input::keys_pressed_down[GLFW_KEY_DOWN])
     {
-        y -= 1;
+        new_y -= 1;
     }
     if (Input::keys_pressed_down[GLFW_KEY_D] || Input::keys_pressed_down[GLFW_KEY_RIGHT])
     {
-        x += 1;
+        new_x += 1;
     }
-    Camera::x = x;
-    Camera::y = y;
+    for (auto& gameobject : World::gameobjects) {
+        auto tile = dynamic_cast<Tile*>(&*gameobject);
+        if (tile != nullptr) {
+            if (new_x == tile->x && new_y == tile->y && tile->wall) {
+                new_spot_occupied = true;
+            }
+        }
+    };
+
+    if (!new_spot_occupied) {
+        x = new_x;
+        y = new_y;
+        Camera::x = x;
+        Camera::y = y;
+    }
 }

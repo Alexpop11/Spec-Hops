@@ -81,6 +81,7 @@ void main()
         float starY = random(vec2(seed, 0.3));
         
         float starX = fract(seed + u_Time * starSpeed);
+
         vec2 starPos = vec2(starX * aspectRatio, starY);
         
         vec3 starTint = starColor(seed);
