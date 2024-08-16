@@ -58,47 +58,16 @@ jobs:
           cp build/OpenGL/SpaceBoom${{ matrix.os == 'windows-latest' && '.exe' || '' }} release/${{ matrix.output_name }}
           cp -r OpenGL/res release/res
 
-      - name: Create release artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.output_name }}
-          path: release
-
-  upload:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v2
-
-      - name: Create release archives
+      - name: Create release archive
         run: |
-          for dir in */; do
-            zip -r "${dir%/}.zip" "$dir"
-          done
+          cd release
+          zip -r ../${{ matrix.output_name }}.zip .
 
-      - name: Upload release assets
-        uses: actions/github-script@v6
+      - name: Upload Release Asset
+        uses: svenstaro/upload-release-action@v2
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const fs = require('fs').promises;
-            const { repo: { owner, repo }, sha } = context;
-            const release = await github.rest.repos.getReleaseByTag({
-              owner,
-              repo,
-              tag: process.env.GITHUB_REF.replace('refs/tags/', '')
-            });
-
-            const assets = await fs.readdir('.');
-            for (const asset of assets) {
-              if (asset.endsWith('.zip')) {
-                await github.rest.repos.uploadReleaseAsset({
-                  owner,
-                  repo,
-                  release_id: release.data.id,
-                  name: asset,
-                  data: await fs.readFile(asset)
-                });
-              }
-            }
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.output_name }}.zip
+          asset_name: ${{ matrix.output_name }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
