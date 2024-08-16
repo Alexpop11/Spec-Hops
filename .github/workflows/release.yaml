@@ -56,7 +56,7 @@ jobs:
         run: |
           mkdir release
           cp build/OpenGL/SpaceBoom${{ matrix.os == 'windows-latest' && '.exe' || '' }} release/${{ matrix.output_name }}
-          cp -r res release/res
+          cp -r OpenGL/res release/res
 
       - name: Create release artifact
         uses: actions/upload-artifact@v2
