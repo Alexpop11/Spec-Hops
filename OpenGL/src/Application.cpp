@@ -112,7 +112,7 @@ void createMap() {
     int total_rows = lines.size();
 
     for (int row = 0; row < total_rows; ++row) {
-        for (int x = 0; x < lines[row].length(); ++x) {
+        for (unsigned long x = 0; x < lines[row].length(); ++x) {
             char c = lines[row][x];
             int y = total_rows - row;
             if (c != '\n') {

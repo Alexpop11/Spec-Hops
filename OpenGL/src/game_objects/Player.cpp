@@ -38,12 +38,11 @@ void Player::update() {
     {
         World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", x, y)));
     }
-    for (auto& gameobject : World::gameobjects) {
-        auto tile = dynamic_cast<Tile*>(&*gameobject);
-        if (tile != nullptr) {
-            if (new_x == tile->x && new_y == tile->y && tile->wall) {
-                new_spot_occupied = true;
-            }
+
+    
+    for (auto& tile : World::at<Tile>(new_x, new_y)) {
+        if (tile->wall) {
+            new_spot_occupied = true;
         }
     };
 
