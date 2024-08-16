@@ -20,18 +20,21 @@ jobs:
             output_name: SpaceBoom-windows.exe
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libgl1-mesa-dev libglew-dev libglfw3-dev
+          sudo apt-get install -y cmake ninja-build libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
 
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          brew install cmake ninja glew glfw3
+          brew install cmake ninja
 
       - name: Install dependencies (Windows)
         if: matrix.os == 'windows-latest'
@@ -52,8 +55,8 @@ jobs:
       - name: Prepare release package
         run: |
           mkdir release
-          cp build/OpenGL/OpenGL release/${{ matrix.output_name }}
-          cp -r OpenGL/res release/res
+          cp build/OpenGL/SpaceBoom${{ matrix.os == 'windows-latest' && '.exe' || '' }} release/${{ matrix.output_name }}
+          cp -r res release/res
 
       - name: Create release artifact
         uses: actions/upload-artifact@v2
