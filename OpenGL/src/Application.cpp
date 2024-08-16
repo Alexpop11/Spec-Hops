@@ -25,6 +25,7 @@
 #include "game_objects/Background.h"
 #include "game_objects/Camera.h"
 #include "game_objects/Tile.h"
+#include "game_objects/enemies/Bomber.h"
 
 #define GLCall(x)  \
    GLClearError(); \
@@ -128,6 +129,10 @@ void createMap() {
                 }
                 if (c == 'w') { // wall
                     World::gameobjects.push_back(std::make_unique<Tile>(Tile("Wall", true, x, y)));
+                }
+                if (c == 'e') { // enemy Bomber 
+                    World::gameobjects.push_back(std::make_unique<Bomber>(Bomber("bomber", x, y)));
+                    World::gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", x, y)));
                 }
             }
 

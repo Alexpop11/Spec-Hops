@@ -86,7 +86,7 @@
     <ClCompile Include="src\game_objects\Background.cpp" />
     <ClCompile Include="src\game_objects\Camera.cpp" />
     <ClCompile Include="src\game_objects\Character.cpp" />
-    <ClCompile Include="src\game_objects\Enemy.cpp" />
+    <ClCompile Include="src\game_objects\enemies\Bomber.cpp" />
     <ClCompile Include="src\game_objects\GameObject.cpp" />
     <ClCompile Include="src\game_objects\Player.cpp" />
     <ClCompile Include="src\game_objects\SquareObject.cpp" />
@@ -104,7 +104,7 @@
     <ClInclude Include="src\game_objects\Bomb.h" />
     <ClInclude Include="src\game_objects\Camera.h" />
     <ClInclude Include="src\game_objects\Character.h" />
-    <ClInclude Include="src\game_objects\Enemy.h" />
+    <ClInclude Include="src\game_objects\enemies\Bomber.h" />
     <ClInclude Include="src\game_objects\GameObject.h" />
     <ClInclude Include="src\game_objects\Player.h" />
     <ClInclude Include="src\game_objects\SquareObject.h" />

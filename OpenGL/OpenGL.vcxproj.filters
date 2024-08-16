@@ -48,7 +48,7 @@
     <ClCompile Include="src\game_objects\Character.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game_objects\Enemy.cpp">
+    <ClCompile Include="src\game_objects\enemies\Bomber.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\game_objects\Player.cpp">
@@ -104,7 +104,7 @@
     <ClInclude Include="src\game_objects\Character.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game_objects\Enemy.h">
+    <ClInclude Include="src\game_objects\enemies\Bomber.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\game_objects\Player.h">

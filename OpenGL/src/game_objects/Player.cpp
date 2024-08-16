@@ -57,17 +57,9 @@ void Player::update() {
     if (health <= 0) {
         die();
     }
-    
-    for (auto& tile : World::at<Tile>(new_x, new_y)) {
-        if (tile->wall) {
-            new_spot_occupied = true;
-        }
-    };
 
-    if (!new_spot_occupied) {
-        x = new_x;
-        y = new_y;
-        Camera::x = x;
-        Camera::y = y;
-    }
+    move(new_x, new_y);
+    Camera::x = x;
+    Camera::y = y;
+    
 }

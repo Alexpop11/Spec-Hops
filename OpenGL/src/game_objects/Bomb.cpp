@@ -23,12 +23,12 @@ void Bomb::update() {
             wall->explode();
         }
 
-        auto nearbyPlayers = World::where<Player>([&](const Player& player) {
-            return (std::abs(x - player.x) + std::abs(y - player.y) < 3);
+        auto nearbyCharacters = World::where<Character>([&](const Character& character) {
+            return (std::abs(x - character.x) + std::abs(y - character.y) < 3);
         });
-        for (auto* player : nearbyPlayers) {
-            player->health -= 1;
-            std::cout << "bomb damaged player. their health is now " << player->health << std::endl;
+        for (auto* character : nearbyCharacters) {
+            character->health -= 1;
+            std::cout << "bomb damaged player. their health is now " << character->health << std::endl;
         }
 
         ShouldDestroy = true;
