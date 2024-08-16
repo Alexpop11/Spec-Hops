@@ -20,6 +20,8 @@ find_package(OpenGL REQUIRED)
 
 add_executable(${PROJECT_NAME} ${cpp_files} ${header_files})
 
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
+
 target_include_directories(${PROJECT_NAME} PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glfw/include
