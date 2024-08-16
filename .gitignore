@@ -400,3 +400,4 @@ FodyWeavers.xsd
 .ninja_deps
 .ninja_log
 build
+!OpenGL/vendor/glew/build
