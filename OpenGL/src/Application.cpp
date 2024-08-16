@@ -227,7 +227,6 @@ int main(void) {
       glfwPollEvents();
    }
 
-   // cleanupOpenAL();
    glfwTerminate();
    return 0;
 }

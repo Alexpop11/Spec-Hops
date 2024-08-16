@@ -13,3 +13,7 @@ to run:
 ```
 cd ../OpenGL
 ../build/OpenGL/OpenGL
+```
+
+to package:
+1. You need one folder with the contents of OpenGL/res/* and the built binary to sit next to one another.

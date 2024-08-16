@@ -1,0 +1,101 @@
+name: Release SpaceBoom
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            output_name: SpaceBoom-linux
+          - os: macos-latest
+            output_name: SpaceBoom-macos
+          - os: windows-latest
+            output_name: SpaceBoom-windows.exe
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libgl1-mesa-dev libglew-dev libglfw3-dev
+
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install cmake ninja glew glfw3
+
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install cmake ninja
+
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake -GNinja ..
+
+      - name: Build
+        run: |
+          cd build
+          ninja
+
+      - name: Prepare release package
+        run: |
+          mkdir release
+          cp build/OpenGL/OpenGL release/${{ matrix.output_name }}
+          cp -r OpenGL/res release/res
+
+      - name: Create release artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.output_name }}
+          path: release
+
+  upload:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Create release archives
+        run: |
+          for dir in */; do
+            zip -r "${dir%/}.zip" "$dir"
+          done
+
+      - name: Upload release assets
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs').promises;
+            const { repo: { owner, repo }, sha } = context;
+            const release = await github.rest.repos.getReleaseByTag({
+              owner,
+              repo,
+              tag: process.env.GITHUB_REF.replace('refs/tags/', '')
+            });
+
+            const assets = await fs.readdir('.');
+            for (const asset of assets) {
+              if (asset.endsWith('.zip')) {
+                await github.rest.repos.uploadReleaseAsset({
+                  owner,
+                  repo,
+                  release_id: release.data.id,
+                  name: asset,
+                  data: await fs.readFile(asset)
+                });
+              }
+            }

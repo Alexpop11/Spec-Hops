@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "Player.h"
 #include "../Input.h"
 #include "Camera.h"
