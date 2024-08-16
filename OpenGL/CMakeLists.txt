@@ -1,4 +1,8 @@
+cmake_minimum_required(VERSION 3.10)
+
 set(PROJECT_NAME OpenGL)
+
+project(${PROJECT_NAME})
 
 file(GLOB_RECURSE cpp_files "src/*.cpp")
 file(GLOB_RECURSE header_files "src/*.h")
@@ -9,7 +13,7 @@ find_package(OpenGL REQUIRED)
 ## GLFW
 if(WIN32)
   set(GLFW_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/OpenGL/Dependencies/GLFW/include")
-  set(GLFW_LIBRARY "${CMAKE_SOURCE_DIR}/OpenGL/Dependencies/GLFW/lib-vc2022")
+  set(GLFW_LIBRARY "${CMAKE_SOURCE_DIR}/OpenGL/Dependencies/GLFW/lib-vc2022/glfw3_mt.lib")
 else()
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(GLFW REQUIRED glfw3)
@@ -19,6 +23,10 @@ endif()
 if(WIN32)
   set(GLEW_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/OpenGL/Dependencies/GLEW/include")
   set(GLEW_LIBRARY "${CMAKE_SOURCE_DIR}/OpenGL/Dependencies/GLEW/lib/Release/x64/glew32s.lib")
+  
+  if(NOT EXISTS ${GLEW_LIBRARY})
+    message(FATAL_ERROR "GLEW library not found at ${GLEW_LIBRARY}. Please check the path.")
+  endif()
 else()
   find_package(GLEW REQUIRED)
 endif()
