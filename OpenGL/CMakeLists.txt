@@ -1,7 +1,7 @@
 set(PROJECT_NAME OpenGL)
 
-file(GLOB cpp_files "src/*.cpp" "src/game_objects/*.cpp")
-file(GLOB header_files "src/*.h" "src/game_objects/*.h")
+file(GLOB_RECURSE cpp_files "src/*.cpp")
+file(GLOB_RECURSE header_files "src/*.h")
 
 ## OpenGL
 find_package(OpenGL REQUIRED)
