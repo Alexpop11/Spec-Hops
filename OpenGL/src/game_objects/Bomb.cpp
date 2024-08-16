@@ -13,10 +13,10 @@ Bomb::Bomb(const std::string& name, float x, float y)
 
 void Bomb::update() {
     // Explode the bomb
+    
     if (glfwGetTime() >= ExplodeTime) {
         auto nearbyWalls = World::where<Tile>([&](const Tile& tile) {
-            return ((x == tile.x + 1 || x == tile.x - 1 || x == tile.x) &&
-                    (y == tile.y + 1 || y == tile.y - 1 || y == tile.y)) && tile.wall;
+            return (std::abs(x - tile.x) + std::abs(y - tile.y) < 3);
         });
 
         for (auto* wall : nearbyWalls) {
@@ -24,8 +24,7 @@ void Bomb::update() {
         }
 
         auto nearbyPlayers = World::where<Player>([&](const Player& player) {
-            return ((x == player.x + 1 || x == player.x - 1 || x == player.x) &&
-                (y == player.y + 1 || y == player.y - 1 || y == player.y));
+            return (std::abs(x - player.x) + std::abs(y - player.y) < 3);
         });
         for (auto* player : nearbyPlayers) {
             player->health -= 1;
