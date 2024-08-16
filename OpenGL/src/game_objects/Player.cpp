@@ -12,6 +12,7 @@ Player::Player(const std::string& name, float x, float y)
     r = 0.5;
     g = 0.8;
     b = 0.5;
+    health = 3;
 }
 
 void Player::update() {
@@ -39,6 +40,23 @@ void Player::update() {
         World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", x, y)));
     }
 
+    if (health == 1) {
+        if (std::fmod(glfwGetTime(), 0.3) < 0.15) 
+        {
+            r = 0.5;
+            g = 0.8;
+            b = 0.5;
+        }
+        else {
+            r = 0.75;
+            g = 0.75;
+            b = 0.0;
+        }
+    }
+
+    if (health <= 0) {
+        die();
+    }
     
     for (auto& tile : World::at<Tile>(new_x, new_y)) {
         if (tile->wall) {

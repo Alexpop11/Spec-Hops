@@ -6,4 +6,6 @@ public:
     Character() = default;
     Character(const std::string& name, float x, float y);
     virtual void update() override;
+    void die();
+    int health;
 };

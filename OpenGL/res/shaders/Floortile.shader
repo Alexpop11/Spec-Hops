@@ -1,58 +1,40 @@
-#shader vertex
-#version 330 core
-
-layout(location = 0) in vec4 position;
-
-uniform float u_AspectRatio;
-uniform vec2 u_Position;
-
-
-void main()
-{
-    vec4 adjustedPosition = position;
-    adjustedPosition.xy += u_Position;
-    adjustedPosition.xy /= 18;
-    adjustedPosition.xy -= 0.5;
-    adjustedPosition.y *= u_AspectRatio;
-    gl_Position = adjustedPosition;
-}
-    
 #shader fragment
 #version 330 core
 
 layout(location = 0) out vec4 color;
 
 uniform vec2 u_Resolution;
-uniform float u_Time;
+uniform vec4 u_BaseColor;  // Base color for the tile (sci-fi style)
+uniform float u_Time;      // Animation over time for added effect
 
-void main() {
-    vec2 uv = gl_FragCoord.xy / u_Resolution.xy;
-    uv *= 10.0; // Scale up to create larger pixels
+// Function to create a grid pattern
+float gridPattern(vec2 uv, float gridSize) {
+    vec2 grid = fract(uv * gridSize);
+    return step(0.9, grid.x) * step(0.9, grid.y);
+}
+
+void main()
+{
+    vec2 uv = gl_FragCoord.xy / u_Resolution;
     
-    vec2 grid = fract(uv);
-    vec2 id = floor(uv);
-    
-    // Create alternating tile pattern
-    float tilePattern = mod(id.x + id.y, 2.0);
-    
-    // Base colors
-    vec3 darkTile = vec3(0.1, 0.2, 0.3);
-    vec3 lightTile = vec3(0.2, 0.3, 0.4);
-    
-    // Choose tile color based on pattern
-    vec3 tileColor = mix(darkTile, lightTile, tilePattern);
-    
-    // Add grid lines
-    float gridLine = step(0.9, grid.x) + step(0.9, grid.y);
-    vec3 gridColor = vec3(0.0, 0.7, 1.0);
-    
-    // Add a "glowing" effect to some tiles
-    float glow = sin(id.x * 0.2 + id.y * 0.3 + u_Time) * 0.5 + 0.5;
-    vec3 glowColor = vec3(0.0, 0.9, 1.0) * glow;
-    
-    // Combine everything
-    vec3 finalColor = mix(tileColor, gridColor, gridLine);
-    finalColor += glowColor * 0.3;
-    
-    color = vec4(finalColor, 1.0);
+    // Scale down the UVs for a blocky/pixel effect
+    float gridSize = 8.0; // The size of each "pixel" in the shader
+    uv = floor(uv * gridSize) / gridSize;
+
+    // Grid color based on position
+    vec3 baseTileColor = vec3(0.2, 0.2, 0.2) + uv.yyx * 0.05; // Add a slight gradient for depth
+
+    // Sci-fi floor panel lines
+    float lines = gridPattern(uv * vec2(4.0, 4.0), 2.0);  // Creates grid lines across the tile
+    vec3 lineColor = mix(baseTileColor, vec3(0.05, 0.05, 0.1), lines);
+
+    // Add a metallic sheen effect using a cosine wave based on time
+    float metallicEffect = abs(sin(u_Time + uv.y * 10.0)) * 0.1;
+    lineColor += vec3(metallicEffect);
+
+    // Apply some subtle "noise" for texture
+    float noise = fract(sin(dot(uv.xy ,vec2(12.9898,78.233))) * 43758.5453);
+    lineColor += vec3(noise * 0.05);
+
+    color = vec4(lineColor, 1.0); // Final output color
 }

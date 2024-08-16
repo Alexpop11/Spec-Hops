@@ -1,6 +1,7 @@
 #include "Bomb.h"
 #include "../World.h"
 #include "Tile.h"
+#include "Player.h"
 
 Bomb::Bomb(const std::string& name, float x, float y)
     : SquareObject(name, 4, x, y) {
@@ -20,6 +21,15 @@ void Bomb::update() {
 
         for (auto* wall : nearbyWalls) {
             wall->explode();
+        }
+
+        auto nearbyPlayers = World::where<Player>([&](const Player& player) {
+            return ((x == player.x + 1 || x == player.x - 1 || x == player.x) &&
+                (y == player.y + 1 || y == player.y - 1 || y == player.y));
+        });
+        for (auto* player : nearbyPlayers) {
+            player->health -= 1;
+            std::cout << "bomb damaged player. their health is now " << player->health << std::endl;
         }
 
         ShouldDestroy = true;

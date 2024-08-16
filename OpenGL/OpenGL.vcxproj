@@ -82,7 +82,6 @@
   <ItemGroup>
     <ClCompile Include="src\game_objects\Bomb.cpp" />
     <ClCompile Include="src\World.cpp" />
-    <Text Include="res\maps\SpaceView.txt" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\game_objects\Background.cpp" />
     <ClCompile Include="src\game_objects\Camera.cpp" />
@@ -120,6 +119,12 @@
     <ClInclude Include="src\VertexArray.h" />
     <ClInclude Include="src\VertexBufferLayout.h" />
     <ClInclude Include="src\World.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\maps\SpaceShip.txt">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -64,8 +64,8 @@ void main()
     
     // Adjust UV coordinates to maintain circular shape
     uv.x *= aspectRatio;
-    uv.x = floor(uv.x * 400)/400;
-    uv.y = floor(uv.y * 400)/400;
+    uv.x = floor(uv.x * 450)/450;
+    uv.y = floor(uv.y * 450)/450;
 
     const int numStars = 600;
     
