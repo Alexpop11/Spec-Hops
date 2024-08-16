@@ -20,6 +20,23 @@ void Bomber::move(float new_x, float new_y) {
     if (nearbyBombsNew.empty() || !nearbyBombsCurrent.empty()) {
         Character::move(new_x, new_y);
     }
+    if (nearbyBombsCurrent.empty()) {
+        for (auto& tile : World::at<Tile>(new_x, new_y)) {
+            if (tile->wall) {
+                // Check for nearby players
+                auto nearbyPlayers = World::where<Player>([&](const Player& player) {
+                    return (std::abs(x - player.x) + std::abs(y - player.y) < 14);
+                    });
+                if (!nearbyPlayers.empty()) {
+                    auto player = nearbyPlayers[0];
+                    World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", x, y)));
+                    Character::move(x - sign(player->x - x), y);
+                    Character::move(x, y - sign(player->y - y));
+                }
+                break;
+            }
+        };
+    }
 }
 
 void Bomber::update() {
@@ -29,7 +46,7 @@ void Bomber::update() {
 
     // Check for nearby players
     auto nearbyPlayers = World::where<Player>([&](const Player& player) {
-        return (std::abs(x - player.x) + std::abs(y - player.y) < 8);
+        return (std::abs(x - player.x) + std::abs(y - player.y) < 14);
         });
 
     // Check for nearby bombs
@@ -49,7 +66,7 @@ void Bomber::update() {
         move(x + sign(player->x - x), y);
         move(x, y + sign(player->y - y));
 
-        if (std::abs(x - player->x) + std::abs(y - player->y) < 3) {
+        if (std::abs(x - player->x) + std::abs(y - player->y) < 2) {
             // Drop a bomb
             World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", x, y)));
 
