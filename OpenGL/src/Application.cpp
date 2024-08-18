@@ -188,17 +188,21 @@ int main(void) {
 
    Input::startTime = glfwGetTime();
 
-   // LOOP
+   // -------------------
+   // Main rendering loop
+   // -------------------
    while (!glfwWindowShouldClose(window)) {
       // set the viewport size
       auto [width, height] = renderer.WindowSize();
       glViewport(0, 0, width, height);
 
-
       sortGameObjectsByPriority(World::gameobjects);
       renderer.Clear();
       Input::updateKeyStates(window);
 
+      // gather all different shaders that are currently in use, and check if we need to
+      // recompile the shader because the file was changed.
+      // -------------------------------------------------------------------------------
       std::set<std::shared_ptr<Shader>> shaders;
       for (auto& gameobject : World::gameobjects) {
          if (gameobject->shader && !shaders.contains(gameobject->shader)) {
@@ -211,24 +215,27 @@ int main(void) {
          gameobject->update();
       }
 
-      World::gameobjects.erase(std::remove_if(World::gameobjects.begin(), World::gameobjects.end(),
-          [](const std::unique_ptr<GameObject>& gameobject) { return gameobject->ShouldDestroy; }),
-          World::gameobjects.end());
+      // erase dead objects
+      // ------------------
+      std::erase_if(World::gameobjects, [](const auto& gameobject) { return gameobject->ShouldDestroy; });
 
+      // add newly created objects
+      // -------------------------
+      for (auto& o : World::gameobjectstoadd)
+         World::gameobjects.push_back(std::move(o));
+      World::gameobjectstoadd.clear();
 
-      while (!World::gameobjectstoadd.empty()) {
-          World::gameobjects.push_back(std::move(World::gameobjectstoadd.back()));
-          World::gameobjectstoadd.pop_back();
-      }
-
-      for (auto& gameobject : World::gameobjects) {
+      // render all objects
+      // ------------------
+      for (auto& gameobject : World::gameobjects)
          gameobject->render(renderer);
-      }
 
-      /* Swap front and back buffers */
+      // swap front and back buffers
+      // ---------------------------
       glfwSwapBuffers(window);
 
-      /* Poll for and process events */
+      // Poll for and process events
+      // ---------------------------
       glfwPollEvents();
    }
 
