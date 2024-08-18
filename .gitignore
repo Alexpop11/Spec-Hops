@@ -401,3 +401,4 @@ FodyWeavers.xsd
 .ninja_log
 build
 !OpenGL/vendor/glew/build
+res_path.hpp
