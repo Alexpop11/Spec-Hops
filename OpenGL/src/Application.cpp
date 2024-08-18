@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <set>
 
 #define STB_IMAGE_IMPLEMENTATION // for icon
 #include "stb_image.h"
@@ -150,14 +151,12 @@ int main(void) {
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-
-
    // Get the primary monitor
    GLFWmonitor*       primaryMonitor = glfwGetPrimaryMonitor();
    const GLFWvidmode* mode           = glfwGetVideoMode(primaryMonitor);
 
    // Create a fullscreen window
-   GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "SpaceBoom", NULL, NULL);
+   GLFWwindow* window = glfwCreateWindow(mode->width/2, mode->height/2, "SpaceBoom", NULL, NULL);
    if (!window) {
       std::cerr << "Failed to create GLFW window" << std::endl;
       glfwTerminate();
@@ -199,6 +198,14 @@ int main(void) {
       sortGameObjectsByPriority(World::gameobjects);
       renderer.Clear();
       Input::updateKeyStates(window);
+
+      std::set<std::shared_ptr<Shader>> shaders;
+      for (auto& gameobject : World::gameobjects) {
+         if (gameobject->shader && !shaders.contains(gameobject->shader)) {
+            shaders.insert(gameobject->shader);
+            gameobject->shader->UpdateIfNeeded();
+         }
+      }
 
       for (auto& gameobject : World::gameobjects) {
          gameobject->update();

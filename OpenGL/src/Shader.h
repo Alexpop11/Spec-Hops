@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <filesystem>
 
 struct ShaderProgramSource {
    std::string VertexSource;
@@ -11,6 +12,7 @@ struct ShaderProgramSource {
 class Shader {
 private:
    std::string                          m_FilePath;
+   std::filesystem::file_time_type      m_last_write;
    unsigned int                         m_RendererID;
    std::unordered_map<std::string, int> m_UniformLocationCache;
    // caching for uniforms
@@ -23,6 +25,7 @@ public:
    Shader& operator=(Shader&& other) noexcept;
    ~Shader();
 
+   void UpdateIfNeeded();
    void Bind() const;
    void Unbind() const;
 

@@ -4,14 +4,17 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-
+#include <filesystem>
 #include "Renderer.h"
+
+namespace fs = std::filesystem;
 
 Shader::Shader(const std::string& filepath)
    : m_FilePath(filepath)
    , m_RendererID(0) {
    ShaderProgramSource source = ParseShader(filepath);
    m_RendererID               = CreateShader(source.VertexSource, source.FragmentSource);
+   m_last_write               = fs::last_write_time(fs::path{m_FilePath});
 }
 
 Shader::~Shader() {
@@ -67,17 +70,23 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
 }
 
 unsigned int Shader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
-   unsigned int program = glCreateProgram();
+   if (vertexShader.empty() || fragmentShader.empty())
+      return 0;
+
+   unsigned int program = 0;
    unsigned int vs      = CompileShader(GL_VERTEX_SHADER, vertexShader);
    unsigned int fs      = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
-   glAttachShader(program, vs);
-   glAttachShader(program, fs);
-   glLinkProgram(program);
-   glValidateProgram(program);
+   if (vs && fs) {
+      program = glCreateProgram();
+      glAttachShader(program, vs);
+      glAttachShader(program, fs);
+      glLinkProgram(program);
+      glValidateProgram(program);
 
-   glDeleteShader(vs);
-   glDeleteShader(fs);
+      glDeleteShader(vs);
+      glDeleteShader(fs);
+   }
 
    return program;
 }
@@ -104,6 +113,18 @@ Shader& Shader::operator=(Shader&& other) noexcept {
       other.m_RendererID = 0;
    }
    return *this;
+}
+
+void Shader::UpdateIfNeeded()  {
+   fs::path p {m_FilePath};
+   auto last_write = fs::last_write_time(p);
+   if (last_write > m_last_write) {
+      ShaderProgramSource source = ParseShader(m_FilePath);
+      if (auto id = CreateShader(source.VertexSource, source.FragmentSource)) {
+         m_RendererID = id;
+         m_last_write = last_write;
+      }
+   }
 }
 
 void Shader::Bind() const {
