@@ -16,8 +16,8 @@ add_subdirectory(vendor/glew/build/cmake)
 add_subdirectory(vendor/glm)
 
 # Add application code
-file(GLOB_RECURSE cpp_files "src/*.cpp")
-file(GLOB_RECURSE header_files "src/*.h")
+file(GLOB cpp_files "src/*.cpp" "src/game_objects/*.cpp" "src/game_objects/enemies/*.cpp")
+file(GLOB header_files "src/*.h" "src/game_objects/*.h" "src/game_objects/enemies/*.h")
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)

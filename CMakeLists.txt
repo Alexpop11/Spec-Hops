@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.24)
 
 project(tests)
 
+include(cmake/CPM.cmake)
+CPMAddPackage(
+  NAME GroupSourcesByFolder.cmake
+  GITHUB_REPOSITORY TheLartians/GroupSourcesByFolder.cmake
+  VERSION 1.0
+)
+
 set( CMAKE_CXX_STANDARD 20 )
 set( CMAKE_CXX_EXTENSIONS OFF )
 set( CXX_STANDARD_REQUIRED ON)
