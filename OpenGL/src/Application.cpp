@@ -124,10 +124,6 @@ int main(void) {
          }
       }
 
-      for (auto& gameobject : World::gameobjects) {
-         gameobject->update();
-      }
-
       World::UpdateObjects();
 
       // render all objects

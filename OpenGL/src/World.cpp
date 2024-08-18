@@ -59,6 +59,10 @@ void World::LoadMap(const std::string& map_path) {
 }
 
 void World::UpdateObjects() {
+   for (auto& gameobject : gameobjects) {
+      gameobject->update();
+   }
+
    // erase dead objects
    // ------------------
    std::erase_if(World::gameobjects, [](const auto& gameobject) { return gameobject->ShouldDestroy; });
