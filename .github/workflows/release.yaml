@@ -74,10 +74,16 @@ jobs:
         run: |
           chmod +x release/${{ matrix.output_name }}
 
-      - name: Create release archive
+      - name: Create release archive (Unix)
+        if: matrix.os != 'windows-latest'
         run: |
           cd release
           zip -r ../${{ matrix.output_name }}.zip .
+
+      - name: Create release archive (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          Compress-Archive -Path release\* -DestinationPath ${{ matrix.output_name }}.zip
 
       - name: Upload Release Asset
         uses: svenstaro/upload-release-action@v2
