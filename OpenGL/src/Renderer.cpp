@@ -42,10 +42,8 @@ const std::string& Renderer::ResPath() {
    return res_path;
 }
 
-
-
 std::tuple<float, float> Renderer::WindowSize() const {
    int width, height;
    glfwGetFramebufferSize(window, &width, &height);
-   return std::tuple<float, float>(width, height);
+   return { width, height };
 }
