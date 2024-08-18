@@ -9,7 +9,7 @@ void GLClearError() {
       ;
 }
 
-bool GLLogCall(const char* function, const char* file, int line) {
+bool GLLogCall(const char* function, const char* file, int /* line */) {
    bool ok = true;
    while (GLenum error = glGetError()) {
       std::cout << "[OpenGL Error] (" << error << ")" << function << " " << file << " " << std::endl;
@@ -42,7 +42,7 @@ const std::string& Renderer::ResPath() {
    return res_path;
 }
 
-std::tuple<float, float> Renderer::WindowSize() const {
+std::tuple<int, int> Renderer::WindowSize() const {
    int width, height;
    glfwGetFramebufferSize(window, &width, &height);
    return { width, height };

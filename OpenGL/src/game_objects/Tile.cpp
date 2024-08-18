@@ -2,34 +2,28 @@
 
 
 Tile::Tile(const std::string& name, bool wall, float x, float y)
-    : SquareObject(name, 2, x, y), wall(wall)
-{
-
-}
+   : SquareObject(name, 2, x, y)
+   , wall(wall) {}
 
 Tile::Tile(const std::string& name, float x, float y)
-    : Tile(name, false, x, y)
-{
-
-}
+   : Tile(name, false, x, y) {}
 
 void Tile::explode() {
-    wall = false;
+   wall = false;
 
-    r = 0.8;
-    g = 0.5;
-    b = 0.5;
+   r = 0.8f;
+   g = 0.5f;
+   b = 0.5f;
 }
 
 void Tile::update() {
-    if (wall == true) {
-        r = 0.4;
-        g = 0.4;
-        b = 0.4;
-    }
-    else {
-        r = 0.5;
-        g = 0.5;
-        b = 0.5;
-    }
+   if (wall == true) {
+      r = 0.4f;
+      g = 0.4f;
+      b = 0.4f;
+   } else {
+      r = 0.5f;
+      g = 0.5f;
+      b = 0.5f;
+   }
 }

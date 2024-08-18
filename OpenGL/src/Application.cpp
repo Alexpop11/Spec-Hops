@@ -31,7 +31,7 @@ void setWindowIcon(GLFWwindow* window, const char* iconPath) {
    unsigned char* pixels = stbi_load(iconPath, &width, &height, &channels, 4);
    if (pixels) {
       GLFWimage images[1];
-      images[0] = { .width  = width, .height = height, .pixels = pixels };
+      images[0] = {.width = width, .height = height, .pixels = pixels};
       glfwSetWindowIcon(window, 1, images);
       stbi_image_free(pixels);
    } else {
@@ -39,7 +39,7 @@ void setWindowIcon(GLFWwindow* window, const char* iconPath) {
    }
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void key_callback(GLFWwindow* window, int key, int /* scancode */, int action, int /* mods */) {
    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
       std::cout << "Escape key was pressed" << std::endl;
       glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -68,7 +68,7 @@ int main(void) {
    const GLFWvidmode* mode           = glfwGetVideoMode(primaryMonitor);
 
    // Create a fullscreen window
-   GLFWwindow* window = glfwCreateWindow(mode->width/2, mode->height/2, "SpaceBoom", NULL, NULL);
+   GLFWwindow* window = glfwCreateWindow(mode->width / 2, mode->height / 2, "SpaceBoom", NULL, NULL);
    if (!window) {
       std::cerr << "Failed to create GLFW window" << std::endl;
       glfwTerminate();
@@ -94,12 +94,9 @@ int main(void) {
    Renderer renderer;
    renderer.window = window;
 
-   float r         = 0.0f;
-   float increment = 0.05f;
-
    World::LoadMap("maps/SpaceShip.txt");
 
-   Input::startTime = glfwGetTime();
+   Input::startTime = (float)glfwGetTime();
 
    // -------------------
    // Main rendering loop
@@ -107,7 +104,7 @@ int main(void) {
    while (!glfwWindowShouldClose(window)) {
       // set the viewport size
       auto [width, height] = renderer.WindowSize();
-      glViewport(0, 0, width, height);
+      glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
       sortGameObjectsByPriority(World::gameobjects);
       renderer.Clear();

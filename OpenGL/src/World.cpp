@@ -9,7 +9,7 @@
 #include "game_objects/Tile.h"
 #include "game_objects/enemies/Bomber.h"
 
-std::vector<std::unique_ptr<GameObject>> World::gameobjects = {};
+std::vector<std::unique_ptr<GameObject>> World::gameobjects      = {};
 std::vector<std::unique_ptr<GameObject>> World::gameobjectstoadd = {};
 
 void World::LoadMap(const std::string& map_path) {
@@ -22,36 +22,36 @@ void World::LoadMap(const std::string& map_path) {
    }
 
    std::vector<std::string> lines;
-   std::string line;
+   std::string              line;
 
    // Read all lines into a vector
    while (std::getline(file, line)) {
       lines.push_back(std::move(line));
    }
 
-   int total_rows = lines.size();
+   size_t total_rows = lines.size();
 
-   for (int row = 0; row < total_rows; ++row) {
+   for (size_t row = 0; row < total_rows; ++row) {
       for (unsigned long x = 0; x < lines[row].length(); ++x) {
-         char c = lines[row][x];
-         int y = total_rows - row;
+         char   c = lines[row][x];
+         size_t y = total_rows - row;
          if (c != '\n') {
             if (c == 'b') { // Background
                gameobjects.push_back(std::make_unique<Background>(Background("Background", 0, 0, 0)));
             }
             if (c == 'p') { // player
-               gameobjects.push_back(std::make_unique<Player>(Player("Coolbox", x, y)));
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", x, y)));
+               gameobjects.push_back(std::make_unique<Player>(Player("Coolbox", (float)x, (float)y)));
+               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
             }
             if (c == 'f') { // floor
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", x, y)));
+               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
             }
             if (c == 'w') { // wall
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Wall", true, x, y)));
+               gameobjects.push_back(std::make_unique<Tile>(Tile("Wall", true, (float)x, (float)y)));
             }
             if (c == 'e') { // enemy Bomber
-               gameobjects.push_back(std::make_unique<Bomber>(Bomber("bomber", x, y)));
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", x, y)));
+               gameobjects.push_back(std::make_unique<Bomber>(Bomber("bomber", (float)x, (float)y)));
+               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
             }
          }
       }

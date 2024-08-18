@@ -32,7 +32,7 @@ public:
    GLFWwindow*              window;
    void                     Clear() const;
    void                     Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
-   std::tuple<float, float> WindowSize() const;
+   std::tuple<int, int>     WindowSize() const;
 
    static const std::string& ResPath();
 
