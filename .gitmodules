@@ -1,5 +1,5 @@
-[submodule "vendor/glfw"]
-	path = vendor/glfw
+[submodule "OpenGL/vendor/glfw"]
+	path = OpenGL/vendor/glfw
 	url = https://github.com/glfw/glfw.git
 [submodule "OpenGL/vendor/glm"]
 	path = OpenGL/vendor/glm
