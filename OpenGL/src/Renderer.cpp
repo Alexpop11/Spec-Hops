@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+std::string Renderer::res_path;
+
 void GLClearError() {
    while (glGetError() != GL_NO_ERROR)
       ;
@@ -26,6 +28,21 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
    ib.Bind();
    GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
+
+const std::string& Renderer::ResPath() {
+   namespace fs = std::filesystem;
+   if (res_path.empty()) {
+      if (fs::exists("./res/shaders"))
+         res_path = "./res/";
+      else if (fs::exists(RES_PATH "/res/shaders"))
+         res_path = RES_PATH "/res/";
+      else
+         std::cout << "Resource directory not found\n";
+   }
+   return res_path;
+}
+
+
 
 std::tuple<float, float> Renderer::WindowSize() const {
    int width, height;

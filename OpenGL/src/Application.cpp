@@ -94,7 +94,7 @@ std::vector<std::string> mapLoader(const std::string& filename) {
 }
 
 void createMap() {
-    std::string filename = RES_PATH "/res/maps/SpaceShip.txt";
+    std::string filename = Renderer::ResPath() + "maps/SpaceShip.txt";
     std::ifstream file(filename);
 
     if (!file.is_open()) {
@@ -166,7 +166,8 @@ int main(void) {
    glfwSetKeyCallback(window, key_callback);
 
    // Set the window icon
-   setWindowIcon(window, "res/Images/Logo2.png");
+   std::string icon_path = Renderer::ResPath() + "Images/Logo2.png";
+   setWindowIcon(window, icon_path.c_str());
 
    /* Make the window's context current */
    glfwMakeContextCurrent(window);

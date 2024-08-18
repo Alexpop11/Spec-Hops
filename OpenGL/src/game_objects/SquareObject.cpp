@@ -5,7 +5,7 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, float x, f
     r = 0.5;
     g = 0.5;
     b = 0.5;
-    shader = std::make_shared<Shader>(RES_PATH "/res/shaders/shader.shader");
+    shader = std::make_shared<Shader>(Renderer::ResPath() + "shaders/shader.shader");
 }
 
 void SquareObject::setUpShader(Renderer& renderer)
@@ -15,7 +15,7 @@ void SquareObject::setUpShader(Renderer& renderer)
 }
 
 void SquareObject::render(Renderer& renderer) {
-    
+
     GameObject::render(renderer);
 
     float positions[] = {
