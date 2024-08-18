@@ -12,6 +12,10 @@ add_subdirectory(vendor/glfw)
 set(BUILD_UTILS OFF CACHE BOOL "" FORCE)
 add_subdirectory(vendor/glew/build/cmake)
 
+# Add GLM
+add_subdirectory(vendor/glm)
+
+# Add application code
 file(GLOB_RECURSE cpp_files "src/*.cpp")
 file(GLOB_RECURSE header_files "src/*.h")
 
@@ -26,12 +30,14 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glfw/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glew/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     glfw
     glew
     OpenGL::GL
+    glm::glm
 )
 
 if(WIN32)
