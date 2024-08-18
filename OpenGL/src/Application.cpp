@@ -93,7 +93,7 @@ std::vector<std::string> mapLoader(const std::string& filename) {
 }
 
 void createMap() {
-    std::string filename = "res/maps/SpaceShip.txt";
+    std::string filename = RES_PATH "/res/maps/SpaceShip.txt";
     std::ifstream file(filename);
 
     if (!file.is_open()) {

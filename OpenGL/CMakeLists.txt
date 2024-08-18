@@ -40,6 +40,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     glm::glm
 )
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/res_path.hpp.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/src/res_path.hpp ESCAPE_QUOTES)
+
 if(WIN32)
     target_compile_definitions(${PROJECT_NAME} PRIVATE GLEW_STATIC)
 endif()

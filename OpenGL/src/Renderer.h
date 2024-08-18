@@ -3,6 +3,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "res_path.hpp"
+
 #include "VertexArray.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
