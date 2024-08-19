@@ -4,6 +4,7 @@ project(SpaceBoom)
 
 set( CMAKE_CXX_STANDARD 20 )
 
+include(../cmake/CPM.cmake)
 CPMAddPackage(
   NAME GroupSourcesByFolder.cmake
   GITHUB_REPOSITORY TheLartians/GroupSourcesByFolder.cmake
