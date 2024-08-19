@@ -7,7 +7,7 @@
 #include "Tile.h"
 #include "Bomb.h"
 
-Player::Player(const std::string& name, float x, float y)
+Player::Player(const std::string& name, int x, int y)
    : Character(name, x, y) {
    drawPriority = 3;
    r            = 0.5f;
@@ -17,13 +17,20 @@ Player::Player(const std::string& name, float x, float y)
 }
 
 void Player::update() {
-
+   Character::update();
+   Camera::x = x;
+   Camera::y = y;
 }
 
 void Player::tickUpdate() {
-   float new_x             = x;
-   float new_y             = y;
-   //bool  new_spot_occupied = false;
+   if (moved_last_tick) {
+      moved_last_tick = false;
+      return;
+   }
+   moved_last_tick = true;
+   int new_x = tile_x;
+   int new_y = tile_y;
+   // bool  new_spot_occupied = false;
    if (Input::keys_pressed[GLFW_KEY_W] || Input::keys_pressed[GLFW_KEY_UP]) {
       new_y += 1;
    }
@@ -57,6 +64,4 @@ void Player::tickUpdate() {
    }
 
    move(new_x, new_y);
-   Camera::x = x;
-   Camera::y = y;
 }

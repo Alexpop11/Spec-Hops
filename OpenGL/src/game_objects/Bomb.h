@@ -6,5 +6,5 @@ public:
     Bomb() = default;
     Bomb(const std::string& name, float x, float y);
     virtual void update() override;
-    float ExplodeTime;
+    int ExplodeTick;
 };

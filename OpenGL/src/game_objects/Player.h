@@ -4,7 +4,8 @@
 class Player : public Character {
 public:
     Player() = default;
-    Player(const std::string& name, float x, float y);
+    Player(const std::string& name, int x, int y);
     virtual void update() override;
+    bool         moved_last_tick = false;
     virtual void tickUpdate() override;
 };

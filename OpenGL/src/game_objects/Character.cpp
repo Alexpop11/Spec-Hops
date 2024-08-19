@@ -1,17 +1,18 @@
 #include "Character.h"
 
-Character::Character(const std::string& name, float x, float y)
+Character::Character(const std::string& name, int x, int y)
    : SquareObject(name, 2, x, y) {}
 
 void Character::update() {
-
+   x = x + 0.6 * (tile_x - x);
+   y = y + 0.6 * (tile_y - y);
 }
 
 void Character::tickUpdate() {
 
 }
 
-void Character::move(float new_x, float new_y) {
+void Character::move(int new_x, int new_y) {
    bool new_spot_occupied = false;
    for (auto& tile : World::at<Tile>(new_x, new_y)) {
       if (tile->wall) {
@@ -23,8 +24,8 @@ void Character::move(float new_x, float new_y) {
    };
 
    if (!new_spot_occupied) {
-      x = new_x;
-      y = new_y;
+      tile_x = new_x;
+      tile_y = new_y;
    }
 }
 

@@ -55,8 +55,7 @@ void sortGameObjectsByPriority(std::vector<std::unique_ptr<GameObject>>& gameObj
 
 int main(void) {
 
-   const float TICKS_PER_SECOND = 9.0f;
-   const float MS_PER_TICK      = 1000.0f / TICKS_PER_SECOND;
+   const float TICKS_PER_SECOND = 12.0f;
 
    /* Initialize the library */
    if (!glfwInit())

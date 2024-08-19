@@ -8,13 +8,13 @@ Bomb::Bomb(const std::string& name, float x, float y)
    r           = 0.2f;
    g           = 0.2f;
    b           = 0.2f;
-   ExplodeTime = CreationTime + 1.5f;
+   ExplodeTick = 0;
 }
 
 void Bomb::update() {
    // Explode the bomb
 
-   if (glfwGetTime() >= ExplodeTime) {
+   if (ExplodeTick > 24) {
       auto nearbyWalls =
          World::where<Tile>([&](const Tile& tile) { return (std::abs(x - tile.x) + std::abs(y - tile.y) < 3); });
 
@@ -30,5 +30,7 @@ void Bomb::update() {
       }
 
       ShouldDestroy = true;
+   } else {
+      ExplodeTick++;
    }
 }

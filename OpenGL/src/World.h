@@ -21,9 +21,9 @@ public:
    }
 
    template <typename T>
-   static std::vector<T*> at(float x, float y) {
+   static std::vector<T*> at(int x, int y) {
       std::vector<T*> filteredObjects;
-      return where<T>([&](const T& obj) { return obj.x == x && obj.y == y; });
+      return where<T>([&](const T& obj) { return obj.tile_x == x && obj.tile_y == y; });
    }
 
    static void LoadMap(const std::string& map_path);
