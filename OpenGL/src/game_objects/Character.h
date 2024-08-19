@@ -10,6 +10,7 @@ public:
     Character(const std::string& name, float x, float y);
     virtual void move(float new_x, float new_y);
     virtual void update() override;
+    virtual void tickUpdate() override;
     void die();
     int health;
 };

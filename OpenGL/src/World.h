@@ -29,4 +29,5 @@ public:
    static void LoadMap(const std::string& map_path);
 
    static void UpdateObjects();
+   static void TickObjects();
 };

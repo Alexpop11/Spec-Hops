@@ -17,22 +17,26 @@ Player::Player(const std::string& name, float x, float y)
 }
 
 void Player::update() {
+
+}
+
+void Player::tickUpdate() {
    float new_x             = x;
    float new_y             = y;
    //bool  new_spot_occupied = false;
-   if (Input::keys_pressed_down[GLFW_KEY_W] || Input::keys_pressed_down[GLFW_KEY_UP]) {
+   if (Input::keys_pressed[GLFW_KEY_W] || Input::keys_pressed[GLFW_KEY_UP]) {
       new_y += 1;
    }
-   if (Input::keys_pressed_down[GLFW_KEY_A] || Input::keys_pressed_down[GLFW_KEY_LEFT]) {
+   if (Input::keys_pressed[GLFW_KEY_A] || Input::keys_pressed[GLFW_KEY_LEFT]) {
       new_x -= 1;
    }
-   if (Input::keys_pressed_down[GLFW_KEY_S] || Input::keys_pressed_down[GLFW_KEY_DOWN]) {
+   if (Input::keys_pressed[GLFW_KEY_S] || Input::keys_pressed[GLFW_KEY_DOWN]) {
       new_y -= 1;
    }
-   if (Input::keys_pressed_down[GLFW_KEY_D] || Input::keys_pressed_down[GLFW_KEY_RIGHT]) {
+   if (Input::keys_pressed[GLFW_KEY_D] || Input::keys_pressed[GLFW_KEY_RIGHT]) {
       new_x += 1;
    }
-   if (Input::keys_pressed_down[GLFW_KEY_SPACE]) {
+   if (Input::keys_pressed[GLFW_KEY_SPACE]) {
       World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", x, y)));
    }
 

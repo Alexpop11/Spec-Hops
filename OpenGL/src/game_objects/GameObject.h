@@ -25,6 +25,8 @@ public:
     virtual void setUpShader(Renderer& renderer);
     virtual void render(Renderer& renderer);
     virtual void update();
+    virtual void tickUpdate();
+
 
     std::shared_ptr<Shader> shader;
 

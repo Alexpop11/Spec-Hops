@@ -73,3 +73,10 @@ void World::UpdateObjects() {
       World::gameobjects.push_back(std::move(o));
    World::gameobjectstoadd.clear();
 }
+
+void World::TickObjects() {
+   for (auto& gameobject : gameobjects) {
+      gameobject->tickUpdate();
+   }
+
+}

@@ -4,7 +4,11 @@ Character::Character(const std::string& name, float x, float y)
    : SquareObject(name, 2, x, y) {}
 
 void Character::update() {
-   // Update logic for Character
+
+}
+
+void Character::tickUpdate() {
+
 }
 
 void Character::move(float new_x, float new_y) {

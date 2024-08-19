@@ -15,6 +15,8 @@ GameObject::GameObject(const std::string& name, int drawPriority, float x, float
 
 void GameObject::update() {}
 
+void GameObject::tickUpdate() {}
+
 void GameObject::setUpShader(Renderer& renderer) {
    if (shader) {
       auto [width, height] = renderer.WindowSize();

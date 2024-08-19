@@ -55,6 +55,9 @@ void sortGameObjectsByPriority(std::vector<std::unique_ptr<GameObject>>& gameObj
 
 int main(void) {
 
+   const float TICKS_PER_SECOND = 9.0f;
+   const float MS_PER_TICK      = 1000.0f / TICKS_PER_SECOND;
+
    /* Initialize the library */
    if (!glfwInit())
       return -1;
@@ -68,7 +71,7 @@ int main(void) {
    const GLFWvidmode* mode           = glfwGetVideoMode(primaryMonitor);
 
    // Create a fullscreen window
-   GLFWwindow* window = glfwCreateWindow(mode->width / 2, mode->height / 2, "SpaceBoom", NULL, NULL);
+   GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "SpaceBoom", primaryMonitor, NULL);
    if (!window) {
       std::cerr << "Failed to create GLFW window" << std::endl;
       glfwTerminate();
@@ -97,12 +100,16 @@ int main(void) {
    World::LoadMap("maps/SpaceShip.txt");
 
    Input::startTime = (float)glfwGetTime();
+   double lastTick = Input::startTime;
 
    // -------------------
    // Main rendering loop
    // -------------------
    while (!glfwWindowShouldClose(window)) {
-      // set the viewport size
+      
+      double currentTime = glfwGetTime();
+
+       // set the viewport size
       auto [width, height] = renderer.WindowSize();
       glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
@@ -122,6 +129,11 @@ int main(void) {
       }
 
       World::UpdateObjects();
+
+      if (lastTick + 1/TICKS_PER_SECOND >= currentTime) {
+         World::TickObjects();
+         lastTick = currentTime;
+      }
 
       // render all objects
       // ------------------
