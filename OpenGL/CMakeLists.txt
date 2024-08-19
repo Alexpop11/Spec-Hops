@@ -4,6 +4,10 @@ project(SpaceBoom)
 
 set( CMAKE_CXX_STANDARD 20 )
 
+# Add application code
+file(GLOB cpp_files "src/*.cpp" "src/game_objects/*.cpp" "src/game_objects/enemies/*.cpp")
+file(GLOB header_files "src/*.h" "src/game_objects/*.h" "src/game_objects/enemies/*.h")
+
 include(../cmake/CPM.cmake)
 CPMAddPackage(
   NAME GroupSourcesByFolder.cmake
@@ -20,10 +24,6 @@ add_subdirectory(vendor/glew/build/cmake)
 
 # Add GLM
 add_subdirectory(vendor/glm)
-
-# Add application code
-file(GLOB cpp_files "src/*.cpp" "src/game_objects/*.cpp" "src/game_objects/enemies/*.cpp")
-file(GLOB header_files "src/*.h" "src/game_objects/*.h" "src/game_objects/enemies/*.h")
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
