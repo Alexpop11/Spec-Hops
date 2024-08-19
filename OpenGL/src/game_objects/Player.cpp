@@ -14,12 +14,15 @@ Player::Player(const std::string& name, int x, int y)
    g            = 0.8f;
    b            = 0.5f;
    health       = 3;
+   Camera::x = x;
+   Camera::y = y;
 }
 
 void Player::update() {
    Character::update();
-   Camera::x = x;
-   Camera::y = y;
+   // smooth camera movement
+   Camera::x = Camera::x + 0.4 * (x - Camera::x);
+   Camera::y = Camera::y + 0.4 * (y - Camera::y);
 }
 
 void Player::tickUpdate() {
@@ -44,7 +47,7 @@ void Player::tickUpdate() {
       new_x += 1;
    }
    if (Input::keys_pressed[GLFW_KEY_SPACE]) {
-      World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", x, y)));
+      World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
    }
 
    if (health == 1) {
