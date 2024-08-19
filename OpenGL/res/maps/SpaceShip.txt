@@ -1,42 +1,42 @@
-﻿ wwww
-  wwwww
-   wwwwwwww
-   wwwwwwwwwww       ww
-wwwwwwwwwwwwwwwwwwwwwwwww
- wwwwwwwwwwwwwwwwwwwwwwww
-wwwwwwwwwwwwwwwwwwwwwwwwww
-    wwwfffffffffwwww
-    wwwfffffffffwwwwwww         wwww
-    wwwfffffffffffffwwwwwwwwwwwwwwwwwwwwwww
-    wwwfffffffffffffwwwwwwwwwwwwwwwwww
-    wwwwfwwwwwwwwwfwwwffffffffffffffwwwwwwwww
-     wwwfffffffffffffwffffffffffffffwfffffffwwwwwww
-     wwwffffffmffffffwffffffffffffffwfffffffffffffw
-     wwwfffffffffffffwwwwwwwffffffffwffffffffffffwwwwww
-      wwffwwfffffwwffwfffffwffmfffffffffwffffffffwffffww
-      wwffwwfffffwwffwffffffffffffffffffwffffffffwfffffww
-      wwfffffffffffffwfffffwwwwwwwwwwfffwffffffffwfffffffww
-      wwfffffffffffffwwfffwwwwfffffffwfffffffffffwffffffffww
-      wwffwffpffffwffffffffwfffffeffffwwwffffffffffffffffffwwww
-      wwfffffffffffffwwfffwwwwfffffffwfffffffffffwffffffffww
-      wwfffffffffffffwfffffwwwwwwwwwwfffwffffffffwfffffffww
-      wwffwwfffffwwffwffffffffffffffffffwffffffffwfffffww
-      wwffwwfffffwwffwfffffwffmfffffffffwffffffffwffffww
-     wwwfffffffffffffwwwwwwwffffffffwffffffffffffwwwww
-     wwwffffffmffffffwffffffffffffffwfffffffffffffw
-     wwwfffffffffffffwffffffffffffffwfffffffwwwwwww
-    wwwwfwwwwwwwwwfwwwffffffffffffffwwwwwwwww
-    wwwfffffffffffffwwwwwwwwwwwwwwwwww
-    wwwfffffffffffffwwwwwwwwwwwwwwwwwwwwwww
-    wwwfffffffffwwwwwww         wwww
-    wwwfffffffffwwww
-wwwwwwwwwwwwwwwwwwwwwwwwww
- wwwwwwwwwwwwwwwwwwwwwwww
-wwwwwwwwwwwwwwwwwwwwwwwww                       
-   wwwwwwwwwww       ww
-   wwwwwwww                                
-  wwwww                                     
- wwww                                      
+﻿ WWWW
+  WWWWW
+   WWWWWWWW
+   WWWWWWWWWWW       WW
+WWWWWWWWWWWWWWWWWWWWWWWWW
+ WWWWWWWWWWWWWWWWWWWWWWWW
+WWWWWWWWWWWWWWWWWWWWWWWWWW
+    WWwfffffffffwWWW
+    WWwfffffffffwWWWWWW         WWWW
+    WWwfffffffffffffWWWWWWWWWWWWWWWWWWWWWWW
+    WWwfffffffffffffWWWWWWWWWWWWWWWWWW
+    WWwwfwwwwwwwwwfwwwffffffffffffffWWWWWWWWW
+     WwwfffffffffffffwffffffffffffffwfffffffWWWWWWW
+     WwwffffffmffffffwffffffffffffffwfffffffffffffW
+     WwwfffffffffffffwwwwwwwffffffffwffffffffffffwwWWWW
+      WwffwwfffffwwffwfffffwffmfffffffffwffffffffwffffWW
+      WwffwwfffffwwffwffffffffffffffffffwffffffffwfffffWW
+      WwfffffffffffffwfffffwwwwwwwwwwfffwffffffffwfffffffWW
+      WwfffffffffffffwwfffwwwwfffffffwfffffffffffwffffffffWW
+      WwffwffpffffwffffffffwfffffeffffwwwffffffffffffffffffWWWW
+      WwfffffffffffffwwfffwwwwfffffffwfffffffffffwffffffffWW
+      WwfffffffffffffwfffffwwwwwwwwwwfffwffffffffwfffffffWW
+      WwffwwfffffwwffwffffffffffffffffffwffffffffwfffffWW
+      WwffwwfffffwwffwfffffwffmfffffffffwffffffffwffffWW
+     WwwfffffffffffffwwwwwwwffffffffwffffffffffffwwWWW
+     WwwffffffmffffffwffffffffffffffwfffffffffffffW
+     WwwfffffffffffffwffffffffffffffwfffffffWWWWWWW
+    WwwwfwwwwwwwwwfwwwffffffffffffffWWWWWWWWW
+    WwwfffffffffffffWWWWWWWWWWWWWWWWWW
+    WwwfffffffffffffWWWWWWWWWWWWWWWWWWWWWWW
+    WwwfffffffffwWWWWWW         WWWW
+    WwwfffffffffwWWW
+WWWWWWWWWWWWWWWWWWWWWWWWWW
+ WWWWWWWWWWWWWWWWWWWWWWWW
+WWWWWWWWWWWWWWWWWWWWWWWWW                       
+   WWWWWWWWWWW       WW
+   WWWWWWWW                                
+  WWWWW                                     
+ WWWW                                      
                                           
                                           
                                           

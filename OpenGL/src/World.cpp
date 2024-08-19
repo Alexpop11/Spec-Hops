@@ -48,7 +48,10 @@ void World::LoadMap(const std::string& map_path) {
                gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
             }
             if (c == 'w') { // wall
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Wall", true, (float)x, (float)y)));
+               gameobjects.push_back(std::make_unique<Tile>(Tile("Wall", true, false, (float)x, (float)y)));
+            }
+            if (c == 'W') { // wall
+               gameobjects.push_back(std::make_unique<Tile>(Tile("Wall", true, true, (float)x, (float)y)));
             }
             if (c == 'e') { // enemy Bomber
                gameobjects.push_back(std::make_unique<Bomber>(Bomber("bomber", (float)x, (float)y)));
