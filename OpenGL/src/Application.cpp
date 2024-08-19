@@ -71,7 +71,7 @@ int main(void) {
    const GLFWvidmode* mode           = glfwGetVideoMode(primaryMonitor);
 
    // Create a fullscreen window
-   GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "SpaceBoom", primaryMonitor, NULL);
+   GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "SpaceBoom", NULL, NULL);
    if (!window) {
       std::cerr << "Failed to create GLFW window" << std::endl;
       glfwTerminate();
@@ -100,16 +100,16 @@ int main(void) {
    World::LoadMap("maps/SpaceShip.txt");
 
    Input::startTime = (float)glfwGetTime();
-   double lastTick = Input::startTime;
+   double lastTick  = Input::startTime;
 
    // -------------------
    // Main rendering loop
    // -------------------
    while (!glfwWindowShouldClose(window)) {
-      
+
       double currentTime = glfwGetTime();
 
-       // set the viewport size
+      // set the viewport size
       auto [width, height] = renderer.WindowSize();
       glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
@@ -130,7 +130,7 @@ int main(void) {
 
       World::UpdateObjects();
 
-      if (lastTick + 1/TICKS_PER_SECOND >= currentTime) {
+      if (lastTick + (1.0 / TICKS_PER_SECOND) <= currentTime) {
          World::TickObjects();
          lastTick = currentTime;
       }
