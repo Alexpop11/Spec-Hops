@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.10)
 
 project(SpaceBoom)
 
+set( CMAKE_CXX_STANDARD 20 )
+
+CPMAddPackage(
+  NAME GroupSourcesByFolder.cmake
+  GITHUB_REPOSITORY TheLartians/GroupSourcesByFolder.cmake
+  VERSION 1.0
+)
+
 # Add GLFW
 add_subdirectory(vendor/glfw)
 
