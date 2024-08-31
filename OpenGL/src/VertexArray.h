@@ -1,6 +1,9 @@
 #pragma once
 #include "VertexBuffer.h"
 #include <utility> // for std::swap
+#include "WeakMemoizeConstructor.h"
+#include <vector>
+#include <tuple>
 
 class VertexBufferLayout;
 
@@ -10,6 +13,8 @@ private:
 
 public:
    VertexArray();
+
+   VertexArray(const VertexBuffer& vb, const VertexBufferLayout& layout);
 
    // Delete copy constructor
    VertexArray(const VertexArray&) = delete;
@@ -41,4 +46,7 @@ public:
 
    void Bind() const;
    void Unbind() const;
+
+   // Declare the global memoized constructor
+   DECLARE_GLOBAL_MEMOIZED_CONSTRUCTOR(VertexArray)
 };

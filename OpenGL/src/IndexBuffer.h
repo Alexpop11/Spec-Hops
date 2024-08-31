@@ -1,5 +1,10 @@
 #pragma once
 #include <utility> // for std::swap
+#include "WeakMemoizeConstructor.h"
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include "Utils.h"
 
 class IndexBuffer {
 private:
@@ -7,7 +12,13 @@ private:
    unsigned int m_Count;
 
 public:
-   IndexBuffer(const unsigned int* data, unsigned int count);
+   template <size_t N>
+   IndexBuffer(const std::array<unsigned int, N>& data) {
+      m_Count = N;
+      GLCall(glGenBuffers(1, &m_RendererID));
+      GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
+      GLCall(glBufferData(GL_ARRAY_BUFFER, N * sizeof(unsigned int), data.data(), GL_STATIC_DRAW));
+   }
 
    // Delete copy constructor
    IndexBuffer(const IndexBuffer&) = delete;
@@ -42,4 +53,7 @@ public:
    void Unbind() const;
 
    inline unsigned int GetCount() const { return m_Count; }
+
+   // Declare the global memoized constructor
+   DECLARE_GLOBAL_MEMOIZED_CONSTRUCTOR(IndexBuffer)
 };

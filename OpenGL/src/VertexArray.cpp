@@ -4,8 +4,15 @@
 #include "Renderer.h"
 
 VertexArray::VertexArray() {
-   GLCall(glGenVertexArrays(1, &m_RendererID));
 }
+
+
+VertexArray::VertexArray(const VertexBuffer& vb, const VertexBufferLayout& layout)
+   : VertexArray() {
+   GLCall(glGenVertexArrays(1, &m_RendererID));
+   AddBuffer(vb, layout);
+}
+
 
 VertexArray::~VertexArray() {
    GLCall(glDeleteVertexArrays(1, &m_RendererID));

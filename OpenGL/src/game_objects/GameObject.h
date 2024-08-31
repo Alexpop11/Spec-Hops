@@ -32,10 +32,10 @@ public:
    virtual void tickUpdate();
 
 
-   std::shared_ptr<Shader>     shader;
-   std::optional<VertexArray>  va;
-   std::optional<VertexBuffer> vb;
-   std::optional<IndexBuffer>  ib;
+   std::shared_ptr<Shader>       shader;
+   std::shared_ptr<VertexArray>  va;
+   std::shared_ptr<VertexBuffer> vb;
+   std::shared_ptr<IndexBuffer>  ib;
 
    std::string name;
    int         drawPriority;

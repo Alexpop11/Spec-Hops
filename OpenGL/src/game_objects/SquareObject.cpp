@@ -9,23 +9,19 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, int x, int
    tile_y = y;
    shader = Shader::create(Renderer::ResPath() + "shaders/shader.shader");
 
-   float positions[] = {
-      -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f,
-   };
+   std::array<float, 8> positions = {-0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f};
 
-   unsigned int indices[] = {0, 1, 2, 2, 3, 0};
+   std::array<unsigned int, 6> indices = {0, 1, 2, 2, 3, 0};
 
    unsigned int vao;
    GLCall(glGenVertexArrays(1, &vao));
    GLCall(glBindVertexArray(vao));
 
-   va = std::make_optional(VertexArray());
-   vb = std::make_optional(VertexBuffer(positions, 4 * 2 * sizeof(float)));
+   vb = std::make_shared<VertexBuffer>(VertexBuffer(positions));
    VertexBufferLayout layout;
    layout.Push<float>(2);
-   va->AddBuffer(*vb, layout);
-
-   ib = std::make_optional(IndexBuffer(indices, 6));
+   va = std::make_shared<VertexArray>(VertexArray(*vb, layout));
+   ib = std::make_shared<IndexBuffer>(IndexBuffer(indices));
 }
 
 void SquareObject::setUpShader(Renderer& renderer) {
