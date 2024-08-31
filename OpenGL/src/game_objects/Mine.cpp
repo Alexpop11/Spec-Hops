@@ -11,7 +11,7 @@ Mine::Mine(const std::string& name, float x, float y)
    ExplodeTick = 0;
 }
 
-void Mine::update() {
+void Mine::tickUpdate() {
    // Explode the Mine
 
    auto nearbyCharacters = World::where<Character>([&](const Character& character) {

@@ -7,6 +7,7 @@ public:
    static bool  keys_pressed[GLFW_KEY_LAST];
    static bool  keys_pressed_down[GLFW_KEY_LAST];
    static float startTime;
+   static float deltaTime;
 
 private:
    static bool keys_pressed_last_frame[GLFW_KEY_LAST];
@@ -23,3 +24,5 @@ public:
       }
    }
 };
+
+float zeno(float current, float target, float timeConstant);

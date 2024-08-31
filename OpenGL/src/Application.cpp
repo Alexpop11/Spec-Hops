@@ -100,15 +100,16 @@ int main(void) {
 
    World::LoadMap("maps/SpaceShip.txt");
 
-   Input::startTime = (float)glfwGetTime();
-   double lastTick  = Input::startTime;
+   double currentTime = glfwGetTime();
+   double lastTick    = Input::startTime;
 
    // -------------------
    // Main rendering loop
    // -------------------
    while (!glfwWindowShouldClose(window)) {
-
-      double currentTime = glfwGetTime();
+      double lastFrameTime = currentTime;
+      currentTime          = glfwGetTime();
+      Input::deltaTime     = currentTime - lastFrameTime;
 
       // set the viewport size
       auto [width, height] = renderer.WindowSize();

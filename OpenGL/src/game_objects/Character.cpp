@@ -1,11 +1,12 @@
 #include "Character.h"
+#include "Input.h"
 
 Character::Character(const std::string& name, int x, int y)
    : SquareObject(name, 2, x, y) {}
 
 void Character::update() {
-   x = x + 0.6 * (tile_x - x);
-   y = y + 0.6 * (tile_y - y);
+   x = zeno(x, tile_x, 0.1);
+   y = zeno(y, tile_y, 0.1);
 }
 
 void Character::tickUpdate() {}

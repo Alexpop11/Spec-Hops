@@ -11,9 +11,8 @@ Bomb::Bomb(const std::string& name, float x, float y)
    ExplodeTick = 0;
 }
 
-void Bomb::update() {
+void Bomb::tickUpdate() {
    // Explode the bomb
-
    if (ExplodeTick > 24) {
       auto nearbyWalls =
          World::where<Tile>([&](const Tile& tile) { return (std::abs(x - tile.x) + std::abs(y - tile.y) < 3); });

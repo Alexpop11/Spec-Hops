@@ -21,8 +21,8 @@ Player::Player(const std::string& name, int x, int y)
 void Player::update() {
    Character::update();
    // smooth camera movement
-   Camera::x = Camera::x + 0.4 * (x - Camera::x);
-   Camera::y = Camera::y + 0.4 * (y - Camera::y);
+   Camera::x = zeno(Camera::x, x, 1);
+   Camera::y = zeno(Camera::y, y, 1);
 }
 
 void Player::tickUpdate() {
