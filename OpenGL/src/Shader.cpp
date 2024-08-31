@@ -115,9 +115,9 @@ Shader& Shader::operator=(Shader&& other) noexcept {
    return *this;
 }
 
-void Shader::UpdateIfNeeded()  {
-   fs::path p {m_FilePath};
-   auto last_write = fs::last_write_time(p);
+void Shader::UpdateIfNeeded() {
+   fs::path p{m_FilePath};
+   auto     last_write = fs::last_write_time(p);
    if (last_write > m_last_write) {
       ShaderProgramSource source = ParseShader(m_FilePath);
       if (auto id = CreateShader(source.VertexSource, source.FragmentSource)) {

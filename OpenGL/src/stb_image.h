@@ -126,8 +126,8 @@ RECENT REVISION HISTORY:
   of the credits.
 */
 #ifndef _MSC_VER
-#pragma GCC diagnostic ignored "-Wcast-qual"
-#pragma GCC diagnostic ignored "-Wswitch-default"
+   #pragma GCC diagnostic ignored "-Wcast-qual"
+   #pragma GCC diagnostic ignored "-Wswitch-default"
 #endif
 
 #ifndef STBI_INCLUDE_STB_IMAGE_H
@@ -1312,8 +1312,8 @@ static void stbi__float_postprocess(float* result, int* x, int* y, int* comp, in
 
       #if defined(_WIN32) && defined(STBI_WINDOWS_UTF8)
 STBI_EXTERN
-   __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int cp, unsigned long flags, const char* str,
-                                                           int cbmb, wchar_t* widestr, int cchwide);
+__declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int cp, unsigned long flags, const char* str, int cbmb,
+                                                        wchar_t* widestr, int cchwide);
 STBI_EXTERN __declspec(dllimport) int __stdcall WideCharToMultiByte(unsigned int cp, unsigned long flags,
                                                                     const wchar_t* widestr, int cchwide, char* str,
                                                                     int cbmb, const char* defchar, int* used_default);

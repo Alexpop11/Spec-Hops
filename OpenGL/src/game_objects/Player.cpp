@@ -14,8 +14,8 @@ Player::Player(const std::string& name, int x, int y)
    g            = 0.8f;
    b            = 0.5f;
    health       = 3;
-   Camera::x = x;
-   Camera::y = y;
+   Camera::x    = x;
+   Camera::y    = y;
 }
 
 void Player::update() {
@@ -31,8 +31,8 @@ void Player::tickUpdate() {
       return;
    }
    moved_last_tick = true;
-   int new_x = tile_x;
-   int new_y = tile_y;
+   int new_x       = tile_x;
+   int new_y       = tile_y;
    // bool  new_spot_occupied = false;
    if (Input::keys_pressed[GLFW_KEY_W] || Input::keys_pressed[GLFW_KEY_UP]) {
       new_y += 1;

@@ -58,8 +58,8 @@ void World::LoadMap(const std::string& map_path) {
                gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
             }
             if (c == 'm') { // Mine
-                  gameobjects.push_back(std::make_unique<Mine>(Mine("mine", (float)x, (float)y)));
-                  gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
+               gameobjects.push_back(std::make_unique<Mine>(Mine("mine", (float)x, (float)y)));
+               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
             }
          }
       }
@@ -86,5 +86,4 @@ void World::TickObjects() {
    for (auto& gameobject : gameobjects) {
       gameobject->tickUpdate();
    }
-
 }

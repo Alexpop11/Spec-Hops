@@ -29,10 +29,10 @@ bool GLLogCall(const char* function, const char* file, int line);
 
 class Renderer {
 public:
-   GLFWwindow*              window;
-   void                     Clear() const;
-   void                     Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
-   std::tuple<int, int>     WindowSize() const;
+   GLFWwindow*          window;
+   void                 Clear() const;
+   void                 Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
+   std::tuple<int, int> WindowSize() const;
 
    static const std::string& ResPath();
 

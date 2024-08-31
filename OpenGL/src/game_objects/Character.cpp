@@ -8,9 +8,7 @@ void Character::update() {
    y = y + 0.6 * (tile_y - y);
 }
 
-void Character::tickUpdate() {
-
-}
+void Character::tickUpdate() {}
 
 void Character::move(int new_x, int new_y) {
    bool new_spot_occupied = false;

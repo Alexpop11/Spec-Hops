@@ -2,6 +2,6 @@
 
 class Camera {
 public:
-	static float x;
-	static float y;
+   static float x;
+   static float y;
 };

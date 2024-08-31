@@ -3,8 +3,8 @@
 
 class Bomb : public SquareObject {
 public:
-    Bomb() = default;
-    Bomb(const std::string& name, float x, float y);
-    virtual void update() override;
-    int ExplodeTick;
+   Bomb() = default;
+   Bomb(const std::string& name, float x, float y);
+   virtual void update() override;
+   int          ExplodeTick;
 };

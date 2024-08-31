@@ -16,25 +16,32 @@
 
 class GameObject {
 public:
-    GameObject(const std::string& name, int drawPriority, float x, float y);
-    GameObject() = default;
-    virtual ~GameObject() = default;
-    float CreationTime = (float)glfwGetTime();
-    bool ShouldDestroy = false;
-
-    virtual void setUpShader(Renderer& renderer);
-    virtual void render(Renderer& renderer);
-    virtual void update();
-    virtual void tickUpdate();
+   GameObject(const std::string& name, int drawPriority, float x, float y);
+   GameObject()                           = default;
+   GameObject(GameObject&& mE)            = default;
+   GameObject& operator=(GameObject&& mE) = default;
 
 
-    std::shared_ptr<Shader> shader;
+   virtual ~GameObject() = default;
+   float CreationTime    = (float)glfwGetTime();
+   bool  ShouldDestroy   = false;
 
-    std::string name;
-    int drawPriority;
-    float x;
-    float y;
+   virtual void setUpShader(Renderer& renderer);
+   virtual void render(Renderer& renderer);
+   virtual void update();
+   virtual void tickUpdate();
+
+
+   std::shared_ptr<Shader>     shader;
+   std::optional<VertexArray>  va;
+   std::optional<VertexBuffer> vb;
+   std::optional<IndexBuffer>  ib;
+
+   std::string name;
+   int         drawPriority;
+   float       x;
+   float       y;
 
 private:
-    // Add any private members here if needed
+   // Add any private members here if needed
 };
