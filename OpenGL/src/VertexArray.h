@@ -4,6 +4,8 @@
 #include "WeakMemoizeConstructor.h"
 #include <vector>
 #include <tuple>
+#include <array>
+#include <array>
 
 class VertexBufferLayout;
 

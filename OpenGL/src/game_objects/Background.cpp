@@ -1,4 +1,5 @@
 #include "Background.h"
+#include <array>
 
 Background::Background(const std::string& name, int drawPriority, float x, float y)
    : GameObject(name, drawPriority, x, y) {

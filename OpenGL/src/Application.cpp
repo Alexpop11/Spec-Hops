@@ -88,7 +88,7 @@ int main(void) {
    /* Make the window's context current */
    glfwMakeContextCurrent(window);
 
-   glfwSwapInterval(1);
+   glfwSwapInterval(0);
 
    if (glewInit() != GLEW_OK)
       std::cout << "Error!" << std::endl;
@@ -121,13 +121,13 @@ int main(void) {
       // gather all different shaders that are currently in use, and check if we need to
       // recompile the shader because the file was changed.
       // -------------------------------------------------------------------------------
-      std::set<std::shared_ptr<Shader>> shaders;
+      /* std::set<std::shared_ptr<Shader>> shaders;
       for (auto& gameobject : World::gameobjects) {
          if (gameobject->shader && !shaders.contains(gameobject->shader)) {
             shaders.insert(gameobject->shader);
             gameobject->shader->UpdateIfNeeded();
          }
-      }
+      }*/
 
       World::UpdateObjects();
 
