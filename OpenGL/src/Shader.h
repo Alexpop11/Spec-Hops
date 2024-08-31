@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <filesystem>
+#include "WeakMemoizeConstructor.h"
 
 struct ShaderProgramSource {
    std::string VertexSource;
@@ -33,6 +34,9 @@ public:
    void SetUniform4f(const std::string& name, float v0, float v1, float f2, float f3);
    void SetUniform1f(const std::string& name, float v0);
    void SetUniform2f(const std::string& name, float v0, float v1);
+
+   // Declare the global memoized constructor
+   DECLARE_GLOBAL_MEMOIZED_CONSTRUCTOR(Shader)
 
 private:
    ShaderProgramSource ParseShader(const std::string& filepath);

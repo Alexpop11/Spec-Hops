@@ -7,8 +7,7 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, int x, int
    b      = 0.5;
    tile_x = x;
    tile_y = y;
-   shader = std::make_shared<Shader>(Renderer::ResPath() + "shaders/shader.shader");
-
+   shader = Shader::create(Renderer::ResPath() + "shaders/shader.shader");
 
    float positions[] = {
       -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f,

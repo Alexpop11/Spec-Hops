@@ -2,7 +2,7 @@
 
 Background::Background(const std::string& name, int drawPriority, float x, float y)
    : GameObject(name, drawPriority, x, y) {
-   shader       = std::make_shared<Shader>(Renderer::ResPath() + "shaders/stars.shader");
+   shader       = Shader::create(Renderer::ResPath() + "shaders/stars.shader");
    drawPriority = 0;
 
    float positions[] = {

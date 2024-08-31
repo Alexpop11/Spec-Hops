@@ -26,6 +26,8 @@
 #include "game_objects/Tile.h"
 #include "game_objects/enemies/Bomber.h"
 
+#include "WeakMemoizeConstructor.h"
+
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
    int            width, height, channels;
    unsigned char* pixels = stbi_load(iconPath, &width, &height, &channels, 4);

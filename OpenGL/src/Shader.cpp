@@ -12,6 +12,7 @@ namespace fs = std::filesystem;
 Shader::Shader(const std::string& filepath)
    : m_FilePath(filepath)
    , m_RendererID(0) {
+   std::cout << "Initializing shader: " << filepath << std::endl;
    ShaderProgramSource source = ParseShader(filepath);
    m_RendererID               = CreateShader(source.VertexSource, source.FragmentSource);
    m_last_write               = fs::last_write_time(fs::path{m_FilePath});
