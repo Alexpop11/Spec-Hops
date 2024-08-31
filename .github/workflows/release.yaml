@@ -44,24 +44,15 @@ jobs:
         run: |
           choco install cmake ninja
 
-      - name: Configure CMake (non-macOS)
-        if: matrix.os != 'macos-latest'
+      - name: Configure CMake
         run: |
           mkdir build
           cd build
-          cmake -GNinja ..
-
-      - name: Configure CMake (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          mkdir build
-          cd build
-          cmake -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} ..
+          cmake -GNinja -DCMAKE_BUILD_TYPE=Release ${{ matrix.os == 'macos-latest' && format('-DCMAKE_OSX_ARCHITECTURES={0}', matrix.arch) || '' }} ..
 
       - name: Build
         run: |
-          cd build
-          ninja
+          cmake --build build --config Release
 
       - name: Prepare release package
         run: |
