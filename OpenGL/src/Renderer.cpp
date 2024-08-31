@@ -24,12 +24,14 @@ const std::string& Renderer::ResPath() {
       fs::path exe_dir  = exe_path.parent_path();
 
       // Check for "res/shaders" relative to the executable's directory
-      if (fs::exists(exe_dir / "res" / "shaders"))
+      if (fs::exists(exe_dir / "res" / "shaders")) {
          res_path = (exe_dir / "res").string() + "/";
-      else if (fs::exists(RES_PATH "/res/shaders"))
+      } else if (fs::exists(RES_PATH "/res/shaders")) {
          res_path = RES_PATH "/res/";
-      else
-         std::cout << "Resource directory not found\n";
+      } else {
+         std::cout << "Resource directory not found relative to " << exe_dir << " or " << RES_PATH << std::endl;
+         res_path = "./res/";
+      }
    }
 
    return res_path;
