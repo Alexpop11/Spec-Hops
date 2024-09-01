@@ -8,7 +8,7 @@
 #include "game_objects/Camera.h"
 #include "game_objects/Tile.h"
 #include "game_objects/enemies/Bomber.h"
-#include "game_objects/Mine.h"
+#include "game_objects/entities/Mine.h"
 
 std::vector<std::unique_ptr<GameObject>> World::gameobjects      = {};
 std::vector<std::unique_ptr<GameObject>> World::gameobjectstoadd = {};

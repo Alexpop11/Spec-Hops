@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "../World.h"
 #include "Tile.h"
-#include "Bomb.h"
+#include "entities/Bomb.h"
 
 Player::Player(const std::string& name, int x, int y)
    : Character(name, x, y) {

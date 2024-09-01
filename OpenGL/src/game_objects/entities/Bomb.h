@@ -1,5 +1,5 @@
 #pragma once
-#include "SquareObject.h"
+#include "../SquareObject.h"
 
 class Bomb : public SquareObject {
 public:

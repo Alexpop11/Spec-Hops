@@ -2,7 +2,7 @@
 #include "../Character.h"
 #include "../Player.h"
 #include "../../World.h"
-#include "../Bomb.h"
+#include "../entities/Bomb.h"
 
 class Bomber : public Character {
 public:

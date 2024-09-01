@@ -1,7 +1,7 @@
 #include "Bomb.h"
-#include "../World.h"
-#include "Tile.h"
-#include "Player.h"
+#include "../../World.h"
+#include "../Tile.h"
+#include "../Player.h"
 
 Bomb::Bomb(const std::string& name, float x, float y)
    : SquareObject(name, 4, x, y) {
