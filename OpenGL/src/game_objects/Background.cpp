@@ -10,10 +10,6 @@ Background::Background(const std::string& name, int drawPriority, float x, float
 
    std::array<unsigned int, 6> indices = {0, 1, 2, 2, 3, 0};
 
-   unsigned int vao;
-   GLCall(glGenVertexArrays(1, &vao));
-   GLCall(glBindVertexArray(vao));
-
    vb = std::make_shared<VertexBuffer>(VertexBuffer(positions));
    VertexBufferLayout layout;
    layout.Push<float>(2);
