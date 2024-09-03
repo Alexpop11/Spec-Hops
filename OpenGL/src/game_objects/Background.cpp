@@ -14,12 +14,10 @@ Background::Background(const std::string& name, int drawPriority, float x, float
    GLCall(glGenVertexArrays(1, &vao));
    GLCall(glBindVertexArray(vao));
 
-   va = std::make_shared<VertexArray>();
    vb = std::make_shared<VertexBuffer>(VertexBuffer(positions));
    VertexBufferLayout layout;
    layout.Push<float>(2);
-   va->AddBuffer(*vb, layout);
-
+   va = std::make_shared<VertexArray>(VertexArray(*vb, layout));
    ib = std::make_shared<IndexBuffer>(IndexBuffer(indices));
 }
 
