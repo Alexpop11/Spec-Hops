@@ -14,8 +14,6 @@ private:
    unsigned int m_RendererID;
 
 public:
-   VertexArray();
-
    VertexArray(const VertexBuffer& vb, const VertexBufferLayout& layout);
 
    // Delete copy constructor

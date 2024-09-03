@@ -3,12 +3,8 @@
 #include "VertexBufferLayout.h"
 #include "Renderer.h"
 
-VertexArray::VertexArray() {
-}
 
-
-VertexArray::VertexArray(const VertexBuffer& vb, const VertexBufferLayout& layout)
-   : VertexArray() {
+VertexArray::VertexArray(const VertexBuffer& vb, const VertexBufferLayout& layout) {
    GLCall(glGenVertexArrays(1, &m_RendererID));
    AddBuffer(vb, layout);
 }
