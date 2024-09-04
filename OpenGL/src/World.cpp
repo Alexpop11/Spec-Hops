@@ -8,6 +8,7 @@
 #include "game_objects/Camera.h"
 #include "game_objects/Tile.h"
 #include "game_objects/enemies/Bomber.h"
+#include "game_objects/enemies/Turret.h"
 #include "game_objects/Mine.h"
 
 std::vector<std::unique_ptr<GameObject>> World::gameobjects      = {};
@@ -55,6 +56,10 @@ void World::LoadMap(const std::string& map_path) {
             }
             if (c == 'e') { // enemy Bomber
                gameobjects.push_back(std::make_unique<Bomber>(Bomber("bomber", (float)x, (float)y)));
+               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
+            }
+            if (c == 't') { // Turret
+               gameobjects.push_back(std::make_unique<Turret>(Turret("turret", (float)x, (float)y)));
                gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
             }
             if (c == 'm') { // Mine
