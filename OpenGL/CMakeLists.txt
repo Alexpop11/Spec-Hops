@@ -31,6 +31,9 @@ add_subdirectory(vendor/glm)
 # Find OpenGL
 find_package(OpenGL REQUIRED)
 
+# Add xxHash
+add_subdirectory(vendor/xxHash/cmake_unofficial vendor/xxHash/build/ EXCLUDE_FROM_ALL)
+
 add_executable(${PROJECT_NAME} ${cpp_files} ${header_files} ${res_files})
 
 # Set resource files as header-only (non-compiled)
@@ -53,11 +56,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
 )
 
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
     glfw
     glew_s
     OpenGL::GL
     glm::glm
+    xxHash::xxhash
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/res_path.hpp.in

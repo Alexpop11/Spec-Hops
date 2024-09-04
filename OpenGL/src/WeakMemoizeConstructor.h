@@ -7,30 +7,61 @@
 #include <type_traits>
 #include <tuple>
 
-namespace gtl {
+#include "xxhash.h"
+#include <iostream>
 
-// Custom hash function for tuples
+// Type trait to check if a type is safe for bit-wise hashing
+template <typename T>
+struct is_safe_for_bitwise_hash
+   : std::conjunction<std::is_trivially_copyable<T>, std::negation<std::is_pointer<T>>,
+                      std::negation<std::is_member_pointer<T>>, std::negation<std::is_array<T>>> {};
+
+template <typename T>
+inline constexpr bool is_safe_for_bitwise_hash_v = is_safe_for_bitwise_hash<T>::value;
+
+// Custom hash function for tuples using xxHash/
+struct hash_util {
+    template <typename T>
+    static XXH64_hash_t hash_element(const T& element, XXH64_hash_t seed) {
+        if constexpr (is_safe_for_bitwise_hash_v<T>) {
+            std::aligned_storage_t<sizeof(T), alignof(T)> buffer;
+            std::memcpy(&buffer, &element, sizeof(T));
+            return XXH64(&buffer, sizeof(T), seed);
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            return XXH64(element.data(), element.size(), seed);
+        } else {
+            static_assert(always_false<T>, "Unsupported type for hashing");
+        }
+    }
+
+    template <typename T>
+    static constexpr bool always_false = false;
+};
+
+// Base case
 template <typename Tuple, size_t Index = std::tuple_size<Tuple>::value - 1>
-struct tuple_hash {
-   static size_t apply(const Tuple& tuple) {
-      size_t seed = tuple_hash<Tuple, Index - 1>::apply(tuple);
-      return seed ^ (std::hash<typename std::tuple_element<Index, Tuple>::type>{}(std::get<Index>(tuple)) + 0x9e3779b9 +
-                     (seed << 6) + (seed >> 2));
-   }
+struct tuple_hash : hash_util {
+    static XXH64_hash_t apply(const Tuple& tuple, XXH64_hash_t seed = 0) {
+        XXH64_hash_t hash = tuple_hash<Tuple, Index - 1>::apply(tuple, seed);
+        return hash_element(std::get<Index>(tuple), hash);
+    }
 };
 
+// Specialization for index 0
 template <typename Tuple>
-struct tuple_hash<Tuple, 0> {
-   static size_t apply(const Tuple& tuple) {
-      return std::hash<typename std::tuple_element<0, Tuple>::type>{}(std::get<0>(tuple));
-   }
+struct tuple_hash<Tuple, 0> : hash_util {
+    static XXH64_hash_t apply(const Tuple& tuple, XXH64_hash_t seed = 0) {
+        return hash_element(std::get<0>(tuple), seed);
+    }
 };
+
+namespace gtl {
 
 template <typename T>
 class weak_memoize_constructor {
 private:
-   mutable std::mutex                                   mtx;
-   mutable std::unordered_map<size_t, std::weak_ptr<T>> cache;
+   mutable std::mutex                                         mtx;
+   mutable std::unordered_map<XXH64_hash_t, std::weak_ptr<T>> cache;
 
    template <typename Tuple, std::size_t... Is>
    std::shared_ptr<T> construct_helper(Tuple&& args, std::index_sequence<Is...>) const {
@@ -40,10 +71,10 @@ private:
 public:
    template <typename... Args>
    std::shared_ptr<T> operator()(Args&&... args) const {
-      using KeyType = std::tuple<typename std::decay<Args>::type...>;
+      using KeyType = std::tuple<Args...>;
 
-      KeyType key(std::forward<Args>(args)...);
-      size_t  hash = tuple_hash<KeyType>::apply(key);
+      KeyType      key(std::forward<Args>(args)...);
+      XXH64_hash_t hash = tuple_hash<KeyType>::apply(key);
 
       std::lock_guard<std::mutex> lock(mtx);
 

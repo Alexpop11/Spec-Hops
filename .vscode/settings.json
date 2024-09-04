@@ -63,6 +63,14 @@
         "__debug": "cpp",
         "atomic": "cpp",
         "exception": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "any": "cpp",
+        "cinttypes": "cpp",
+        "future": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "scoped_allocator": "cpp",
+        "typeindex": "cpp",
+        "unordered_set": "cpp"
     }
 }
