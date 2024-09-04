@@ -21,8 +21,9 @@ void Bomb::tickUpdate() {
          wall->explode();
       }
 
-      auto nearbyCharacters = World::where<Character>(
-         [&](const Character& character) { return (std::abs(x - character.x) + std::abs(y - character.y) < 3); });
+      auto nearbyCharacters = World::where<Character>([&](const Character& character) {
+         return (std::abs(x - character.tile_x) + std::abs(y - character.tile_y) < 3);
+      });
       for (auto* character : nearbyCharacters) {
          character->health -= 1;
          std::cout << "bomb damaged player. their health is now " << character->health << std::endl;

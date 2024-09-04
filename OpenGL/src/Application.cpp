@@ -88,7 +88,7 @@ int main(void) {
    /* Make the window's context current */
    glfwMakeContextCurrent(window);
 
-   glfwSwapInterval(0);
+   glfwSwapInterval(1);
 
    if (glewInit() != GLEW_OK)
       std::cout << "Error!" << std::endl;
@@ -132,9 +132,10 @@ int main(void) {
 
       World::UpdateObjects();
 
-      if (lastTick + (1.0 / TICKS_PER_SECOND) <= currentTime) {
+      if (World::shouldTick || lastTick + (1.0 / TICKS_PER_SECOND) <= currentTime) {
          World::TickObjects();
          lastTick = currentTime;
+         World::shouldTick = false;
       }
 
       // render all objects

@@ -1,5 +1,6 @@
 #pragma once
 #include "SquareObject.h"
+#include "Input.h"
 
 class Tile : public SquareObject {
 public:

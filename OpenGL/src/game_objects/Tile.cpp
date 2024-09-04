@@ -20,17 +20,17 @@ void Tile::explode() {
 
 void Tile::update() {
    if (wall == true && !unbreakable) {
-      r = 0.4f;
-      g = 0.4f;
-      b = 0.4f;
+      r = zeno(r, 0.4f, 0.1);
+      g = zeno(g, 0.4f, 0.1);
+      b = zeno(b, 0.4f, 0.1);
 
    } else if (wall == true) {
       r = 0.3f;
       g = 0.3f;
       b = 0.3f;
    } else {
-      r = 0.5f;
-      g = 0.5f;
-      b = 0.5f;
+      r = zeno(r, 0.5f, 0.1);
+      g = zeno(g, 0.5f, 0.1);
+      b = zeno(b, 0.5f, 0.1);
    }
 }

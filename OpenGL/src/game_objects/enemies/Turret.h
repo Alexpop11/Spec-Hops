@@ -12,4 +12,5 @@ public:
    int aimDirection_x = 0;
    int aimDirection_y = 0;
    int bulletsToShoot          = 0;
+   bool shot_last_tick         = false;
 };

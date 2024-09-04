@@ -41,5 +41,6 @@ void SquareObject::render(Renderer& renderer) {
 }
 
 void SquareObject::update() {
-   // Update logic for SquareObject
+   x = zeno(x, tile_x, 0.05);
+   y = zeno(y, tile_y, 0.05);
 }

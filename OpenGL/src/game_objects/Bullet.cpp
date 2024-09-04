@@ -18,10 +18,12 @@ void Bullet::tickUpdate() {
    tile_y += direction_y;
 
    // Check if the bullet hits a wall
-   auto nearbyWalls = World::at<Tile>(tile_x, tile_y);
-   if (!nearbyWalls.empty()) {
-      ShouldDestroy = true;
-      return; // Stop further processing since the bullet is destroyed
+   auto tiles = World::at<Tile>(tile_x, tile_y);
+   for (auto tile : tiles) {
+      if (tile->wall) {
+         ShouldDestroy = true;
+         return; // Stop further processing since the bullet is destroyed
+      }
    }
 
    // Assuming you have a way to check for characters at the new position

@@ -14,6 +14,8 @@
 std::vector<std::unique_ptr<GameObject>> World::gameobjects      = {};
 std::vector<std::unique_ptr<GameObject>> World::gameobjectstoadd = {};
 
+bool World::shouldTick = false;
+
 void World::LoadMap(const std::string& map_path) {
    gameobjects.clear();
 

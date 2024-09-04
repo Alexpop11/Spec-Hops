@@ -30,4 +30,5 @@ public:
 
    static void UpdateObjects();
    static void TickObjects();
+   static bool        shouldTick;
 };

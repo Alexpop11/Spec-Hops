@@ -5,8 +5,7 @@ Character::Character(const std::string& name, int x, int y)
    : SquareObject(name, 2, x, y) {}
 
 void Character::update() {
-   x = zeno(x, tile_x, 0.1);
-   y = zeno(y, tile_y, 0.1);
+   SquareObject::update();
 }
 
 void Character::tickUpdate() {}

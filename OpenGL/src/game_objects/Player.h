@@ -8,4 +8,5 @@ public:
    virtual void update() override;
    bool         moved_last_tick = false;
    virtual void tickUpdate() override;
+   bool         key_pressed_last_frame = false;
 };

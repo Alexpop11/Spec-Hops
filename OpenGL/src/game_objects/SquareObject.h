@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "Input.h"
 
 class SquareObject : public GameObject {
 public:

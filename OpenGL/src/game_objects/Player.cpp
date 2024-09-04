@@ -17,12 +17,34 @@ Player::Player(const std::string& name, int x, int y)
    Camera::x    = x;
    Camera::y    = y;
 }
-
 void Player::update() {
    Character::update();
    // smooth camera movement
    Camera::x = zeno(Camera::x, x, 1);
    Camera::y = zeno(Camera::y, y, 1);
+
+   bool key_pressed_this_frame = false;
+
+   if (Input::keys_pressed[GLFW_KEY_W] || Input::keys_pressed[GLFW_KEY_UP]) {
+      key_pressed_this_frame = true;
+   }
+   if (Input::keys_pressed[GLFW_KEY_A] || Input::keys_pressed[GLFW_KEY_LEFT]) {
+      key_pressed_this_frame = true;
+   }
+   if (Input::keys_pressed[GLFW_KEY_S] || Input::keys_pressed[GLFW_KEY_DOWN]) {
+      key_pressed_this_frame = true;
+   }
+   if (Input::keys_pressed[GLFW_KEY_D] || Input::keys_pressed[GLFW_KEY_RIGHT]) {
+      key_pressed_this_frame = true;
+   }
+   if (Input::keys_pressed[GLFW_KEY_SPACE]) {
+      key_pressed_this_frame = true;
+   }
+
+   if (!key_pressed_last_frame && key_pressed_this_frame) {
+       World::shouldTick = true;
+   }
+   key_pressed_last_frame = key_pressed_this_frame;
 }
 
 void Player::tickUpdate() {
@@ -30,6 +52,7 @@ void Player::tickUpdate() {
       moved_last_tick = false;
       return;
    }
+
    moved_last_tick = true;
    int new_x       = tile_x;
    int new_y       = tile_y;
@@ -48,6 +71,10 @@ void Player::tickUpdate() {
    }
    if (Input::keys_pressed[GLFW_KEY_SPACE]) {
       World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
+   }
+
+   if (!key_pressed_last_frame) {
+       
    }
 
    if (health == 1) {
