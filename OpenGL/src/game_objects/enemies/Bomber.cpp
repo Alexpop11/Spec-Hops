@@ -53,6 +53,8 @@ void Bomber::tickUpdate() {
    // Check for nearby bombs
    auto nearbyBombs = World::where<Bomb>(
       [&](const Bomb& bomb) { return (std::abs(tile_x - bomb.tile_x) + std::abs(tile_y - bomb.tile_y) < 3); });
+   auto nearbyBullets = World::where<Bullet>(
+      [&](const Bullet& bullet) { return (std::abs(tile_x - bullet.tile_x) + std::abs(tile_y - bullet.tile_y) < 3); });
 
    // Move to player
    if (!nearbyBombs.empty()) {
@@ -60,7 +62,21 @@ void Bomber::tickUpdate() {
       // Move away from bomb
       move(tile_x + (tile_x > bomb->tile_x ? 1 : -1), tile_y);
       move(tile_x, tile_y + (tile_y > bomb->tile_y ? 1 : -1));
-   } else if (!nearbyPlayers.empty() && nearbyBombs.empty()) {
+   }
+   if (!nearbyBullets.empty()) {
+      auto bullet = nearbyBullets[0];
+      // Move away from bullet
+      
+      if (bullet->direction_x + bullet->tile_x == tile_x && bullet->direction_y + bullet->tile_y == tile_y) {
+         if (bullet->direction_x != 0) {
+            move(tile_x, tile_y + (tile_y > bullet->tile_y ? 1 : -1));
+         } else {
+            move(tile_x + (tile_x > bullet->tile_x ? 1 : -1), tile_y);
+         }
+      }
+   }
+   
+   else if (!nearbyPlayers.empty() && nearbyBombs.empty()) {
       auto player = nearbyPlayers[0];
       move(tile_x + sign(player->tile_x - tile_x), tile_y);
       move(tile_x, tile_y + sign(player->tile_y - tile_y));

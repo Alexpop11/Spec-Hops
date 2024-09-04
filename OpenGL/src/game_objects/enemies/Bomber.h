@@ -3,6 +3,7 @@
 #include "../Player.h"
 #include "../../World.h"
 #include "../Bomb.h"
+#include "../Bullet.h"
 
 class Bomber : public Character {
 public:
