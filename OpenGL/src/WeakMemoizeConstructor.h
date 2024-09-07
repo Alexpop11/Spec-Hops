@@ -21,38 +21,38 @@ inline constexpr bool is_safe_for_bitwise_hash_v = is_safe_for_bitwise_hash<T>::
 
 // Custom hash function for tuples using xxHash/
 struct hash_util {
-    template <typename T>
-    static XXH64_hash_t hash_element(const T& element, XXH64_hash_t seed) {
-        if constexpr (is_safe_for_bitwise_hash_v<T>) {
-            std::aligned_storage_t<sizeof(T), alignof(T)> buffer;
-            std::memcpy(&buffer, &element, sizeof(T));
-            return XXH64(&buffer, sizeof(T), seed);
-        } else if constexpr (std::is_same_v<T, std::string>) {
-            return XXH64(element.data(), element.size(), seed);
-        } else {
-            static_assert(always_false<T>, "Unsupported type for hashing");
-        }
-    }
+   template <typename T>
+   static XXH64_hash_t hash_element(const T& element, XXH64_hash_t seed) {
+      if constexpr (is_safe_for_bitwise_hash_v<T>) {
+         std::aligned_storage_t<sizeof(T), alignof(T)> buffer;
+         std::memcpy(&buffer, &element, sizeof(T));
+         return XXH64(&buffer, sizeof(T), seed);
+      } else if constexpr (std::is_same_v<T, std::string>) {
+         return XXH64(element.data(), element.size(), seed);
+      } else {
+         static_assert(always_false<T>, "Unsupported type for hashing");
+      }
+   }
 
-    template <typename T>
-    static constexpr bool always_false = false;
+   template <typename T>
+   static constexpr bool always_false = false;
 };
 
 // Base case
 template <typename Tuple, size_t Index = std::tuple_size<Tuple>::value - 1>
 struct tuple_hash : hash_util {
-    static XXH64_hash_t apply(const Tuple& tuple, XXH64_hash_t seed = 0) {
-        XXH64_hash_t hash = tuple_hash<Tuple, Index - 1>::apply(tuple, seed);
-        return hash_element(std::get<Index>(tuple), hash);
-    }
+   static XXH64_hash_t apply(const Tuple& tuple, XXH64_hash_t seed = 0) {
+      XXH64_hash_t hash = tuple_hash<Tuple, Index - 1>::apply(tuple, seed);
+      return hash_element(std::get<Index>(tuple), hash);
+   }
 };
 
 // Specialization for index 0
 template <typename Tuple>
 struct tuple_hash<Tuple, 0> : hash_util {
-    static XXH64_hash_t apply(const Tuple& tuple, XXH64_hash_t seed = 0) {
-        return hash_element(std::get<0>(tuple), seed);
-    }
+   static XXH64_hash_t apply(const Tuple& tuple, XXH64_hash_t seed = 0) {
+      return hash_element(std::get<0>(tuple), seed);
+   }
 };
 
 namespace gtl {

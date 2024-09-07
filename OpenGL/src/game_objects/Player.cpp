@@ -42,7 +42,7 @@ void Player::update() {
    }
 
    if (!key_pressed_last_frame && key_pressed_this_frame) {
-       World::shouldTick = true;
+      World::shouldTick = true;
    }
    key_pressed_last_frame = key_pressed_this_frame;
 }
@@ -73,9 +73,7 @@ void Player::tickUpdate() {
       World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
    }
 
-   if (!key_pressed_last_frame) {
-       
-   }
+   if (!key_pressed_last_frame) {}
 
    if (health == 1) {
       if (std::fmod(glfwGetTime(), 0.3) < 0.15) {

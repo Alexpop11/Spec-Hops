@@ -134,7 +134,7 @@ int main(void) {
 
       if (World::shouldTick || lastTick + (1.0 / TICKS_PER_SECOND) <= currentTime) {
          World::TickObjects();
-         lastTick = currentTime;
+         lastTick          = currentTime;
          World::shouldTick = false;
       }
 

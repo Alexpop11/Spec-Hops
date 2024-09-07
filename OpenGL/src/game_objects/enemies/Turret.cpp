@@ -21,37 +21,37 @@ void Turret::tickUpdate() {
       ticksBeforeNextSpray--;
       return;
    }
-      if (shot_last_tick) {
-         shot_last_tick = false;
-         return;
+   if (shot_last_tick) {
+      shot_last_tick = false;
+      return;
+   }
+   shot_last_tick     = true;
+   auto nearbyPlayers = World::where<Player>([&](const Player& player) {
+      // Check for horizontal proximity
+      if (std::abs(tile_x - player.tile_x) <= 10 && tile_y == player.tile_y) {
+         aimDirection_x = (player.tile_x > tile_x) ? 1 : -1;
+         aimDirection_y = 0;
+         bulletsToShoot = 3;
+         return true;
       }
-      shot_last_tick     = true;
-      auto nearbyPlayers = World::where<Player>([&](const Player& player) {
-         // Check for horizontal proximity
-         if (std::abs(tile_x - player.tile_x) <= 10 && tile_y == player.tile_y) {
-            aimDirection_x = (player.tile_x > tile_x) ? 1 : -1;
-            aimDirection_y = 0;
-            bulletsToShoot = 3;
-            return true;
-         }
-         // Check for vertical proximity
-         if (std::abs(tile_y - player.tile_y) <= 10 && tile_x == player.tile_x) {
-            aimDirection_y = (player.tile_y > tile_y) ? 1 : -1;
-            aimDirection_x = 0;
-            bulletsToShoot = 3;
-            return true;
-         }
-         return false;
-      });
+      // Check for vertical proximity
+      if (std::abs(tile_y - player.tile_y) <= 10 && tile_x == player.tile_x) {
+         aimDirection_y = (player.tile_y > tile_y) ? 1 : -1;
+         aimDirection_x = 0;
+         bulletsToShoot = 3;
+         return true;
+      }
+      return false;
+   });
 
-      // Shoot a bullet if a player is detected
-      if (bulletsToShoot >= 1) {
-         World::gameobjectstoadd.push_back(std::make_unique<Bullet>(
-            Bullet("CoolBullet", tile_x + aimDirection_x, tile_y + aimDirection_y, aimDirection_x, aimDirection_y)));
-         bulletsToShoot -= 1;
-      } else {
-         aimDirection_x       = 0;
-         aimDirection_y       = 0;
-         ticksBeforeNextSpray = 9;
-      }
+   // Shoot a bullet if a player is detected
+   if (bulletsToShoot >= 1) {
+      World::gameobjectstoadd.push_back(std::make_unique<Bullet>(
+         Bullet("CoolBullet", tile_x + aimDirection_x, tile_y + aimDirection_y, aimDirection_x, aimDirection_y)));
+      bulletsToShoot -= 1;
+   } else {
+      aimDirection_x       = 0;
+      aimDirection_y       = 0;
+      ticksBeforeNextSpray = 9;
+   }
 }

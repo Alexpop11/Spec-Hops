@@ -8,5 +8,4 @@ public:
    virtual void tickUpdate() override;
    int          direction_x;
    int          direction_y;
-
 };
