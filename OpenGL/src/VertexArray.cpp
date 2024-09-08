@@ -4,9 +4,10 @@
 #include "Renderer.h"
 
 
-VertexArray::VertexArray(const VertexBuffer& vb, const VertexBufferLayout& layout) {
+VertexArray::VertexArray(std::shared_ptr<VertexBuffer> vbp, const VertexBufferLayout& layout) {
+   vb.push_back(vbp);
    GLCall(glGenVertexArrays(1, &m_RendererID));
-   AddBuffer(vb, layout);
+   AddBuffer(*vbp, layout);
 }
 
 

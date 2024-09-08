@@ -3,6 +3,7 @@
 #include <vector>
 #include "Renderer.h"
 #include <GL/glew.h>
+#include <array>
 
 struct VertexBufferElement {
    unsigned int  type;
@@ -22,6 +23,8 @@ struct VertexBufferElement {
       }
       return 0;
    }
+
+   std::vector<unsigned int> data() const { return std::vector<unsigned int>({type, count, normalized}); }
 };
 
 class VertexBufferLayout {
@@ -38,4 +41,15 @@ public:
 
    inline const std::vector<VertexBufferElement> GetElements() const& { return m_Elements; }
    inline unsigned int                           GetStride() const { return m_Stride; }
+
+   std::vector<unsigned int> data() const {
+      std::vector<unsigned int> data;
+      data.push_back(m_Elements.size());
+      for (const auto& element : m_Elements) {
+         auto element_data = element.data();
+         data.insert(data.end(), element_data.begin(), element_data.end());
+      }
+      data.push_back(m_Stride);
+      return data;
+   }
 };

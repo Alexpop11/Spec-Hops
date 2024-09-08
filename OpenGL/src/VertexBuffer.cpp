@@ -1,5 +1,6 @@
 #include "VertexBuffer.h"
 #include "Renderer.h"
+#include <iostream>
 
 VertexBuffer::~VertexBuffer() {
    GLCall(glDeleteBuffers(1, &m_RendererID));

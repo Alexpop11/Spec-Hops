@@ -10,10 +10,10 @@ Background::Background(const std::string& name, int drawPriority, float x, float
 
    std::array<unsigned int, 6> indices = {0, 1, 2, 2, 3, 0};
 
-   vb = std::make_shared<VertexBuffer>(VertexBuffer(positions));
+   vb = VertexBuffer::create(positions);
    VertexBufferLayout layout;
    layout.Push<float>(2);
-   va = std::make_shared<VertexArray>(VertexArray(*vb, layout));
+   va = std::make_shared<VertexArray>(vb, layout);
    ib = std::make_shared<IndexBuffer>(IndexBuffer(indices));
 }
 

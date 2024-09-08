@@ -21,7 +21,7 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, int x, int
    vb = VertexBuffer::create(positions);
    VertexBufferLayout layout;
    layout.Push<float>(2);
-   va = std::make_shared<VertexArray>(VertexArray(*vb, layout));
+   va = std::make_shared<VertexArray>(vb, layout);
    ib = IndexBuffer::create(indices);
 }
 

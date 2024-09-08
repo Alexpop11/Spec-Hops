@@ -11,10 +11,20 @@ class VertexBufferLayout;
 
 class VertexArray {
 private:
-   unsigned int m_RendererID;
+   unsigned int                               m_RendererID;
+   std::vector<std::shared_ptr<VertexBuffer>> vb;
 
 public:
-   VertexArray(const VertexBuffer& vb, const VertexBufferLayout& layout);
+   VertexArray(std::shared_ptr<VertexBuffer> vb, const VertexBufferLayout& layout);
+
+
+   template <typename T, size_t N>
+   VertexArray(const std::array<T, N>& vbData, const VertexBufferLayout& layout) {
+      auto vbp = VertexBuffer::create(vbData);
+      vb.push_back(vbp);
+      VertexArray(vbp, layout);
+   }
+
 
    // Delete copy constructor
    VertexArray(const VertexArray&) = delete;
@@ -29,16 +39,7 @@ public:
    VertexArray& operator=(const VertexArray&) = delete;
 
    // Move assignment operator using swap
-   VertexArray& operator=(VertexArray&& other) noexcept {
-      swap(*this, other);
-      return *this;
-   }
-
-   // Swap function
-   friend void swap(VertexArray& first, VertexArray& second) noexcept {
-      using std::swap;
-      swap(first.m_RendererID, second.m_RendererID);
-   }
+   VertexArray& operator=(VertexArray&& other) noexcept = default;
 
    ~VertexArray();
 
