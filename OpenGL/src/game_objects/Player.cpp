@@ -42,7 +42,7 @@ void Player::update() {
    }
 
    if (!key_pressed_last_frame && key_pressed_this_frame) {
-       World::shouldTick = true;
+      World::shouldTick = true;
    }
    key_pressed_last_frame = key_pressed_this_frame;
 }
@@ -52,30 +52,65 @@ void Player::tickUpdate() {
       moved_last_tick = false;
       return;
    }
+   // This logic is already in character, but it's not applying to the player for some reason - so for now I'm just
+   // going to copy it here. pls help Powerup cooldowns
+   if (bombCoolDown > 0) {
+      bombCoolDown--;
+   }
+   if (bunnyHopCoolDown > 0) {
+      if (bunnyHopCoolDown < playerBunnyHopCoolDown) {
+         hoppedLastTurn = false;
+      }
+      bunnyHopCoolDown--;
+   }
+
+   int boostJumpCount =
+      0; // For bunny hop mechanic. Resets to 0 here, and if the player is holding shift it increases temporarily.
 
    moved_last_tick = true;
    int new_x       = tile_x;
    int new_y       = tile_y;
-   // bool  new_spot_occupied = false;
-   if (Input::keys_pressed[GLFW_KEY_W] || Input::keys_pressed[GLFW_KEY_UP]) {
-      new_y += 1;
-   }
-   if (Input::keys_pressed[GLFW_KEY_A] || Input::keys_pressed[GLFW_KEY_LEFT]) {
-      new_x -= 1;
-   }
-   if (Input::keys_pressed[GLFW_KEY_S] || Input::keys_pressed[GLFW_KEY_DOWN]) {
-      new_y -= 1;
-   }
-   if (Input::keys_pressed[GLFW_KEY_D] || Input::keys_pressed[GLFW_KEY_RIGHT]) {
-      new_x += 1;
-   }
-   if (Input::keys_pressed[GLFW_KEY_SPACE]) {
-      World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
+
+   if (Input::keys_pressed[GLFW_KEY_LEFT_SHIFT] || Input::keys_pressed[GLFW_KEY_RIGHT_SHIFT]) {
+      if (hasBunnyHop = true && bunnyHopCoolDown <= 0) {
+         boostJumpCount = 2;
+         hoppedLastTurn = true;
+      }
    }
 
-   if (!key_pressed_last_frame) {
-       
+   // bool  new_spot_occupied = false;
+   if (Input::keys_pressed[GLFW_KEY_W] || Input::keys_pressed[GLFW_KEY_UP]) {
+      new_y += 1 + boostJumpCount;
+      if (boostJumpCount > 0) {
+         bunnyHopCoolDown = playerBunnyHopCoolDown;
+      }
    }
+   if (Input::keys_pressed[GLFW_KEY_A] || Input::keys_pressed[GLFW_KEY_LEFT]) {
+      new_x -= 1 + boostJumpCount;
+      if (boostJumpCount > 0) {
+         bunnyHopCoolDown = playerBunnyHopCoolDown;
+      }
+   }
+   if (Input::keys_pressed[GLFW_KEY_S] || Input::keys_pressed[GLFW_KEY_DOWN]) {
+      new_y -= 1 + boostJumpCount;
+      if (boostJumpCount > 0) {
+         bunnyHopCoolDown = playerBunnyHopCoolDown;
+      }
+   }
+   if (Input::keys_pressed[GLFW_KEY_D] || Input::keys_pressed[GLFW_KEY_RIGHT]) {
+      new_x += 1 + boostJumpCount;
+      if (boostJumpCount > 0) {
+         bunnyHopCoolDown = playerBunnyHopCoolDown;
+      }
+   }
+   if (Input::keys_pressed[GLFW_KEY_SPACE]) {
+      if (hasBomb && bombCoolDown <= 0) {
+         World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
+         bombCoolDown = 3;
+      }
+   }
+
+   if (!key_pressed_last_frame) {}
 
    if (health == 1) {
       if (std::fmod(glfwGetTime(), 0.3) < 0.15) {

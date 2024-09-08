@@ -13,6 +13,14 @@ public:
    virtual void tickUpdate() override;
    void         die();
    int          health = 1;
+
+    // Powerups
+   bool hasBomb      = true;
+   int  bombCoolDown = 0;
+
+   bool hasBunnyHop      = true;
+   int  bunnyHopCoolDown = 0;
+   bool hoppedLastTurn   = false;
 };
 
 template <typename T>

@@ -1,5 +1,6 @@
 #include "Character.h"
 #include "Input.h"
+#include <cmath>
 
 Character::Character(const std::string& name, int x, int y)
    : SquareObject(name, 2, x, y) {}
@@ -8,23 +9,57 @@ void Character::update() {
    SquareObject::update();
 }
 
-void Character::tickUpdate() {}
+void Character::tickUpdate() {
+    // Powerup cooldowns
+   if (bombCoolDown > 0) {
+        bombCoolDown--;
+    }
+   if (bunnyHopCoolDown > 0) {
+        bunnyHopCoolDown--;
+    }
+}
 
 void Character::move(int new_x, int new_y) {
-   bool new_spot_occupied = false;
-   for (auto& tile : World::at<Tile>(new_x, new_y)) {
-      if (tile->wall) {
-         new_spot_occupied = true;
-      }
-   };
-   for (auto& tile : World::at<Character>(new_x, new_y)) {
-      new_spot_occupied = true;
-   };
+   int dx = new_x - tile_x;
+   int dy = new_y - tile_y;
+   int steps = std::max(std::abs(dx), std::abs(dy));
 
-   if (!new_spot_occupied) {
-      tile_x = new_x;
-      tile_y = new_y;
+   for (int i = 1; i <= steps; ++i) {
+      int check_x = tile_x + (dx * i) / steps;
+      int check_y = tile_y + (dy * i) / steps;
+
+      bool spot_occupied = false;
+      for (auto& tile : World::at<Tile>(check_x, check_y)) {
+         if (tile->wall) {
+            spot_occupied = true;
+            break;
+         }
+      }
+      if (!spot_occupied) {
+         for (auto& character : World::at<Character>(check_x, check_y)) {
+            if (character != this) {
+               spot_occupied = true;
+               break;
+            }
+         }
+      }
+
+      if (spot_occupied) {
+         // Move to the last unoccupied position
+          if (i <= 1 && !hoppedLastTurn) {
+            bunnyHopCoolDown = 0;
+          }
+          if (i > 1) {
+            tile_x = tile_x + (dx * (i - 1)) / steps;
+            tile_y = tile_y + (dy * (i - 1)) / steps;
+         }
+         return;
+      }
    }
+
+   // If we've made it here, the entire path is clear
+   tile_x = new_x;
+   tile_y = new_y;
 }
 
 void Character::die() {
