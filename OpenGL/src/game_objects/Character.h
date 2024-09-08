@@ -14,7 +14,7 @@ public:
    void         die();
    int          health = 1;
 
-    // Powerups
+   // Powerups
    bool hasBomb      = true;
    int  bombCoolDown = 0;
 

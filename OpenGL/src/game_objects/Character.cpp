@@ -10,18 +10,18 @@ void Character::update() {
 }
 
 void Character::tickUpdate() {
-    // Powerup cooldowns
+   // Powerup cooldowns
    if (bombCoolDown > 0) {
-        bombCoolDown--;
-    }
+      bombCoolDown--;
+   }
    if (bunnyHopCoolDown > 0) {
-        bunnyHopCoolDown--;
-    }
+      bunnyHopCoolDown--;
+   }
 }
 
 void Character::move(int new_x, int new_y) {
-   int dx = new_x - tile_x;
-   int dy = new_y - tile_y;
+   int dx    = new_x - tile_x;
+   int dy    = new_y - tile_y;
    int steps = std::max(std::abs(dx), std::abs(dy));
 
    for (int i = 1; i <= steps; ++i) {
@@ -46,10 +46,10 @@ void Character::move(int new_x, int new_y) {
 
       if (spot_occupied) {
          // Move to the last unoccupied position
-          if (i <= 1 && !hoppedLastTurn) {
+         if (i <= 1 && !hoppedLastTurn) {
             bunnyHopCoolDown = 0;
-          }
-          if (i > 1) {
+         }
+         if (i > 1) {
             tile_x = tile_x + (dx * (i - 1)) / steps;
             tile_y = tile_y + (dy * (i - 1)) / steps;
          }

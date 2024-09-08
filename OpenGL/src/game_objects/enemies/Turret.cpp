@@ -46,7 +46,7 @@ void Turret::tickUpdate() {
          Bullet("CoolBullet", tile_x + aimDirection_x, tile_y + aimDirection_y, aimDirection_x, aimDirection_y)));
       bulletsToShoot -= 1;
    } else {
-       aimDirection_x = 0;
-       aimDirection_y = 0;
+      aimDirection_x = 0;
+      aimDirection_y = 0;
    }
 }
