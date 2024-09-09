@@ -42,3 +42,5 @@ std::tuple<int, int> Renderer::WindowSize() const {
    glfwGetFramebufferSize(window, &width, &height);
    return {width, height};
 }
+
+AudioEngine Renderer::audioEngine = AudioEngine();

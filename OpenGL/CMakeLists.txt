@@ -18,21 +18,28 @@ CPMAddPackage(
   VERSION 1.0
 )
 
+set(VENDOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor)
+
+
+
 # Add GLFW
-add_subdirectory(vendor/glfw)
+add_subdirectory(${VENDOR_DIR}/glfw)
 
 # Add GLEW
 set(BUILD_UTILS OFF CACHE BOOL "" FORCE)
-add_subdirectory(vendor/glew/build/cmake)
+add_subdirectory(${VENDOR_DIR}/glew/build/cmake)
 
 # Add GLM
-add_subdirectory(vendor/glm)
+add_subdirectory(${VENDOR_DIR}/glm)
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
 
 # Add xxHash
-add_subdirectory(vendor/xxHash/cmake_unofficial vendor/xxHash/build/ EXCLUDE_FROM_ALL)
+add_subdirectory(${VENDOR_DIR}/xxHash/cmake_unofficial ${VENDOR_DIR}/xxHash/build/ EXCLUDE_FROM_ALL)
+
+# Add soloud
+add_subdirectory(${VENDOR_DIR}/soloud/contrib ${VENDOR_DIR}/soloud/build EXCLUDE_FROM_ALL)
 
 add_executable(${PROJECT_NAME} ${cpp_files} ${header_files} ${res_files})
 
@@ -51,9 +58,10 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT $
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glfw/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glew/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
+    ${VENDOR_DIR}/glfw/include
+    ${VENDOR_DIR}/glew/include
+    ${VENDOR_DIR}/glm
+    ${VENDOR_DIR}/soloud/include
 )
 
 
@@ -63,6 +71,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     OpenGL::GL
     glm::glm
     xxHash::xxhash
+    soloud
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/res_path.hpp.in
