@@ -67,7 +67,7 @@ void main()
     uv.x = floor(uv.x * 450)/450;
     uv.y = floor(uv.y * 450)/450;
 
-    const int numStars = 6;
+    const int numStars = 800;
     
     vec3 finalColor = vec3(0.0);
     
