@@ -7,3 +7,6 @@
 [submodule "OpenGL/vendor/xxHash"]
 	path = OpenGL/vendor/xxHash
 	url = https://github.com/Cyan4973/xxHash.git
+[submodule "OpenGL/vendor/soloud"]
+	path = OpenGL/vendor/soloud
+	url = https://github.com/jarikomppa/soloud.git
