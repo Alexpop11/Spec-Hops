@@ -17,12 +17,6 @@ Player::Player(const std::string& name, int x, int y)
    Camera::x    = x;
    Camera::y    = y;
 }
-
-void Player::move(int new_x, int new_y) {
-   Character::move(new_x, new_y);
-   Renderer::audioEngine.Walk.play();
-}
-
 void Player::update() {
    Character::update();
    // smooth camera movement
@@ -78,7 +72,7 @@ void Player::tickUpdate() {
    int new_y       = tile_y;
 
    if (Input::keys_pressed[GLFW_KEY_LEFT_SHIFT] || Input::keys_pressed[GLFW_KEY_RIGHT_SHIFT]) {
-      if (hasBunnyHop && bunnyHopCoolDown <= 0) {
+      if (hasBunnyHop = true && bunnyHopCoolDown <= 0) {
          boostJumpCount = 2;
          hoppedLastTurn = true;
       }
@@ -116,9 +110,7 @@ void Player::tickUpdate() {
       }
    }
 
-   if (new_x != tile_x || new_y != tile_y) {
-      move(new_x, new_y);
-   }
+   if (!key_pressed_last_frame) {}
 
    if (health == 1) {
       if (std::fmod(glfwGetTime(), 0.3) < 0.15) {
@@ -135,4 +127,6 @@ void Player::tickUpdate() {
    if (health <= 0) {
       die();
    }
+
+   move(new_x, new_y);
 }

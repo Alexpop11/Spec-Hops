@@ -9,7 +9,6 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "Utils.h"
-#include "AudioEngine.h"
 
 
 class Renderer {
@@ -20,8 +19,6 @@ public:
    std::tuple<int, int> WindowSize() const;
 
    static const std::string& ResPath();
-
-   static AudioEngine audioEngine;
 
 private:
    static std::string res_path;

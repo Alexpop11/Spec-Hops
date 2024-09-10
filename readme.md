@@ -18,4 +18,4 @@ cd ../OpenGL
 ```
 
 to package:
-1. You need one folder called `res` with the contents of `OpenGL/res/*` and the built binary to sit next to one another.
+1. You need one folder with the contents of OpenGL/res/* and the built binary to sit next to one another.
