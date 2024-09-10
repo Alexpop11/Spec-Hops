@@ -21,7 +21,6 @@ CPMAddPackage(
 set(VENDOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
 
-
 # Add GLFW
 add_subdirectory(${VENDOR_DIR}/glfw)
 
@@ -39,7 +38,13 @@ find_package(OpenGL REQUIRED)
 add_subdirectory(${VENDOR_DIR}/xxHash/cmake_unofficial ${VENDOR_DIR}/xxHash/build/ EXCLUDE_FROM_ALL)
 
 # Add soloud
+set(SOLOUD_BACKEND_OPENAL ON CACHE BOOL "Use OpenAL backend" FORCE)
+set(SOLOUD_STATIC_LIBRARY ON CACHE BOOL "Build static library" FORCE)
 add_subdirectory(${VENDOR_DIR}/soloud/contrib ${VENDOR_DIR}/soloud/build EXCLUDE_FROM_ALL)
+
+# Add SDL
+add_subdirectory(${VENDOR_DIR}/openal-soft)
+include_directories(${VENDOR_DIR}/openal-soft/include)
 
 add_executable(${PROJECT_NAME} ${cpp_files} ${header_files} ${res_files})
 
@@ -72,6 +77,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     glm::glm
     xxHash::xxhash
     soloud
+    OpenAL
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/res_path.hpp.in

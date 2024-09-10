@@ -10,3 +10,6 @@
 [submodule "OpenGL/vendor/soloud"]
 	path = OpenGL/vendor/soloud
 	url = https://github.com/jarikomppa/soloud.git
+[submodule "OpenGL/vendor/openal-soft"]
+	path = OpenGL/vendor/openal-soft
+	url = https://github.com/kcat/openal-soft.git
