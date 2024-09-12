@@ -5,7 +5,7 @@ project(SpaceBoom)
 set(CMAKE_CXX_STANDARD 20)
 
 # Add application code
-file(GLOB cpp_files "src/*.cpp" "src/game_objects/*.cpp" "src/game_objects/enemies/*.cpp")
+file(GLOB cpp_files "src/*.c" "src/*.cpp" "src/game_objects/*.cpp" "src/game_objects/enemies/*.cpp")
 file(GLOB header_files "src/*.h" "src/game_objects/*.h" "src/game_objects/enemies/*.h")
 
 # Add resource files
@@ -37,15 +37,6 @@ find_package(OpenGL REQUIRED)
 # Add xxHash
 add_subdirectory(${VENDOR_DIR}/xxHash/cmake_unofficial ${VENDOR_DIR}/xxHash/build/ EXCLUDE_FROM_ALL)
 
-# Add soloud
-set(SOLOUD_BACKEND_OPENAL ON CACHE BOOL "Use OpenAL backend" FORCE)
-set(SOLOUD_STATIC_LIBRARY ON CACHE BOOL "Build static library" FORCE)
-add_subdirectory(${VENDOR_DIR}/soloud/contrib ${VENDOR_DIR}/soloud/build EXCLUDE_FROM_ALL)
-
-# Add SDL
-add_subdirectory(${VENDOR_DIR}/openal-soft)
-include_directories(${VENDOR_DIR}/openal-soft/include)
-
 add_executable(${PROJECT_NAME} ${cpp_files} ${header_files} ${res_files})
 
 # Set resource files as header-only (non-compiled)
@@ -66,7 +57,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${VENDOR_DIR}/glfw/include
     ${VENDOR_DIR}/glew/include
     ${VENDOR_DIR}/glm
-    ${VENDOR_DIR}/soloud/include
+    ${VENDOR_DIR}/miniaudio
 )
 
 
@@ -76,8 +67,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     OpenGL::GL
     glm::glm
     xxHash::xxhash
-    soloud
-    OpenAL
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/res_path.hpp.in

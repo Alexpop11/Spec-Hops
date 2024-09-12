@@ -21,8 +21,6 @@ public:
 
    static const std::string& ResPath();
 
-   static AudioEngine audioEngine;
-
 private:
    static std::string res_path;
 };

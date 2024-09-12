@@ -20,7 +20,7 @@ Player::Player(const std::string& name, int x, int y)
 
 void Player::move(int new_x, int new_y) {
    Character::move(new_x, new_y);
-   Renderer::audioEngine.Walk.play();
+   audio().Walk.play();
 }
 
 void Player::update() {

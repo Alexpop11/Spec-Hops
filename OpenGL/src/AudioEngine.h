@@ -2,29 +2,49 @@
 
 #include <memory>
 #include <string>
-#include "soloud.h"
-#include "soloud_wav.h"
+#include <iostream>
+#include "miniaudio.h"
 
 class Sound {
 private:
-   SoLoud::Soloud& soloud;
-   SoLoud::Wav     wav;
+   ma_engine* engine;
+   ma_sound   sound;
 
 public:
-   Sound(std::string filename, SoLoud::Soloud& soloud);
-   void play();
+   Sound(const std::string& filename, ma_engine* engine);
+   Sound(const Sound&)            = delete;
+   Sound& operator=(const Sound&) = delete;
+   Sound(Sound&& other) noexcept;
+   Sound& operator=(Sound&& other) noexcept;
+   void   play();
+   ~Sound();
+};
+
+
+class MiniAudioEngine {
+public:
+   ma_engine engine;
+   MiniAudioEngine() {
+      ma_result result;
+
+      result = ma_engine_init(NULL, &engine);
+      if (result != MA_SUCCESS) {
+         std::cout << "Failed to initialize audio engine - " << result << std::endl;
+      }
+   }
 };
 
 class AudioEngine {
 private:
-   SoLoud::Soloud soloud;
+   MiniAudioEngine engine;
 
-   Sound getSound(const std::string& name, SoLoud::Soloud& audioEngine);
+   Sound getSound(const std::string& name);
 
 public:
    AudioEngine();
    void play(Sound& sound);
-   ~AudioEngine();
 
    Sound Walk;
 };
+
+AudioEngine& audio();
