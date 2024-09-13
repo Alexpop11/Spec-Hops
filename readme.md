@@ -7,14 +7,14 @@ mkdir build
 cd build
 // install dependencies: cmake, ninja, opengl
 // detailed instructions are in .github/workflows/release.yaml
-cmake -GNinja .
+cmake -GNinja ..
 ninja
 ```
 
 to run:
 ```
-cd ../OpenGL
-../build/OpenGL/OpenGL
+# from within the build directory
+./OpenGL/SpaceBoom
 ```
 
 to package:
