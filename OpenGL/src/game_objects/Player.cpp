@@ -20,7 +20,13 @@ Player::Player(const std::string& name, int x, int y)
 
 void Player::move(int new_x, int new_y) {
    Character::move(new_x, new_y);
-   audio().Walk.play();
+   if (!second_step) {
+      audio().Walk.play();
+      second_step = true;
+   } else if (second_step) {
+      audio().Walk1.play();
+      second_step = false;
+   }
 }
 
 void Player::update() {
@@ -134,5 +140,6 @@ void Player::tickUpdate() {
 
    if (health <= 0) {
       die();
+      audio().Death_Sound.play();
    }
 }

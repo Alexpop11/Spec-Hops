@@ -44,10 +44,14 @@ Sound::~Sound() {
 
 
 AudioEngine::AudioEngine()
-   : Walk(getSound("walk1.wav")) {
-   /*result =
-      ma_sound_init_from_file(&engine, (Renderer::ResPath() + "Sounds/" + "walk1.wav").c_str(), 0, NULL, NULL, &sound);
-   ma_sound_start(&sound);*/
+   : Walk(getSound("walk1.wav")), 
+    /*result =
+     ma_sound_init_from_file(&engine, (Renderer::ResPath() + "Sounds/" + "walk1.wav").c_str(), 0, NULL, NULL, &sound);
+     ma_sound_start(&sound);*/
+    Walk1(getSound("walk2.wav")), 
+    Bomb_Sound(getSound("Bomb1.wav")),
+    Death_Sound(getSound("Death2.wav"))
+     {
 }
 
 Sound AudioEngine::getSound(const std::string& name) {

@@ -29,6 +29,7 @@ void Bomb::tickUpdate() {
          std::cout << "bomb damaged player. their health is now " << character->health << std::endl;
       }
 
+      audio().Bomb_Sound.play();
       ShouldDestroy = true;
    } else {
       ExplodeTick++;

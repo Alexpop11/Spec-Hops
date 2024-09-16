@@ -1,6 +1,8 @@
 #include "Character.h"
 #include "Input.h"
 #include <cmath>
+#include <Renderer.h>
+
 
 Character::Character(const std::string& name, int x, int y)
    : SquareObject(name, 2, x, y) {}

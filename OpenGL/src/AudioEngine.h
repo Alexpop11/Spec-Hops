@@ -45,6 +45,9 @@ public:
    void play(Sound& sound);
 
    Sound Walk;
+   Sound Walk1;
+   Sound Bomb_Sound;
+   Sound Death_Sound;
 };
 
 AudioEngine& audio();
