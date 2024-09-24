@@ -1,7 +1,7 @@
 #pragma once
+#include "glm/glm.hpp"
 
 class Camera {
 public:
-   static float x;
-   static float y;
+   static glm::vec2 position;
 };

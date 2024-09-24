@@ -2,7 +2,7 @@
 #include <array>
 
 Background::Background(const std::string& name, int drawPriority, float x, float y)
-   : GameObject(name, drawPriority, x, y) {
+   : GameObject(name, drawPriority, {x, y}) {
    shader       = Shader::create(Renderer::ResPath() + "shaders/stars.shader");
    drawPriority = 0;
 

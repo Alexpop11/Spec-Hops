@@ -3,13 +3,13 @@
 #include "GameObject.h"
 #include "../Input.h"
 #include "Camera.h"
+#include "glm/glm.hpp"
 
 
-GameObject::GameObject(const std::string& name, int drawPriority, float x, float y)
+GameObject::GameObject(const std::string& name, int drawPriority, glm::vec2 position)
    : name(name)
    , drawPriority(drawPriority)
-   , x(x)
-   , y(y) {
+   , position(position) {
    // TODO: Add any additional initialization if needed
 }
 
@@ -27,7 +27,7 @@ void GameObject::setUpShader(Renderer& renderer) {
       shader->SetUniform1f("u_Time", currentTime);
       shader->SetUniform1f("u_StartTime", Input::startTime);
       shader->SetUniform1f("u_AspectRatio", float(width) / float(height));
-      shader->SetUniform2f("u_Position", {x - Camera::x + 9, y - Camera::y + 9});
+      shader->SetUniform2f("u_Position", position - Camera::position + glm::vec2{9.0, 9.0});
       shader->SetUniform2f("u_Resolution", {(float)width, (float)height});
    }
 }

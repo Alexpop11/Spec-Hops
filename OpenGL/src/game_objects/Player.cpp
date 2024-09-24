@@ -7,12 +7,11 @@
 #include "Tile.h"
 #include "Bomb.h"
 
-Player::Player(const std::string& name, int x, int y)
-   : Character(name, x, y, "Textures/player.png") {
-   drawPriority = 3;
-   health       = 3;
-   Camera::x    = x;
-   Camera::y    = y;
+Player::Player(const std::string& name, int tile_x, int tile_y)
+   : Character(name, tile_x, tile_y, "Textures/player.png") {
+   drawPriority     = 3;
+   health           = 3;
+   Camera::position = {tile_x, tile_y};
 }
 
 void Player::move(int new_x, int new_y) {
@@ -29,8 +28,7 @@ void Player::move(int new_x, int new_y) {
 void Player::update() {
    Character::update();
    // smooth camera movement
-   Camera::x = zeno(Camera::x, x, 1);
-   Camera::y = zeno(Camera::y, y, 1);
+   Camera::position = zeno(Camera::position, position, 0.1);
 
    bool key_pressed_this_frame = false;
 

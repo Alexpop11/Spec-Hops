@@ -1,6 +1,7 @@
 #pragma once
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "glm/glm.hpp"
 
 class Input {
 public:
@@ -25,4 +26,7 @@ public:
    }
 };
 
-float zeno(float current, float target, float timeConstant);
+float     zeno(float current, float target, float timeConstant);
+glm::vec2 zeno(const glm::vec2& current, const glm::vec2& target, float timeConstant);
+glm::vec3 zeno(const glm::vec3& current, const glm::vec3& target, float timeConstant);
+glm::vec4 zeno(const glm::vec4& current, const glm::vec4& target, float timeConstant);

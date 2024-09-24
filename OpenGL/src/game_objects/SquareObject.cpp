@@ -1,11 +1,11 @@
 #include "SquareObject.h"
 
-SquareObject::SquareObject(const std::string& name, int drawPriority, int x, int y, std::string texturepath)
-   : GameObject(name, drawPriority, x, y) {
+SquareObject::SquareObject(const std::string& name, int drawPriority, int tile_x, int tile_y, std::string texturepath)
+   : GameObject(name, drawPriority, {tile_x, tile_y})
+   , tile_x(tile_x)
+   , tile_y(tile_y) {
    texture = Texture::create(Renderer::ResPath() + texturepath);
    texture->Bind();
-   tile_x = x;
-   tile_y = y;
    tuple_hash<std::tuple<std::string>>::apply(std::make_tuple(Renderer::ResPath() + "shaders/shader.shader"), 0);
    shader = Shader::create(Renderer::ResPath() + "shaders/shader.shader");
 
@@ -48,6 +48,5 @@ void SquareObject::render(Renderer& renderer) {
 }
 
 void SquareObject::update() {
-   x = zeno(x, tile_x, 0.05);
-   y = zeno(y, tile_y, 0.05);
+   position = zeno(position, glm::vec2(tile_x, tile_y), 0.05);
 }

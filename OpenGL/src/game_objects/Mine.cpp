@@ -12,7 +12,7 @@ void Mine::tickUpdate() {
    // Explode the Mine
 
    auto nearbyCharacters = World::where<Character>([&](const Character& character) {
-      return (std::abs(x - character.tile_x) + std::abs(y - character.tile_y) < 3);
+      return (std::abs(tile_x - character.tile_x) + std::abs(tile_y - character.tile_y) < 3);
    });
    if (!nearbyCharacters.empty() || detectedCharacter) {
       detectedCharacter = true;
@@ -31,13 +31,13 @@ void Mine::tickUpdate() {
       if (ExplodeTick > 24) {
 
          auto nearbyWalls = World::where<Tile>(
-            [&](const Tile& tile) { return (std::abs(x - tile.tile_x) + std::abs(y - tile.tile_y) < 3); });
+            [&](const Tile& tile) { return (std::abs(tile_x - tile.tile_x) + std::abs(tile_y - tile.tile_y) < 3); });
 
          for (auto* wall : nearbyWalls) {
             wall->explode();
          }
          auto nearbyCharacters = World::where<Character>([&](const Character& character) {
-            return (std::abs(x - character.tile_x) + std::abs(y - character.tile_y) < 3);
+            return (std::abs(tile_x - character.tile_x) + std::abs(tile_y - character.tile_y) < 3);
          });
          for (auto* character : nearbyCharacters) {
             character->health -= 1;

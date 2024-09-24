@@ -6,8 +6,7 @@
 
 class SquareObject : public GameObject {
 public:
-   SquareObject() = default;
-   SquareObject(const std::string& name, int drawPriority, int x, int y, std::string texturepath);
+   SquareObject(const std::string& name, int drawPriority, int tile_x, int tile_y, std::string texturepath);
    virtual void             render(Renderer& renderer) override;
    virtual void             update() override;
    virtual void             setUpShader(Renderer& renderer) override;
