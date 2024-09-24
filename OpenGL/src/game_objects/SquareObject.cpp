@@ -2,10 +2,10 @@
 
 SquareObject::SquareObject(const std::string& name, int drawPriority, int x, int y, std::string texturepath)
    : GameObject(name, drawPriority, x, y) {
-   r      = 0.5;
-   g      = 0.5;
-   b      = 0.5;
-   texture = std::make_shared<Texture>(Renderer::ResPath() + texturepath);
+   r       = 0.5;
+   g       = 0.5;
+   b       = 0.5;
+   texture = Texture::create(Renderer::ResPath() + texturepath);
    texture->Bind();
    tile_x = x;
    tile_y = y;
@@ -13,10 +13,10 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, int x, int
    shader = Shader::create(Renderer::ResPath() + "shaders/shader.shader");
 
    std::array<float, 16> positions = {
-       -0.5f, -0.5f, 0.0f, 0.0f, // 0
-        0.5f, -0.5f, 1.0f, 0.0f, // 1
-        0.5f,  0.5f, 1.0f, 1.0f, // 2
-       -0.5f,  0.5f, 0.0f, 1.0f  // 3
+      -0.5f, -0.5f, 0.0f, 0.0f, // 0
+      0.5f,  -0.5f, 1.0f, 0.0f, // 1
+      0.5f,  0.5f,  1.0f, 1.0f, // 2
+      -0.5f, 0.5f,  0.0f, 1.0f  // 3
    };
 
    std::array<unsigned int, 6> indices = {0, 1, 2, 2, 3, 0};
