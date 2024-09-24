@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <filesystem>
 #include "WeakMemoizeConstructor.h"
+#include <glm/glm.hpp>
 
 struct ShaderProgramSource {
    std::string VertexSource;
@@ -16,7 +17,6 @@ private:
    std::filesystem::file_time_type      m_last_write;
    unsigned int                         m_RendererID;
    std::unordered_map<std::string, int> m_UniformLocationCache;
-   // caching for uniforms
 
 public:
    Shader(const std::string& filepath);
@@ -32,9 +32,11 @@ public:
 
    // Set Uniforms
    void SetUniform1i(const std::string& name, int value);
-   void SetUniform4f(const std::string& name, float v0, float v1, float f2, float f3);
-   void SetUniform1f(const std::string& name, float v0);
-   void SetUniform2f(const std::string& name, float v0, float v1);
+   void SetUniform1f(const std::string& name, float value);
+   void SetUniform2f(const std::string& name, const glm::vec2& value);
+   void SetUniform3f(const std::string& name, const glm::vec3& value);
+   void SetUniform4f(const std::string& name, const glm::vec4& value);
+   void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
 
    // Declare the global memoized constructor
    DECLARE_GLOBAL_MEMOIZED_CONSTRUCTOR(Shader)

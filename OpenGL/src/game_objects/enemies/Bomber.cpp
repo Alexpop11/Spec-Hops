@@ -4,9 +4,6 @@ Bomber::Bomber(const std::string& name, float x, float y)
    : Character(name, x, y, "Textures/enemy.png") {
    drawPriority = 3;
    health       = 1;
-   r            = 0.8;
-   g            = 0.2;
-   b            = 0.2;
 }
 
 void Bomber::move(int new_x, int new_y) {

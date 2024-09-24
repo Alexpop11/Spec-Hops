@@ -10,9 +10,6 @@
 Player::Player(const std::string& name, int x, int y)
    : Character(name, x, y, "Textures/player.png") {
    drawPriority = 3;
-   r            = 0.5f;
-   g            = 0.8f;
-   b            = 0.5f;
    health       = 3;
    Camera::x    = x;
    Camera::y    = y;
@@ -128,13 +125,9 @@ void Player::tickUpdate() {
 
    if (health == 1) {
       if (std::fmod(glfwGetTime(), 0.3) < 0.15) {
-         r = 0.5f;
-         g = 0.8f;
-         b = 0.5f;
+         tintColor = {0.5, 0.8, 0.5, 0.5};
       } else {
-         r = 0.75f;
-         g = 0.75f;
-         b = 0.0f;
+         tintColor = {0.75, 0.75, 0.0, 0.5};
       }
    }
 

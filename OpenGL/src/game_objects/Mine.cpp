@@ -5,9 +5,6 @@
 
 Mine::Mine(const std::string& name, float x, float y)
    : Bomb(name, x, y) {
-   r           = 0.2f;
-   g           = 0.2f;
-   b           = 0.2f;
    ExplodeTick = 0;
 }
 
@@ -23,13 +20,12 @@ void Mine::tickUpdate() {
       if (!red_last_frame) {
          // reset red_last_frame and make mine red
          red_last_frame = true;
-         r              = 0.8;
-         g              = 0.2;
-         b              = 0.2;
+         tintColor.r    = 0.8;
+         tintColor.g    = 0.2;
+         tintColor.b    = 0.2;
+         tintColor.a    = 1;
       } else {
-         r              = 0.2f;
-         g              = 0.2f;
-         b              = 0.2f;
+         tintColor.a    = 0;
          red_last_frame = false;
       }
       if (ExplodeTick > 24) {

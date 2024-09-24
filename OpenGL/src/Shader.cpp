@@ -6,6 +6,7 @@
 #include <sstream>
 #include <filesystem>
 #include "Renderer.h"
+#include <glm/glm.hpp>
 
 namespace fs = std::filesystem;
 
@@ -25,28 +26,72 @@ Shader::~Shader() {
 }
 
 
+
 ShaderProgramSource Shader::ParseShader(const std::string& filepath) {
+   namespace fs = std::filesystem; // Alias for convenience
+
    std::ifstream stream(filepath);
+   if (!stream.is_open()) {
+      std::cerr << "Failed to open shader file: " << filepath << std::endl;
+      return {};
+   }
+
+   // Extract the directory of the shader file for resolving relative includes
+   fs::path shaderPath(filepath);
+   fs::path shaderDirectory = shaderPath.parent_path();
 
    enum class ShaderType { NONE = -1, VERTEX = 0, FRAGMENT = 1 };
-
    std::string       line;
    std::stringstream ss[2];
    ShaderType        type = ShaderType::NONE;
-   while (getline(stream, line)) {
-      if (line.find("#shader") != std::string::npos) {
-         if (line.find("vertex") != std::string::npos) {
+
+   // Helper lambda to handle #include directives
+   auto handleInclude = [&](const std::string& includePath) -> std::string {
+      fs::path      fullIncludePath = shaderDirectory / includePath; // Resolve relative to shader directory
+      std::ifstream includeFile(fullIncludePath);
+      if (!includeFile.is_open()) {
+         std::cerr << "Failed to open include file: " << fullIncludePath << std::endl;
+         return "";
+      }
+      std::stringstream buffer;
+      buffer << includeFile.rdbuf();
+      return buffer.str();
+   };
+
+   while (std::getline(stream, line)) {
+      // Trim leading whitespace for accurate directive detection
+      std::string trimmedLine = line;
+      trimmedLine.erase(0, trimmedLine.find_first_not_of(" \t"));
+
+      if (trimmedLine.find("#shader") != std::string::npos) {
+         if (trimmedLine.find("vertex") != std::string::npos) {
             type = ShaderType::VERTEX;
-         } else if (line.find("fragment") != std::string::npos) {
+         } else if (trimmedLine.find("fragment") != std::string::npos) {
             type = ShaderType::FRAGMENT;
          }
+      } else if (trimmedLine.find("#include") == 0) { // Check if line starts with #include
+         size_t firstQuote = trimmedLine.find('\"');
+         size_t lastQuote  = trimmedLine.find_last_of('\"');
+         if (firstQuote != std::string::npos && lastQuote != std::string::npos && lastQuote > firstQuote) {
+            std::string includePathStr = trimmedLine.substr(firstQuote + 1, lastQuote - firstQuote - 1);
+            // Handle the include path relative to shader directory
+            std::string includedSource = handleInclude(includePathStr);
+            if (!includedSource.empty()) {
+               ss[(int)type] << includedSource << '\n';
+            }
+         } else {
+            std::cerr << "Invalid #include directive: " << line << std::endl;
+         }
       } else {
-         ss[(int)type] << line << '\n';
+         if (type != ShaderType::NONE) { // Ensure shader type is set before appending
+            ss[(int)type] << line << '\n';
+         }
       }
    }
 
    return {ss[0].str(), ss[1].str()};
 }
+
 
 unsigned int Shader::CompileShader(unsigned int type, const std::string& source) {
    unsigned int id  = glCreateShader(type);
@@ -140,16 +185,24 @@ void Shader::SetUniform1i(const std::string& name, int value) {
    GLCall(glUniform1i(GetUniformLocation(name), value));
 }
 
-void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) {
-   GLCall(glUniform4f(GetUniformLocation(name), v0, v1, v2, v3));
+void Shader::SetUniform1f(const std::string& name, float value) {
+   GLCall(glUniform1f(GetUniformLocation(name), value));
 }
 
-void Shader::SetUniform1f(const std::string& name, float v0) {
-   GLCall(glUniform1f(GetUniformLocation(name), v0));
+void Shader::SetUniform2f(const std::string& name, const glm::vec2& value) {
+   GLCall(glUniform2f(GetUniformLocation(name), value.x, value.y));
 }
 
-void Shader::SetUniform2f(const std::string& name, float v0, float v1) {
-   GLCall(glUniform2f(GetUniformLocation(name), v0, v1));
+void Shader::SetUniform3f(const std::string& name, const glm::vec3& value) {
+   GLCall(glUniform3f(GetUniformLocation(name), value.x, value.y, value.z));
+}
+
+void Shader::SetUniform4f(const std::string& name, const glm::vec4& value) {
+   GLCall(glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w));
+}
+
+void Shader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix) {
+   GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]));
 }
 
 unsigned int Shader::GetUniformLocation(const std::string& name) {

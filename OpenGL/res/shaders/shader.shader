@@ -29,8 +29,14 @@ in vec2 v_TexCoord;
 uniform vec4 u_Color;
 uniform sampler2D u_Texture;
 
+#include "includes/lab.shader"
+
 void main()
 {
     vec4 texColor = texture(u_Texture, v_TexCoord);
-    color = mix(texColor, u_Color, 0.0);
+    vec3 texColor_lab = rgb2lab(texColor.rgb);
+    vec3 inputColor_lab = rgb2lab(u_Color.rgb);
+    
+    vec3 color_lab = mix(texColor_lab, inputColor_lab, u_Color.a);
+    color = vec4(lab2rgb(color_lab), texColor.a);
 }

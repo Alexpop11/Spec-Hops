@@ -65,7 +65,8 @@ void Character::move(int new_x, int new_y) {
 }
 
 void Character::die() {
-   r = 0.4f;
-   g = 0.3f;
-   b = 0.3f;
+   tintColor.r = 0.4f;
+   tintColor.g = 0.3f;
+   tintColor.b = 0.3f;
+   tintColor.a = 0.5f;
 }

@@ -2,9 +2,6 @@
 
 SquareObject::SquareObject(const std::string& name, int drawPriority, int x, int y, std::string texturepath)
    : GameObject(name, drawPriority, x, y) {
-   r       = 0.5;
-   g       = 0.5;
-   b       = 0.5;
    texture = Texture::create(Renderer::ResPath() + texturepath);
    texture->Bind();
    tile_x = x;
@@ -37,7 +34,7 @@ void SquareObject::setUpShader(Renderer& renderer) {
    GameObject::setUpShader(renderer);
    texture->Bind();
    shader->SetUniform1i("u_Texture", 0);
-   shader->SetUniform4f("u_Color", r, g, b, 1.0f);
+   shader->SetUniform4f("u_Color", tintColor);
 }
 
 void SquareObject::render(Renderer& renderer) {

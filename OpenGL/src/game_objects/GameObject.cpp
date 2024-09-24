@@ -27,8 +27,8 @@ void GameObject::setUpShader(Renderer& renderer) {
       shader->SetUniform1f("u_Time", currentTime);
       shader->SetUniform1f("u_StartTime", Input::startTime);
       shader->SetUniform1f("u_AspectRatio", float(width) / float(height));
-      shader->SetUniform2f("u_Position", x - Camera::x + 9, y - Camera::y + 9);
-      shader->SetUniform2f("u_Resolution", (float)width, (float)height);
+      shader->SetUniform2f("u_Position", {x - Camera::x + 9, y - Camera::y + 9});
+      shader->SetUniform2f("u_Resolution", {(float)width, (float)height});
    }
 }
 

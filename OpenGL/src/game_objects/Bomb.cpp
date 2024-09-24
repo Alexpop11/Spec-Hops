@@ -5,9 +5,6 @@
 
 Bomb::Bomb(const std::string& name, float x, float y)
    : SquareObject(name, 4, x, y, "Textures/bomb.png") {
-   r           = 0.2f;
-   g           = 0.2f;
-   b           = 0.2f;
    ExplodeTick = 0;
 }
 
