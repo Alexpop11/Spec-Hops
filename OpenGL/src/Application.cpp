@@ -28,6 +28,7 @@
 #include "game_objects/Camera.h"
 #include "game_objects/Tile.h"
 #include "game_objects/enemies/Bomber.h"
+#include "Texture.h"
 
 #include "WeakMemoizeConstructor.h"
 
@@ -98,10 +99,13 @@ int main(void) {
 
    std::cout << "current version of GL: " << glGetString(GL_VERSION) << std::endl;
 
+   GLCall(glEnable(GL_BLEND));
+   GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
    Renderer renderer;
    renderer.window = window;
 
-   World::LoadMap("maps/Facility.txt");
+   World::LoadMap("maps/SpaceShip.txt");
 
    double currentTime = glfwGetTime();
    double lastTick    = Input::startTime;

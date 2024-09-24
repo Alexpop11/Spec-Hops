@@ -1,6 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "Input.h"
+#include "../Texture.h"
 
 class SquareObject : public GameObject {
 public:
@@ -12,6 +13,7 @@ public:
    float        r      = 0;
    float        g      = 0;
    float        b      = 0;
+   std::shared_ptr<Texture>      texture;
    int          tile_x = 0;
    int          tile_y = 0;
 };

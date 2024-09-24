@@ -5,12 +5,19 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, int x, int
    r      = 0.5;
    g      = 0.5;
    b      = 0.5;
+   texture = std::make_shared<Texture>(Renderer::ResPath() + "Textures/crappier-wall.png");
+   texture->Bind();
    tile_x = x;
    tile_y = y;
    tuple_hash<std::tuple<std::string>>::apply(std::make_tuple(Renderer::ResPath() + "shaders/shader.shader"), 0);
    shader = Shader::create(Renderer::ResPath() + "shaders/shader.shader");
 
-   std::array<float, 8> positions = {-0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f};
+   std::array<float, 16> positions = {
+       -0.5f, -0.5f, 0.0f, 0.0f, // 0
+        0.5f, -0.5f, 1.0f, 0.0f, // 1
+        0.5f,  0.5f, 1.0f, 1.0f, // 2
+       -0.5f,  0.5f, 0.0f, 1.0f  // 3
+   };
 
    std::array<unsigned int, 6> indices = {0, 1, 2, 2, 3, 0};
 
@@ -21,12 +28,15 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, int x, int
    vb = VertexBuffer::create(positions);
    VertexBufferLayout layout;
    layout.Push<float>(2);
+   layout.Push<float>(2);
    va = std::make_shared<VertexArray>(vb, layout);
    ib = IndexBuffer::create(indices);
 }
 
 void SquareObject::setUpShader(Renderer& renderer) {
    GameObject::setUpShader(renderer);
+   texture->Bind();
+   shader->SetUniform1i("u_Texture", 0);
    shader->SetUniform4f("u_Color", r, g, b, 1.0f);
 }
 
