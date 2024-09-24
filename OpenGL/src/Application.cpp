@@ -101,7 +101,7 @@ int main(void) {
    Renderer renderer;
    renderer.window = window;
 
-   World::LoadMap("maps/SpaceShip.txt");
+   World::LoadMap("maps/Facility.txt");
 
    double currentTime = glfwGetTime();
    double lastTick    = Input::startTime;
