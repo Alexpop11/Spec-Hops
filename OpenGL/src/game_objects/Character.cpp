@@ -4,8 +4,8 @@
 #include <Renderer.h>
 
 
-Character::Character(const std::string& name, int x, int y)
-   : SquareObject(name, 2, x, y) {}
+Character::Character(const std::string& name, int x, int y, std::string texturepath)
+   : SquareObject(name, 2, x, y, texturepath) {}
 
 void Character::update() {
    SquareObject::update();

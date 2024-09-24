@@ -7,7 +7,7 @@
 class Character : public SquareObject {
 public:
    Character() = default;
-   Character(const std::string& name, int x, int y);
+   Character(const std::string& name, int x, int y, std::string texturepath);
    virtual void move(int new_x, int new_y);
    virtual void update() override;
    virtual void tickUpdate() override;

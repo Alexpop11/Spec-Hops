@@ -2,7 +2,7 @@
 
 
 Tile::Tile(const std::string& name, bool wall, bool unbreakable, float x, float y)
-   : SquareObject(name, 2, x, y)
+   : SquareObject(name, 2, x, y, "Textures/crappy-wall.png")
    , wall(wall)
    , unbreakable(unbreakable) {}
 

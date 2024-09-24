@@ -1,11 +1,11 @@
 #include "SquareObject.h"
 
-SquareObject::SquareObject(const std::string& name, int drawPriority, int x, int y)
+SquareObject::SquareObject(const std::string& name, int drawPriority, int x, int y, std::string texturepath)
    : GameObject(name, drawPriority, x, y) {
    r      = 0.5;
    g      = 0.5;
    b      = 0.5;
-   texture = std::make_shared<Texture>(Renderer::ResPath() + "Textures/crappier-wall.png");
+   texture = std::make_shared<Texture>(Renderer::ResPath() + texturepath);
    texture->Bind();
    tile_x = x;
    tile_y = y;

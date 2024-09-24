@@ -1,7 +1,7 @@
 #include "Turret.h"
 
 Turret::Turret(const std::string& name, float x, float y)
-   : Character(name, x, y) {
+   : Character(name, x, y, "Textures/enemy.png") {
    drawPriority = 3;
    health       = 1;
    r            = 0.8;

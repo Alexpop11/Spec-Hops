@@ -8,7 +8,7 @@
 #include "Bomb.h"
 
 Player::Player(const std::string& name, int x, int y)
-   : Character(name, x, y) {
+   : Character(name, x, y, "Textures/player.png") {
    drawPriority = 3;
    r            = 0.5f;
    g            = 0.8f;
