@@ -5,8 +5,16 @@ Tile::Tile(const std::string& name, bool wall, bool unbreakable, float x, float 
    , wall(wall)
    , unbreakable(unbreakable) {
    wallTextureUnbreakable = Texture::create(Renderer::ResPath() + "Textures/wall-unbreakable.png");
-   wallTexture            = Texture::create(Renderer::ResPath() + "Textures/wall.png");
-   floorTexture           = Texture::create(Renderer::ResPath() + "Textures/floor.png");
+   wallTexture            = Texture::create(Renderer::ResPath() + "Textures/alt-wall.png");
+
+    // floor textures array
+   std::vector<std::string> floorTextures = {"Textures/alt-floor.png", "Textures/alt-floor-2.png",
+                                             "Textures/alt-floor-2.png", "Textures/alt-floor-3.png"};
+
+   // randomly select the texture
+   floorTexture           = Texture::create(Renderer::ResPath() + floorTextures[rand() % floorTextures.size()]);
+
+
    setTexture();
 }
 
