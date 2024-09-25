@@ -14,6 +14,7 @@ public:
 
 private:
    std::shared_ptr<Texture> wallTexture;
+   std::shared_ptr<Texture> wallTextureUnbreakable;
    std::shared_ptr<Texture> floorTexture;
    void                     setTexture();
 };

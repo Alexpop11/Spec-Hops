@@ -4,8 +4,9 @@ Tile::Tile(const std::string& name, bool wall, bool unbreakable, float x, float 
    : SquareObject(name, 2, x, y, "Textures/wall.png")
    , wall(wall)
    , unbreakable(unbreakable) {
-   wallTexture  = Texture::create(Renderer::ResPath() + "Textures/wall.png");
-   floorTexture = Texture::create(Renderer::ResPath() + "Textures/floor.png");
+   wallTextureUnbreakable = Texture::create(Renderer::ResPath() + "Textures/wall-unbreakable.png");
+   wallTexture            = Texture::create(Renderer::ResPath() + "Textures/wall.png");
+   floorTexture           = Texture::create(Renderer::ResPath() + "Textures/floor.png");
    setTexture();
 }
 
@@ -26,7 +27,11 @@ void Tile::update() {
 
 void Tile::setTexture() {
    if (wall) {
-      texture = wallTexture;
+      if (unbreakable) {
+         texture = wallTextureUnbreakable;
+      } else {
+         texture = wallTexture;
+      }
    } else {
       texture = floorTexture;
    }
