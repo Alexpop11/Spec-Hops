@@ -1,11 +1,10 @@
 #include "SquareObject.h"
 
-SquareObject::SquareObject(const std::string& name, int drawPriority, int tile_x, int tile_y, std::string texturepath)
+SquareObject::SquareObject(const std::string& name, int drawPriority, int tile_x, int tile_y, std::string texturePath)
    : GameObject(name, drawPriority, {tile_x, tile_y})
    , tile_x(tile_x)
    , tile_y(tile_y) {
-   texture = Texture::create(Renderer::ResPath() + texturepath);
-   texture->Bind();
+   texture = Texture::create(Renderer::ResPath() + texturePath);
    tuple_hash<std::tuple<std::string>>::apply(std::make_tuple(Renderer::ResPath() + "shaders/shader.shader"), 0);
    shader = Shader::create(Renderer::ResPath() + "shaders/shader.shader");
 
@@ -38,7 +37,6 @@ void SquareObject::setUpShader(Renderer& renderer) {
 }
 
 void SquareObject::render(Renderer& renderer) {
-
    GameObject::render(renderer);
 
    // draw if va, ib, and shader are set:

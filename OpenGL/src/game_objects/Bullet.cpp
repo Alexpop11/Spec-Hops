@@ -6,8 +6,7 @@
 Bullet::Bullet(const std::string& name, float x, float y, int direction_x, int direction_y)
    : SquareObject(name, 4, x, y, "Textures/bullet.png")
    , direction_x(direction_x)
-   , direction_y(direction_y) {
-}
+   , direction_y(direction_y) {}
 
 void Bullet::tickUpdate() {
    // Move the bullet

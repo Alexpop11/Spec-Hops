@@ -10,4 +10,10 @@ public:
    virtual void explode();
    bool         wall;
    bool         unbreakable = false;
+
+
+private:
+   std::shared_ptr<Texture> wallTexture;
+   std::shared_ptr<Texture> floorTexture;
+   void                     setTexture();
 };
