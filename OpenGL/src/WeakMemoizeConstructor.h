@@ -7,6 +7,7 @@
 #include <type_traits>
 #include <tuple>
 #include <cstring>
+#include <cmath>
 
 #include "xxhash.h"
 #include <iostream>
