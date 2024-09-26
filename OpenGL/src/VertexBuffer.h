@@ -8,7 +8,7 @@
 
 class VertexBuffer {
 private:
-   unsigned int m_RendererID;
+   wrap_t<unsigned int> m_RendererID;
 
 public:
    template <typename T, size_t N>

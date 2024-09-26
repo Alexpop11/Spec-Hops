@@ -11,7 +11,7 @@ class VertexBufferLayout;
 
 class VertexArray {
 private:
-   unsigned int                               m_RendererID;
+   wrap_t<unsigned int>                       m_RendererID;
    std::vector<std::shared_ptr<VertexBuffer>> vb;
 
 public:
