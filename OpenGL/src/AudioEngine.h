@@ -48,6 +48,7 @@ public:
    Sound Walk1;
    Sound Bomb_Sound;
    Sound Death_Sound;
+   Sound Bullet_Sound;
 };
 
 AudioEngine& audio();

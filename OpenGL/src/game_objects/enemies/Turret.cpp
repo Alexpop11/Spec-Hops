@@ -39,6 +39,7 @@ void Turret::tickUpdate() {
 
    // Shoot a bullet if a player is detected
    if (bulletsToShoot >= 1) {
+      audio().Bullet_Sound.play();
       World::gameobjectstoadd.push_back(std::make_unique<Bullet>(
          Bullet("CoolBullet", tile_x + aimDirection_x, tile_y + aimDirection_y, aimDirection_x, aimDirection_y)));
       bulletsToShoot -= 1;
