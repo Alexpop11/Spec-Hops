@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <type_traits>
 #include <tuple>
+#include <cstring>
 
 #include "xxhash.h"
 #include <iostream>
