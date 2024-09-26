@@ -5,7 +5,6 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, int tile_x
    , tile_x(tile_x)
    , tile_y(tile_y) {
    texture = Texture::create(Renderer::ResPath() + texturePath);
-   tuple_hash<std::tuple<std::string>>::apply(std::make_tuple(Renderer::ResPath() + "shaders/shader.shader"), 0);
    shader = Shader::create(Renderer::ResPath() + "shaders/shader.shader");
 
    std::array<float, 16> positions = {
