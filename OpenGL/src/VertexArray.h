@@ -26,20 +26,10 @@ public:
    }
 
 
-   // Delete copy constructor
-   VertexArray(const VertexArray&) = delete;
-
-   // Move constructor
-   VertexArray(VertexArray&& other) noexcept
-      : m_RendererID(other.m_RendererID) {
-      other.m_RendererID = 0;
-   }
-
-   // Delete copy assignment operator
-   VertexArray& operator=(const VertexArray&) = delete;
-
-   // Move assignment operator using swap
-   VertexArray& operator=(VertexArray&& other) noexcept = default;
+   VertexArray(const VertexArray&)             = delete;
+   VertexArray(VertexArray&& other)            = default;
+   VertexArray& operator=(const VertexArray&)  = delete;
+   VertexArray& operator=(VertexArray&& other) = default;
 
    ~VertexArray();
 

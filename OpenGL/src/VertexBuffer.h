@@ -20,29 +20,10 @@ public:
       GLCall(glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(T), data.data(), GL_STATIC_DRAW));
    }
 
-   // Delete copy constructor
-   VertexBuffer(const VertexBuffer&) = delete;
-
-   // Move constructor
-   VertexBuffer(VertexBuffer&& other) noexcept
-      : m_RendererID(other.m_RendererID) {
-      other.m_RendererID = 0;
-   }
-
-   // Delete copy assignment operator
-   VertexBuffer& operator=(const VertexBuffer&) = delete;
-
-   // Move assignment operator using swap
-   VertexBuffer& operator=(VertexBuffer&& other) noexcept {
-      swap(*this, other);
-      return *this;
-   }
-
-   // Swap function
-   friend void swap(VertexBuffer& first, VertexBuffer& second) noexcept {
-      using std::swap;
-      swap(first.m_RendererID, second.m_RendererID);
-   }
+   VertexBuffer(const VertexBuffer&)             = delete;
+   VertexBuffer(VertexBuffer&& other)            = default;
+   VertexBuffer& operator=(const VertexBuffer&)  = delete;
+   VertexBuffer& operator=(VertexBuffer&& other) = default;
 
    ~VertexBuffer();
 

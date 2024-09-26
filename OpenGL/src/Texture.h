@@ -19,6 +19,11 @@ public:
    inline int GetWidth() const { return m_Width; }
    inline int GetHeight() const { return m_Height; }
 
+   Texture(const Texture&)             = delete;
+   Texture(Texture&& other)            = default;
+   Texture& operator=(const Texture&)  = delete;
+   Texture& operator=(Texture&& other) = default;
+
 
    // Declare the global memoized constructor
    DECLARE_GLOBAL_MEMOIZED_CONSTRUCTOR(Texture)
