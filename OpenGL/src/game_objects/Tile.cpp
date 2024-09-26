@@ -4,12 +4,15 @@ Tile::Tile(const std::string& name, bool wall, bool unbreakable, float x, float 
    : SquareObject(name, 2, x, y, "Textures/wall.png")
    , wall(wall)
    , unbreakable(unbreakable) {
-   wallTextureUnbreakable = Texture::create(Renderer::ResPath() + "Textures/wall-unbreakable.png");
-   wallTexture            = Texture::create(Renderer::ResPath() + "Textures/alt-wall.png");
+   wallTextureUnbreakable = Texture::create(Renderer::ResPath() + "Textures/alt-wall-unbreakable.png");
+   wallTexture            = Texture::create(Renderer::ResPath() + "Textures/alt-wall-bright.png");
 
     // floor textures array
-   std::vector<std::string> floorTextures = {"Textures/alt-floor.png", "Textures/alt-floor-2.png",
-                                             "Textures/alt-floor-2.png", "Textures/alt-floor-3.png"};
+   std::vector<std::string> floorTextures = {"Textures/2-alt-floor.png", "Textures/2-alt-floor-2.png"};
+
+    //alternate floor textures i made. I'm going to leave them here for convenience, just comment out the above line and uncomment this one
+    //std::vector<std::string> floorTextures = {"Textures/alt-floor.png", "Textures/alt-floor-2.png",
+    //                                         "Textures/alt-floor-2.png", "Textures/alt-floor-3.png"};
 
    // randomly select the texture
    floorTexture           = Texture::create(Renderer::ResPath() + floorTextures[rand() % floorTextures.size()]);
