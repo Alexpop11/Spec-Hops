@@ -25,14 +25,6 @@ public:
    IndexBuffer& operator=(const IndexBuffer&)  = delete;
    IndexBuffer& operator=(IndexBuffer&& other) = default;
 
-
-   // Swap function
-   friend void swap(IndexBuffer& first, IndexBuffer& second) noexcept {
-      using std::swap;
-      swap(first.m_RendererID, second.m_RendererID);
-      swap(first.m_Count, second.m_Count);
-   }
-
    ~IndexBuffer();
 
    void Bind() const;
