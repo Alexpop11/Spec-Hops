@@ -8,6 +8,7 @@ public:
    Tile(const std::string& name, float x, float y);
    virtual void update() override;
    virtual void explode();
+   std::vector<glm::vec2> getBounds();
    bool         wall;
    bool         unbreakable = false;
 

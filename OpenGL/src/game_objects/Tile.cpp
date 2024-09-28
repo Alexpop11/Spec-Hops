@@ -31,6 +31,21 @@ void Tile::explode() {
    }
 }
 
+std::vector<glm::vec2> Tile::getBounds() {
+   if (wall) {
+      std::vector<glm::vec2> bounds = {
+         position + glm::vec2{-0.5, 0.5 },
+         position + glm::vec2{0.5,  0.5 },
+         position + glm::vec2{0.5,  -0.5},
+         position + glm::vec2{-0.5, -0.5},
+      };
+      return bounds;
+   } else {
+      return std::vector<glm::vec2>{};
+   }
+}
+
+
 void Tile::update() {
    tintColor.a = zeno(tintColor.a, 0, 0.1);
    setTexture();

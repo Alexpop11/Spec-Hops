@@ -29,6 +29,7 @@
 #include "game_objects/Tile.h"
 #include "game_objects/enemies/Bomber.h"
 #include "Texture.h"
+#include "game_objects/Fog.h"
 
 #include "WeakMemoizeConstructor.h"
 
@@ -105,6 +106,7 @@ int main(void) {
    Renderer renderer(window);
 
    World::LoadMap("maps/SpaceShip.txt");
+   World::gameobjects.push_back(std::make_unique<Fog>());
 
    double currentTime = glfwGetTime();
    double lastTick    = Input::startTime;
