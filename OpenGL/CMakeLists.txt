@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(SpaceBoom)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 # Add application code
 file(GLOB cpp_files "src/*.c" "src/*.cpp" "src/game_objects/*.cpp" "src/game_objects/enemies/*.cpp")
