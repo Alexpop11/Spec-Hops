@@ -58,6 +58,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${VENDOR_DIR}/glew/include
     ${VENDOR_DIR}/glm
     ${VENDOR_DIR}/miniaudio
+    ${VENDOR_DIR}/stb_image
 )
 
 
