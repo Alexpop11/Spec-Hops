@@ -44,7 +44,7 @@ void Renderer::Line(glm::vec2 start, glm::vec2 end, glm::vec3 color) {
    lineShader.SetUniform4f("u_Color", glm::vec4(color.r, color.g, color.b, 0.3f));
    lineShader.SetUniform2f("u_StartPos", glm::vec2(start.x, start.y) - Camera::position + glm::vec2{9.0, 9.0});
    lineShader.SetUniform2f("u_EndPos", glm::vec2(end.x, end.y) - Camera::position + glm::vec2{9.0, 9.0});
-   lineShader.SetUniform1f("u_Width", 1.0f);
+   lineShader.SetUniform1f("u_Width", 0.1f);
    lineShader.SetUniform1f("u_AspectRatio", 1.0f);
    auto [width, height] = WindowSize();
    lineShader.SetUniform1f("u_AspectRatio", float(width) / float(height));
