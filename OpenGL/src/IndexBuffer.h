@@ -8,8 +8,8 @@
 
 class IndexBuffer {
 private:
-   unsigned int m_RendererID;
-   unsigned int m_Count;
+   wrap_t<unsigned int> m_RendererID;
+   wrap_t<unsigned int> m_Count;
 
 public:
    template <size_t N>
@@ -20,25 +20,11 @@ public:
       GLCall(glBufferData(GL_ARRAY_BUFFER, N * sizeof(unsigned int), data.data(), GL_STATIC_DRAW));
    }
 
-   // Delete copy constructor
-   IndexBuffer(const IndexBuffer&) = delete;
+   IndexBuffer(const IndexBuffer&)             = delete;
+   IndexBuffer(IndexBuffer&& other)            = default;
+   IndexBuffer& operator=(const IndexBuffer&)  = delete;
+   IndexBuffer& operator=(IndexBuffer&& other) = default;
 
-   // Move constructor
-   IndexBuffer(IndexBuffer&& other) noexcept
-      : m_RendererID(other.m_RendererID)
-      , m_Count(other.m_Count) {
-      other.m_RendererID = 0;
-      other.m_Count      = 0;
-   }
-
-   // Delete copy assignment operator
-   IndexBuffer& operator=(const IndexBuffer&) = delete;
-
-   // Move assignment operator using swap
-   IndexBuffer& operator=(IndexBuffer&& other) noexcept {
-      swap(*this, other);
-      return *this;
-   }
 
    // Swap function
    friend void swap(IndexBuffer& first, IndexBuffer& second) noexcept {
