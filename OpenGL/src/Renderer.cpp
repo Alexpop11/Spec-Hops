@@ -1,11 +1,29 @@
 #include "Renderer.h"
+#include "VertexBufferLayout.h"
 
 #include <iostream>
 
 std::string Renderer::res_path;
 
 Renderer::Renderer(GLFWwindow* window)
-   : window(window) {}
+   : window(window)
+   , lineShader(Shader(Renderer::ResPath() + "shaders/line.shader")) {
+   std::array<float, 8> positions = {
+      -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f,
+   };
+
+   std::array<uint32_t, 6> indices = {0, 1, 2, 2, 3, 0};
+
+   uint32_t vao;
+   GLCall(glGenVertexArrays(1, &vao));
+   GLCall(glBindVertexArray(vao));
+
+   lineVb = VertexBuffer::create(positions);
+   VertexBufferLayout layout;
+   layout.Push<float>(2);
+   lineVa = std::make_shared<VertexArray>(lineVb, layout);
+   lineIb = IndexBuffer::create(indices);
+}
 
 Renderer::~Renderer() {}
 
@@ -18,6 +36,16 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
    va.Bind();
    ib.Bind();
    GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+}
+
+void Renderer::Line(glm::vec2 start, glm::vec2 end, glm::vec3 color) {
+   lineShader.Bind();
+   lineShader.SetUniform4f("u_Color", glm::vec4(color.r, color.g, color.b, 1.0f));
+   lineShader.SetUniform2f("u_StartPos", glm::vec2(start.x, start.y));
+   lineShader.SetUniform2f("u_EndPos", glm::vec2(end.x, end.y));
+
+   // create a vertex buffer and index buffer
+   Draw(*lineVa, *lineIb, lineShader);
 }
 
 const std::string& Renderer::ResPath() {
