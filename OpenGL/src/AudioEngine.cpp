@@ -47,8 +47,8 @@ AudioEngine::AudioEngine()
    : Walk(getSound("walk1.wav"))
    , Walk1(getSound("walk2.wav"))
    , Bomb_Sound(getSound("Bomb1.wav"))
-   , Bullet_Sound(getSound("Bullet.wav"))
-   , Death_Sound(getSound("Death2.wav")) {}
+   , Death_Sound(getSound("Death2.wav"))
+   , Bullet_Sound(getSound("Bullet.wav")) {}
 
 Sound AudioEngine::getSound(const std::string& name) {
    return Sound(Renderer::ResPath() + "Sounds/" + name, &engine.engine);

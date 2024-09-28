@@ -137,30 +137,6 @@ uint32_t Shader::CreateShader(const std::string& vertexShader, const std::string
    return program;
 }
 
-Shader::Shader(Shader&& other) noexcept
-   : m_FilePath(std::move(other.m_FilePath))
-   , m_RendererID(other.m_RendererID)
-   , m_UniformLocationCache(std::move(other.m_UniformLocationCache)) {
-   // Transfer ownership of the shader program
-   other.m_RendererID = 0;
-}
-
-Shader& Shader::operator=(Shader&& other) noexcept {
-   if (this != &other) {
-      // Delete current resources
-      GLCall(glDeleteProgram(m_RendererID));
-
-      // Transfer ownership
-      m_FilePath             = std::move(other.m_FilePath);
-      m_RendererID           = other.m_RendererID;
-      m_UniformLocationCache = std::move(other.m_UniformLocationCache);
-
-      // Reset other's m_RendererID
-      other.m_RendererID = 0;
-   }
-   return *this;
-}
-
 void Shader::UpdateIfNeeded() {
    fs::path p{m_FilePath};
    auto     last_write = fs::last_write_time(p);

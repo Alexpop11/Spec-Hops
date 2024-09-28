@@ -5,6 +5,7 @@
 #include <filesystem>
 #include "WeakMemoizeConstructor.h"
 #include <glm/glm.hpp>
+#include "Utils.h"
 
 struct ShaderProgramSource {
    std::string VertexSource;
@@ -15,16 +16,17 @@ class Shader {
 private:
    std::string                          m_FilePath;
    std::filesystem::file_time_type      m_last_write;
-   uint32_t                             m_RendererID;
+   wrap_t<uint32_t>                     m_RendererID;
    std::unordered_map<std::string, int> m_UniformLocationCache;
 
 public:
    Shader(const std::string& filepath);
-   Shader(Shader&& other) noexcept;
-   Shader(const Shader&)            = delete;
-   Shader& operator=(const Shader&) = delete;
-   Shader& operator=(Shader&& other) noexcept;
    ~Shader();
+
+   Shader(const Shader&)             = delete;
+   Shader(Shader&& other)            = default;
+   Shader& operator=(const Shader&)  = delete;
+   Shader& operator=(Shader&& other) = default;
 
    void UpdateIfNeeded();
    void Bind() const;
