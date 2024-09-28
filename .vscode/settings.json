@@ -86,6 +86,7 @@
         "random": "cpp",
         "type_traits": "cpp",
         "utility": "cpp",
-        "print": "cpp"
+        "print": "cpp",
+        "filesystem": "cpp"
     }
 }

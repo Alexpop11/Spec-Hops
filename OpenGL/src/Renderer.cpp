@@ -4,6 +4,11 @@
 
 std::string Renderer::res_path;
 
+Renderer::Renderer(GLFWwindow* window)
+   : window(window) {}
+
+Renderer::~Renderer() {}
+
 void Renderer::Clear() const {
    GLCall(glClear(GL_COLOR_BUFFER_BIT));
 }

@@ -5,7 +5,7 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, int tile_x
    , tile_x(tile_x)
    , tile_y(tile_y) {
    texture = Texture::create(Renderer::ResPath() + texturePath);
-   shader = Shader::create(Renderer::ResPath() + "shaders/shader.shader");
+   shader  = Shader::create(Renderer::ResPath() + "shaders/shader.shader");
 
    std::array<float, 16> positions = {
       -0.5f, -0.5f, 0.0f, 0.0f, // 0

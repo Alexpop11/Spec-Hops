@@ -17,7 +17,6 @@ private:
 public:
    VertexArray(std::shared_ptr<VertexBuffer> vb, const VertexBufferLayout& layout);
 
-
    template <typename T, size_t N>
    VertexArray(const std::array<T, N>& vbData, const VertexBufferLayout& layout) {
       auto vbp = VertexBuffer::create(vbData);
