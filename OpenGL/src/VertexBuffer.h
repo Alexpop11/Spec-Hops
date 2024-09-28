@@ -8,7 +8,7 @@
 
 class VertexBuffer {
 private:
-   wrap_t<unsigned int> m_RendererID;
+   wrap_t<uint32_t> m_RendererID;
 
 public:
    template <typename T, size_t N>
@@ -30,7 +30,7 @@ public:
    void Bind() const;
    void Unbind() const;
 
-   unsigned int GetRendererID() const { return m_RendererID; }
+   uint32_t GetRendererID() const { return m_RendererID; }
 
    // Declare the global memoized constructor
    DECLARE_GLOBAL_MEMOIZED_CONSTRUCTOR(VertexBuffer)
@@ -39,6 +39,6 @@ public:
 namespace std {
 template <>
 struct hash<VertexBuffer> {
-   std::size_t operator()(const VertexBuffer& vb) const { return std::hash<unsigned int>{}(vb.GetRendererID()); }
+   std::size_t operator()(const VertexBuffer& vb) const { return std::hash<uint32_t>{}(vb.GetRendererID()); }
 };
 } // namespace std

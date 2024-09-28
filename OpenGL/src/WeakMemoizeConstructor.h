@@ -62,7 +62,7 @@ struct hash_util {
    /*// Specialization for VertexBufferLayout
    static XXH64_hash_t hash_element(const VertexBufferLayout& element, XXH64_hash_t seed) {
       auto data = element.data();
-      return XXH64(data.data(), data.size() * sizeof(unsigned int), seed);
+      return XXH64(data.data(), data.size() * sizeof(uint32_t), seed);
    }*/
 
    // Add more specializations for other types as needed

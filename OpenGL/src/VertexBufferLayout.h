@@ -6,11 +6,11 @@
 #include <array>
 
 struct VertexBufferElement {
-   unsigned int  type;
-   unsigned int  count;
+   uint32_t      type;
+   uint32_t      count;
    unsigned char normalized;
 
-   static unsigned int GetSizeOfType(unsigned int type) {
+   static uint32_t GetSizeOfType(uint32_t type) {
       switch (type) {
       case GL_FLOAT:
          return 4;
@@ -24,26 +24,26 @@ struct VertexBufferElement {
       return 0;
    }
 
-   std::vector<unsigned int> data() const { return std::vector<unsigned int>({type, count, normalized}); }
+   std::vector<uint32_t> data() const { return std::vector<uint32_t>({type, count, normalized}); }
 };
 
 class VertexBufferLayout {
 private:
    std::vector<VertexBufferElement> m_Elements;
-   unsigned int                     m_Stride;
+   uint32_t                         m_Stride;
 
 public:
    VertexBufferLayout()
       : m_Stride(0) {}
 
    template <typename T>
-   void Push(unsigned int count);
+   void Push(uint32_t count);
 
    inline const std::vector<VertexBufferElement> GetElements() const& { return m_Elements; }
-   inline unsigned int                           GetStride() const { return m_Stride; }
+   inline uint32_t                               GetStride() const { return m_Stride; }
 
-   std::vector<unsigned int> data() const {
-      std::vector<unsigned int> data;
+   std::vector<uint32_t> data() const {
+      std::vector<uint32_t> data;
       data.push_back(m_Elements.size());
       for (const auto& element : m_Elements) {
          auto element_data = element.data();

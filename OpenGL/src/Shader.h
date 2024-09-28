@@ -15,7 +15,7 @@ class Shader {
 private:
    std::string                          m_FilePath;
    std::filesystem::file_time_type      m_last_write;
-   unsigned int                         m_RendererID;
+   uint32_t                             m_RendererID;
    std::unordered_map<std::string, int> m_UniformLocationCache;
 
 public:
@@ -43,7 +43,7 @@ public:
 
 private:
    ShaderProgramSource ParseShader(const std::string& filepath);
-   unsigned int        CompileShader(unsigned int type, const std::string& source);
-   unsigned int        CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
-   unsigned int        GetUniformLocation(const std::string& name);
+   uint32_t            CompileShader(uint32_t type, const std::string& source);
+   uint32_t            CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
+   uint32_t            GetUniformLocation(const std::string& name);
 };

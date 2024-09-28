@@ -8,16 +8,16 @@
 
 class IndexBuffer {
 private:
-   wrap_t<unsigned int> m_RendererID;
-   wrap_t<unsigned int> m_Count;
+   wrap_t<uint32_t> m_RendererID;
+   wrap_t<uint32_t> m_Count;
 
 public:
    template <size_t N>
-   IndexBuffer(const std::array<unsigned int, N>& data) {
+   IndexBuffer(const std::array<uint32_t, N>& data) {
       m_Count = N;
       GLCall(glGenBuffers(1, &m_RendererID));
       GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
-      GLCall(glBufferData(GL_ARRAY_BUFFER, N * sizeof(unsigned int), data.data(), GL_STATIC_DRAW));
+      GLCall(glBufferData(GL_ARRAY_BUFFER, N * sizeof(uint32_t), data.data(), GL_STATIC_DRAW));
    }
 
    IndexBuffer(const IndexBuffer&)             = delete;
@@ -38,7 +38,7 @@ public:
    void Bind() const;
    void Unbind() const;
 
-   inline unsigned int GetCount() const { return m_Count; }
+   inline uint32_t GetCount() const { return m_Count; }
 
    // Declare the global memoized constructor
    DECLARE_GLOBAL_MEMOIZED_CONSTRUCTOR(IndexBuffer)

@@ -8,7 +8,7 @@ Background::Background(const std::string& name, int drawPriority, float x, float
 
    std::array<float, 8> positions = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
 
-   std::array<unsigned int, 6> indices = {0, 1, 2, 2, 3, 0};
+   std::array<uint32_t, 6> indices = {0, 1, 2, 2, 3, 0};
 
    vb = VertexBuffer::create(positions);
    VertexBufferLayout layout;
