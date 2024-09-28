@@ -10,7 +10,10 @@ Renderer::Renderer(GLFWwindow* window)
    : window(window)
    , lineShader(Shader(Renderer::ResPath() + "shaders/line.shader")) {
    std::array<float, 8> positions = {
-      -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f,
+      0.0f, -0.5f, // Bottom-left
+      1.0f, -0.5f, // Bottom-right
+      1.0f, 0.5f,  // Top-right
+      0.0f, 0.5f,  // Top-left
    };
 
    std::array<uint32_t, 6> indices = {0, 1, 2, 2, 3, 0};

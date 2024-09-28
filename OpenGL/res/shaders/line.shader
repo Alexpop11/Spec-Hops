@@ -28,10 +28,9 @@ void main()
     vec2 finalPos = interpolatedPos + offset;
     
     // Adjust for aspect ratio to maintain consistent width
-    finalPos.y *= u_AspectRatio;
-
     finalPos = finalPos / 18.0;
     finalPos = finalPos - 0.5;
+    finalPos.y *= u_AspectRatio;
     
     // Convert to homogeneous coordinates (assuming orthographic projection)
     gl_Position = vec4(finalPos, 0.0, 1.0);
