@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "VertexBufferLayout.h"
+#include "game_objects/Camera.h"
 
 #include <iostream>
 
@@ -40,9 +41,14 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
 
 void Renderer::Line(glm::vec2 start, glm::vec2 end, glm::vec3 color) {
    lineShader.Bind();
-   lineShader.SetUniform4f("u_Color", glm::vec4(color.r, color.g, color.b, 1.0f));
-   lineShader.SetUniform2f("u_StartPos", glm::vec2(start.x, start.y));
-   lineShader.SetUniform2f("u_EndPos", glm::vec2(end.x, end.y));
+   lineShader.SetUniform4f("u_Color", glm::vec4(color.r, color.g, color.b, 0.3f));
+   lineShader.SetUniform2f("u_StartPos", glm::vec2(start.x, start.y) - Camera::position + glm::vec2{9.0, 9.0});
+   lineShader.SetUniform2f("u_EndPos", glm::vec2(end.x, end.y) - Camera::position + glm::vec2{9.0, 9.0});
+   lineShader.SetUniform1f("u_Width", 1.0f);
+   lineShader.SetUniform1f("u_AspectRatio", 1.0f);
+   auto [width, height] = WindowSize();
+   lineShader.SetUniform1f("u_AspectRatio", float(width) / float(height));
+   lineShader.SetUniform2f("u_Resolution", {(float)width, (float)height});
 
    // create a vertex buffer and index buffer
    Draw(*lineVa, *lineIb, lineShader);
