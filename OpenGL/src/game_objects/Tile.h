@@ -6,11 +6,11 @@ class Tile : public SquareObject {
 public:
    Tile(const std::string& name, bool wall, bool unbreakable, float x, float y);
    Tile(const std::string& name, float x, float y);
-   virtual void update() override;
-   virtual void explode();
+   virtual void           update() override;
+   virtual void           explode();
    std::vector<glm::vec2> getBounds();
-   bool         wall;
-   bool         unbreakable = false;
+   bool                   wall;
+   bool                   unbreakable = false;
 
 
 private:
