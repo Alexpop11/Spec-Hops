@@ -40,6 +40,9 @@ add_subdirectory(${VENDOR_DIR}/xxHash/cmake_unofficial ${VENDOR_DIR}/xxHash/buil
 add_executable(${PROJECT_NAME} ${cpp_files} ${header_files} ${res_files})
 
 # Add Clipper2
+set(CLIPPER2_TESTS OFF CACHE BOOL "Disable Clipper2 tests" FORCE)
+set(CLIPPER2_UTILS OFF CACHE BOOL "Disable Clipper2 utilities" FORCE)
+set(CLIPPER2_EXAMPLES OFF CACHE BOOL "Disable Clipper2 examples" FORCE)
 add_subdirectory(${VENDOR_DIR}/Clipper2/CPP)
 
 # Set resource files as header-only (non-compiled)
