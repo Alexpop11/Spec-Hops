@@ -24,4 +24,14 @@ bool findPolygonUnion(const std::vector<std::vector<glm::vec2>>& polygons, PolyT
  * @return PathsD A flattened PathsD containing all polygons from the hierarchy.
  */
 PathsD FlattenPolyPathD(const PolyPathD& polyPath);
+
+/**
+ * @brief Computes the visibility polygon from a given position and obstacles.
+ *
+ * @param position The player's position as glm::vec2.
+ * @param obstacles The obstacles represented as PathsD (vector of paths).
+ * @return PathD The visibility polygon as a vector of points.
+ */
+PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles);
+PathD ComputeVisibilityPolygon(const PointD& pos, const PathsD& obstacles);
 } // namespace GeometryUtils

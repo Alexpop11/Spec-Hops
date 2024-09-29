@@ -1,6 +1,7 @@
 #include "Fog.h"
 #include <array>
 #include "Tile.h"
+#include "Player.h"
 #include <ranges>
 #include <vector>
 #include "clipper2/clipper.h"
@@ -21,26 +22,17 @@ void Fog::render(Renderer& renderer) {
       allBounds.push_back(bounds);
    }
 
+   auto player = World::where<Player>([&](const Player& player) { return true; })[0];
+
    PolyTreeD combined;
    findPolygonUnion(allBounds, combined);
+   auto flattened = FlattenPolyPathD(combined);
 
-   for (const auto& path : combined) {
-      auto polygon = path->Polygon();
-
-      auto flattened = FlattenPolyPathD(*path);
-      for (const auto& polygon : flattened) {
-         for (size_t i = 0; i < polygon.size(); ++i) {
-            auto start = polygon[i];
-            auto end   = polygon[(i + 1) % polygon.size()];
-            renderer.Line({start.x, start.y}, {end.x, end.y}, {0, 1, 0});
-         }
-      }
-
-      for (size_t i = 0; i < polygon.size(); ++i) {
-         auto start = polygon[i];
-         auto end   = polygon[(i + 1) % polygon.size()];
-         renderer.Line({start.x, start.y}, {end.x, end.y}, {1, 0, 0});
-      }
+   auto visibilityPolygon = ComputeVisibilityPolygon(player->position, flattened);
+   for (auto i = 0; i < visibilityPolygon.size(); i++) {
+      auto& point     = visibilityPolygon[i];
+      auto& nextPoint = visibilityPolygon[(i + 1) % visibilityPolygon.size()];
+      renderer.Line({point.x, point.y}, {nextPoint.x, nextPoint.y}, glm::vec3(1, 1, 1));
    }
 }
 
