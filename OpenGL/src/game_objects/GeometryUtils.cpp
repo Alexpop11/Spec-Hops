@@ -5,6 +5,9 @@
 #include <algorithm>
 #include <limits>
 #include <cmath>
+
+#include "../Renderer.h"
+
 namespace GeometryUtils {
 
 float length2(const glm::vec2& a, const glm::vec2& b) {
@@ -122,43 +125,91 @@ std::optional<glm::vec2> LineSegmentIntersect(const glm::vec2& line1_start, cons
    }
 }
 
+// Struct to hold a point along with its angle and type
+struct TaggedPoint {
+   PointD point;
+   double angle;
+   double adjusted_angle;
+   enum class PointType { START, MIDDLE, END } type;
+};
+
+std::vector<TaggedPoint> TagPoints(const glm::vec2& position, const PathD& polygon) {
+   std::vector<TaggedPoint> tagged_points;
+
+   // Compute angle for each vertex and collect them
+   for (const auto& pt : polygon) {
+      glm::vec2 vertex(pt.x, pt.y);
+      double    dx    = vertex.x - position.x;
+      double    dy    = vertex.y - position.y;
+      double    angle = atan2(dy, dx);
+
+      tagged_points.emplace_back(pt, angle, 0.0, TaggedPoint::PointType::MIDDLE);
+   }
+
+   if (tagged_points.empty()) {
+      // Handle the case where polygon has no points
+      return tagged_points;
+   }
+
+   if (PointInPolygon({position.x, position.y}, polygon) == PointInPolygonResult::IsInside) {
+      // all points are inside, so all are middle
+      for (auto& tp : tagged_points) {
+         tp.type = TaggedPoint::PointType::MIDDLE;
+      }
+      return tagged_points;
+   }
+
+   // Find a reference angle (e.g., the angle of the first point)
+   double ref_angle = tagged_points.front().angle;
+
+   // Adjust angles to handle wrapping
+   for (auto& tp : tagged_points) {
+      double angle_diff = tp.angle - ref_angle;
+
+      // Normalize angle_diff to be within [-π, π)
+      while (angle_diff < -M_PI)
+         angle_diff += 2 * M_PI;
+      while (angle_diff >= M_PI)
+         angle_diff -= 2 * M_PI;
+
+      // Store the adjusted angle relative to the reference angle
+      tp.adjusted_angle = angle_diff;
+   }
+
+   // Sort the vertices of the polygon by adjusted angle
+   std::sort(tagged_points.begin(), tagged_points.end(),
+             [](const TaggedPoint& a, const TaggedPoint& b) { return a.adjusted_angle < b.adjusted_angle; });
+
+   // Calculate the total angle span
+   double total_angle_span = tagged_points.back().adjusted_angle - tagged_points.front().adjusted_angle;
+
+   // Tag the first as START, last as END, others as MIDDLE
+   tagged_points.front().type = TaggedPoint::PointType::START;
+   tagged_points.back().type  = TaggedPoint::PointType::END;
+
+
+   return tagged_points;
+}
+
 // ComputeVisibilityPolygon function implementing the new algorithm
 PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles) {
-   // Struct to hold a point along with its angle and type
-   struct TaggedPoint {
-      PointD point;
-      double angle;
-      enum class PointType { START, MIDDLE, END } type;
-   };
+
 
    std::vector<TaggedPoint> all_points;
 
    // For each obstacle
    for (const auto& polygon : obstacles) {
-      std::vector<TaggedPoint> tagged_points;
-
-      // Compute angle for each vertex and collect them
-      for (const auto& pt : polygon) {
-         glm::vec2 vertex(pt.x, pt.y);
-         double    dx    = vertex.x - position.x;
-         double    dy    = vertex.y - position.y;
-         double    angle = atan2(dy, dx);
-
-         tagged_points.push_back({pt, angle, TaggedPoint::PointType::MIDDLE});
-      }
-
-      // Sort the vertices of the polygon by angle
-      std::sort(tagged_points.begin(), tagged_points.end(),
-                [](const TaggedPoint& a, const TaggedPoint& b) { return a.angle < b.angle; });
-
-      // Tag the first as START, last as END, others as MIDDLE
-      if (!tagged_points.empty()) {
-         tagged_points.front().type = TaggedPoint::PointType::START;
-         tagged_points.back().type  = TaggedPoint::PointType::END;
-      }
+      std::vector<TaggedPoint> tagged_points = TagPoints(position, polygon);
 
       // Add tagged points to the global list
       all_points.insert(all_points.end(), tagged_points.begin(), tagged_points.end());
+   }
+
+   for (auto& point : all_points) {
+      auto color = point.type == TaggedPoint::PointType::START ? glm::vec4(1, 0, 0, 1)
+                   : point.type == TaggedPoint::PointType::END ? glm::vec4(0, 1, 0, 1)
+                                                               : glm::vec4(1, 1, 1, 1);
+      Renderer::DebugLine({point.point.x, point.point.y}, {point.point.x + 0.1, point.point.y + 0.1}, color);
    }
 
    // Sort all points globally by angle

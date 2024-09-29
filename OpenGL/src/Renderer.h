@@ -19,8 +19,8 @@ class Line {
 public:
    glm::vec2 start;
    glm::vec2 end;
-   glm::vec3 color;
-   Line(const glm::vec2& s, const glm::vec2& e, const glm::vec3& c)
+   glm::vec4 color;
+   Line(const glm::vec2& s, const glm::vec2& e, const glm::vec4& c)
       : start(s)
       , end(e)
       , color(c) {}
@@ -41,8 +41,8 @@ public:
    std::tuple<int, int> WindowSize() const;
 
    static const std::string& ResPath();
-   static std::vector<Line>& GetDebugLines();
    static void               DebugLine(glm::vec2 start, glm::vec2 end, glm::vec3 color);
+   static void               DebugLine(glm::vec2 start, glm::vec2 end, glm::vec4 color);
 
    // Window pointer
    GLFWwindow* window;
@@ -55,6 +55,7 @@ public:
 
 
 private:
-   static std::string res_path;
-   void               DrawLine(glm::vec2 start, glm::vec2 end, glm::vec3 color);
+   static std::string        res_path;
+   void                      DrawLine(glm::vec2 start, glm::vec2 end, glm::vec4 color);
+   static std::vector<Line>& GetDebugLines();
 };

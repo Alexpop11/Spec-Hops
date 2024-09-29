@@ -42,9 +42,9 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
    GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::DrawLine(glm::vec2 start, glm::vec2 end, glm::vec3 color) {
+void Renderer::DrawLine(glm::vec2 start, glm::vec2 end, glm::vec4 color) {
    lineShader.Bind();
-   lineShader.SetUniform4f("u_Color", glm::vec4(color.r, color.g, color.b, 0.3f));
+   lineShader.SetUniform4f("u_Color", color);
    lineShader.SetUniform2f("u_StartPos", glm::vec2(start.x, start.y) - Camera::position + glm::vec2{9.0, 9.0});
    lineShader.SetUniform2f("u_EndPos", glm::vec2(end.x, end.y) - Camera::position + glm::vec2{9.0, 9.0});
    lineShader.SetUniform1f("u_Width", 0.1f);
@@ -91,8 +91,13 @@ std::vector<Line>& Renderer::GetDebugLines() {
 }
 
 void Renderer::DebugLine(glm::vec2 start, glm::vec2 end, glm::vec3 color) {
+   Renderer::DebugLine(start, end, glm::vec4(color, 0.3f));
+}
+
+void Renderer::DebugLine(glm::vec2 start, glm::vec2 end, glm::vec4 color) {
    GetDebugLines().push_back({start, end, color});
 }
+
 
 void Renderer::DrawDebug() {
    for (const auto& line : GetDebugLines()) {

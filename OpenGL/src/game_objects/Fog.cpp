@@ -28,6 +28,14 @@ void Fog::render(Renderer& renderer) {
    findPolygonUnion(allBounds, combined);
    auto flattened = FlattenPolyPathD(combined);
 
+   for (auto& polygon : flattened) {
+      for (int i = 0; i < polygon.size(); i++) {
+         auto& point     = polygon[i];
+         auto& nextPoint = polygon[(i + 1) % polygon.size()];
+         Renderer::DebugLine({point.x, point.y}, {nextPoint.x, nextPoint.y}, glm::vec3(1, 0, 1));
+      }
+   }
+
    auto visibilityPolygon = ComputeVisibilityPolygon(player->position, flattened);
    for (auto i = 0; i < visibilityPolygon.size(); i++) {
       auto& point     = visibilityPolygon[i];
