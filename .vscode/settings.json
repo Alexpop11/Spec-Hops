@@ -87,6 +87,11 @@
         "type_traits": "cpp",
         "utility": "cpp",
         "print": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "forward_list": "cpp"
+    },
+    "files.exclude": {
+        "build": true,
+        "OpenGL/vendor": true,
     }
 }

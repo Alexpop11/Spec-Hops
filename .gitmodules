@@ -7,3 +7,6 @@
 [submodule "OpenGL/vendor/xxHash"]
 	path = OpenGL/vendor/xxHash
 	url = https://github.com/Cyan4973/xxHash.git
+[submodule "OpenGL/vendor/Clipper2"]
+	path = OpenGL/vendor/Clipper2
+	url = https://github.com/AngusJohnson/Clipper2.git

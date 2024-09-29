@@ -39,6 +39,9 @@ add_subdirectory(${VENDOR_DIR}/xxHash/cmake_unofficial ${VENDOR_DIR}/xxHash/buil
 
 add_executable(${PROJECT_NAME} ${cpp_files} ${header_files} ${res_files})
 
+# Add Clipper2
+add_subdirectory(${VENDOR_DIR}/Clipper2/CPP)
+
 # Set resource files as header-only (non-compiled)
 foreach(res_file ${res_files})
     set_source_files_properties(${res_file} PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -59,8 +62,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${VENDOR_DIR}/glm
     ${VENDOR_DIR}/miniaudio
     ${VENDOR_DIR}/stb_image
+    ${VENDOR_DIR}/stb_image
+    ${VENDOR_DIR}/Clipper2/CPP/Clipper2Lib/include
 )
-
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     glfw
@@ -68,6 +72,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     OpenGL::GL
     glm::glm
     xxHash::xxhash
+    Clipper2
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/res_path.hpp.in
