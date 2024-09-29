@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <functional>
+#include <optional>
 #include "clipper2/clipper.h"
 #include <glm/glm.hpp>
 
@@ -33,5 +34,30 @@ PathsD FlattenPolyPathD(const PolyPathD& polyPath);
  * @return PathD The visibility polygon as a vector of points.
  */
 PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles);
-PathD ComputeVisibilityPolygon(const PointD& pos, const PathsD& obstacles);
+
+/**
+ * @brief Computes the intersection point between a ray and a line segment.
+ *
+ * @param ray_origin The origin point of the ray.
+ * @param dx The x-component of the ray's direction vector.
+ * @param dy The y-component of the ray's direction vector.
+ * @param a The first endpoint of the line segment.
+ * @param b The second endpoint of the line segment.
+ * @return std::optional<glm::vec2> containing the intersection point if it exists.
+ */
+std::optional<glm::vec2> RaySegmentIntersect(const glm::vec2& ray_origin, double dx, double dy, const glm::vec2& a,
+                                             const glm::vec2& b);
+
+/**
+ * @brief Computes the intersection point between two line segments.
+ *
+ * @param line1_start The starting point of the first line segment.
+ * @param line1_end The ending point of the first line segment.
+ * @param line2_start The starting point of the second line segment.
+ * @param line2_end The ending point of the second line segment.
+ * @return std::optional<glm::vec2> containing the intersection point if it exists.
+ */
+std::optional<glm::vec2> LineSegmentIntersect(const glm::vec2& line1_start, const glm::vec2& line1_end,
+                                              const glm::vec2& line2_start, const glm::vec2& line2_end);
+
 } // namespace GeometryUtils
