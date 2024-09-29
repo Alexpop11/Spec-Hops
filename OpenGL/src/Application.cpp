@@ -151,6 +151,10 @@ int main(void) {
       for (auto& gameobject : World::gameobjects)
          gameobject->render(renderer);
 
+      // render debug lines
+      // ------------------
+      renderer.DrawDebug();
+
       // swap front and back buffers
       // ---------------------------
       glfwSwapBuffers(window);

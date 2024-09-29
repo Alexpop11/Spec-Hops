@@ -32,7 +32,7 @@ void Fog::render(Renderer& renderer) {
    for (auto i = 0; i < visibilityPolygon.size(); i++) {
       auto& point     = visibilityPolygon[i];
       auto& nextPoint = visibilityPolygon[(i + 1) % visibilityPolygon.size()];
-      renderer.Line({point.x, point.y}, {nextPoint.x, nextPoint.y}, glm::vec3(1, 1, 1));
+      Renderer::DebugLine({point.x, point.y}, {nextPoint.x, nextPoint.y}, glm::vec3(1, 1, 1));
    }
 }
 

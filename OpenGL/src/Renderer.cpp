@@ -42,7 +42,7 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
    GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::Line(glm::vec2 start, glm::vec2 end, glm::vec3 color) {
+void Renderer::DrawLine(glm::vec2 start, glm::vec2 end, glm::vec3 color) {
    lineShader.Bind();
    lineShader.SetUniform4f("u_Color", glm::vec4(color.r, color.g, color.b, 0.3f));
    lineShader.SetUniform2f("u_StartPos", glm::vec2(start.x, start.y) - Camera::position + glm::vec2{9.0, 9.0});
@@ -83,4 +83,20 @@ std::tuple<int, int> Renderer::WindowSize() const {
    int width, height;
    glfwGetFramebufferSize(window, &width, &height);
    return {width, height};
+}
+
+std::vector<Line>& Renderer::GetDebugLines() {
+   static std::vector<Line> debugLines; // Initialized within the function
+   return debugLines;
+}
+
+void Renderer::DebugLine(glm::vec2 start, glm::vec2 end, glm::vec3 color) {
+   GetDebugLines().push_back({start, end, color});
+}
+
+void Renderer::DrawDebug() {
+   for (const auto& line : GetDebugLines()) {
+      this->DrawLine(line.start, line.end, line.color); // Use the Line function to draw
+   }
+   GetDebugLines().clear(); // Clear the vector after drawing
 }
