@@ -1,5 +1,3 @@
-// PolygonUtils.cpp
-
 #include "GeometryUtils.h"
 #include <functional>
 #include <algorithm>
@@ -126,7 +124,6 @@ std::optional<glm::vec2> LineSegmentIntersect(const glm::vec2& line1_start, cons
 }
 
 
-// ComputeVisibilityPolygon function implementing the new algorithm
 PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles) {
    // Struct to hold a point along with its angle and type
    struct TaggedPoint {
