@@ -4,26 +4,14 @@
 #include <ranges>
 #include <vector>
 #include "clipper2/clipper.h"
+#include "GeometryUtils.h"
 using namespace Clipper2Lib;
+using namespace GeometryUtils;
 
 Fog::Fog()
    : GameObject("Fog of War", 6, {0, 0}) {}
 
 void Fog::setUpShader(Renderer& renderer) {}
-
-PathsD findPolygonUnion(const std::vector<std::vector<glm::vec2>>& polygons) {
-   PathsD subject;
-   for (const auto& polygon : polygons) {
-      PathD path = MakePathD<double>({});
-      for (const auto& point : polygon) {
-         path.emplace_back(point.x, point.y);
-      }
-      subject.push_back(path);
-   }
-   auto solution = Union(subject, FillRule::NonZero);
-   return solution;
-}
-
 
 void Fog::render(Renderer& renderer) {
    std::vector<std::vector<glm::vec2>> allBounds;
@@ -32,11 +20,25 @@ void Fog::render(Renderer& renderer) {
       auto bounds = tile->getBounds();
       allBounds.push_back(bounds);
    }
-   auto combined = findPolygonUnion(allBounds);
+
+   PolyTreeD combined;
+   findPolygonUnion(allBounds, combined);
+
    for (const auto& path : combined) {
-      for (size_t i = 0; i < path.size(); ++i) {
-         auto start = path[i];
-         auto end   = path[(i + 1) % path.size()];
+      auto polygon = path->Polygon();
+
+      auto flattened = FlattenPolyPathD(*path);
+      for (const auto& polygon : flattened) {
+         for (size_t i = 0; i < polygon.size(); ++i) {
+            auto start = polygon[i];
+            auto end   = polygon[(i + 1) % polygon.size()];
+            renderer.Line({start.x, start.y}, {end.x, end.y}, {0, 1, 0});
+         }
+      }
+
+      for (size_t i = 0; i < polygon.size(); ++i) {
+         auto start = polygon[i];
+         auto end   = polygon[(i + 1) % polygon.size()];
          renderer.Line({start.x, start.y}, {end.x, end.y}, {1, 0, 0});
       }
    }

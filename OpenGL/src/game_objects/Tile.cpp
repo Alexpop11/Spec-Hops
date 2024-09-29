@@ -34,10 +34,10 @@ void Tile::explode() {
 std::vector<glm::vec2> Tile::getBounds() {
    if (wall) {
       std::vector<glm::vec2> bounds = {
-         position + glm::vec2{-0.5, 0.5 },
-         position + glm::vec2{0.5,  0.5 },
-         position + glm::vec2{0.5,  -0.5},
          position + glm::vec2{-0.5, -0.5},
+         position + glm::vec2{0.5,  -0.5},
+         position + glm::vec2{0.5,  0.5 },
+         position + glm::vec2{-0.5, 0.5 },
       };
       return bounds;
    } else {
