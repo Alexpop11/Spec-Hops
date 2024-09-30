@@ -16,10 +16,6 @@ SquareObject::SquareObject(const std::string& name, int drawPriority, int tile_x
 
    std::array<uint32_t, 6> indices = {0, 1, 2, 2, 3, 0};
 
-   uint32_t vao;
-   GLCall(glGenVertexArrays(1, &vao));
-   GLCall(glBindVertexArray(vao));
-
    vb = VertexBuffer::create(positions);
    VertexBufferLayout layout;
    layout.Push<float>(2);

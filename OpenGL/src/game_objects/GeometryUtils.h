@@ -5,6 +5,7 @@
 #include <optional>
 #include "clipper2/clipper.h"
 #include <glm/glm.hpp>
+#include "earcut.hpp"
 
 namespace GeometryUtils {
 using namespace Clipper2Lib;
@@ -61,3 +62,20 @@ std::optional<glm::vec2> LineSegmentIntersect(const glm::vec2& line1_start, cons
                                               const glm::vec2& line2_start, const glm::vec2& line2_end);
 
 } // namespace GeometryUtils
+
+
+namespace mapbox {
+namespace util {
+
+template <>
+struct nth<0, Clipper2Lib::PointD> {
+   inline static auto get(const Clipper2Lib::PointD& t) { return t.x; };
+};
+
+template <>
+struct nth<1, Clipper2Lib::PointD> {
+   inline static auto get(const Clipper2Lib::PointD& t) { return t.y; };
+};
+
+} // namespace util
+} // namespace mapbox

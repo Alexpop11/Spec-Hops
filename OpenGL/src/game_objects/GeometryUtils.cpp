@@ -4,6 +4,7 @@
 #include <limits>
 #include <cmath>
 #include <cstdlib>
+#include "earcut.hpp"
 
 #include "../Renderer.h"
 
@@ -18,14 +19,12 @@ bool findPolygonUnion(const std::vector<std::vector<glm::vec2>>& polygons, PolyT
    ClipperD clipper;
    for (const auto& polygon : polygons) {
       if (!polygon.empty()) {
-         PathsD subject;
-         PathD  path;
+         PathD path;
          path.reserve(polygon.size());
          for (const auto& point : polygon) {
             path.emplace_back(static_cast<double>(point.x), static_cast<double>(point.y));
          }
-         subject.push_back(path);
-         clipper.AddSubject(subject);
+         clipper.AddSubject({path});
       }
    }
    return clipper.Execute(ClipType::Union, FillRule::Positive, output);
@@ -119,15 +118,11 @@ std::optional<glm::vec2> RayIntersect(const glm::vec2& ray_origin, double dx, do
                if (current_distance < closest_distance) {
                   closest_distance     = current_distance;
                   closest_intersection = intersection_opt;
-                  std::cout << "closest intersection: " << closest_intersection->x << ", " << closest_intersection->y
-                            << " with length2: " << current_distance << std::endl;
                }
             }
          }
       }
    }
-   std::cout << "returning closest intersection: " << closest_intersection->x << ", " << closest_intersection->y
-             << " with length2: " << closest_distance << std::endl;
    return closest_intersection;
 }
 

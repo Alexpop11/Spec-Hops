@@ -12,12 +12,14 @@ private:
    wrap_t<uint32_t> m_Count;
 
 public:
-   template <size_t N>
-   IndexBuffer(const std::array<uint32_t, N>& data) {
-      m_Count = N;
+   template <typename Container>
+   IndexBuffer(const Container& data) {
+      static_assert(std::is_same_v<typename Container::value_type, uint32_t>,
+                    "Container must contain uint32_t elements");
+      m_Count = data.size();
       GLCall(glGenBuffers(1, &m_RendererID));
       GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
-      GLCall(glBufferData(GL_ARRAY_BUFFER, N * sizeof(uint32_t), data.data(), GL_STATIC_DRAW));
+      GLCall(glBufferData(GL_ARRAY_BUFFER, m_Count * sizeof(uint32_t), data.data(), GL_STATIC_DRAW));
    }
 
    IndexBuffer(const IndexBuffer&)             = delete;
