@@ -8,7 +8,8 @@ layout(location = 0) in vec2 a_Position;
 uniform vec2 u_StartPos;       // Start position of the line
 uniform vec2 u_EndPos;         // End position of the line
 uniform float u_Width;         // Width of the line
-uniform float u_AspectRatio;   // Aspect ratio of the viewport
+
+uniform mat4 u_MVP;            // Model-View-Projection matrix
 
 void main()
 {
@@ -27,13 +28,8 @@ void main()
     // Apply the offset to get the final position
     vec2 finalPos = interpolatedPos + offset;
     
-    // Adjust for aspect ratio to maintain consistent width
-    finalPos = finalPos / 18.0;
-    finalPos = finalPos - 0.5;
-    finalPos.y *= u_AspectRatio;
-    
-    // Convert to homogeneous coordinates (assuming orthographic projection)
-    gl_Position = vec4(finalPos, 0.0, 1.0);
+    // Transform the final position using the MVP matrix
+    gl_Position = u_MVP * vec4(finalPos, 0.0, 1.0);
 }
 
 #shader fragment
