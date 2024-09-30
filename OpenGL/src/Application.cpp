@@ -140,6 +140,8 @@ int main(void) {
 
       World::UpdateObjects();
 
+      sortGameObjectsByPriority(World::gameobjects);
+
       if (World::shouldTick || lastTick + (1.0 / TICKS_PER_SECOND) <= currentTime) {
          World::TickObjects();
          lastTick          = currentTime;
