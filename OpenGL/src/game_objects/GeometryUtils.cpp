@@ -255,11 +255,22 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
    std::sort(all_points.begin(), all_points.end(),
              [](const TaggedPoint& a, const TaggedPoint& b) { return a.angle < b.angle; });
 
-   // filter out obstructed points
    std::vector<TaggedPoint> filtered_points;
    for (const auto& point : all_points) {
+      auto pointCopy = point;
+      if (!filtered_points.empty()) {
+         auto& most_recent_point = filtered_points.back();
+         auto  dupeDetected      = (most_recent_point.point == point.point) &&
+                             ((most_recent_point.end == PointType::End && point.end == PointType::Start) ||
+                              (most_recent_point.end == PointType::Start && point.end == PointType::End));
+         if (dupeDetected) {
+            filtered_points.pop_back();
+            pointCopy.end = PointType::Middle;
+         }
+      }
+
       if (!isPointObstructed(position, {point.point.x, point.point.y}, obstacles)) {
-         filtered_points.push_back(point);
+         filtered_points.push_back(pointCopy);
       }
    }
 
