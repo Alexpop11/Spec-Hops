@@ -13,33 +13,11 @@ using namespace GeometryUtils;
 
 Fog::Fog()
    : GameObject("Fog of War", 6, {0, 0}) {
-   // shader = Shader::create(Renderer::ResPath() + "shaders/fog.shader");
-
-   texture = Texture::create(Renderer::ResPath() + "Textures/alternate-player.png");
-   shader  = Shader::create(Renderer::ResPath() + "Shaders/fog.shader");
-
-   std::array<float, 16> positions = {
-      -0.5f, -0.5f, 0.0f, 0.0f, // 0
-      0.5f,  -0.5f, 1.0f, 0.0f, // 1
-      0.5f,  0.5f,  1.0f, 1.0f, // 2
-      -0.5f, 0.5f,  0.0f, 1.0f  // 3
-   };
-
-   std::array<uint32_t, 6> indices = {0, 1, 2, 2, 3, 0};
-
-   vb = VertexBuffer::create(positions);
-   VertexBufferLayout layout;
-   layout.Push<float>(2);
-   layout.Push<float>(2);
-   va = std::make_shared<VertexArray>(vb, layout);
-   ib = IndexBuffer::create(indices);
+   shader = Shader::create(Renderer::ResPath() + "Shaders/fog.shader");
 }
 
 void Fog::setUpShader(Renderer& renderer) {
    GameObject::setUpShader(renderer);
-   texture->Bind();
-   shader->SetUniform1i("u_Texture", 0);
-   shader->SetUniform4f("u_Color", glm::vec4{0, 0, 0, 0});
 }
 
 void Fog::render(Renderer& renderer) {
