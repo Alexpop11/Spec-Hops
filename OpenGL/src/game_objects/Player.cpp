@@ -27,6 +27,9 @@ void Player::move(int new_x, int new_y) {
 
 void Player::update() {
    Character::update();
+
+   Renderer::DebugLine(glm::vec2{tile_x, tile_y}, glm::vec2{tile_x + 1, tile_y + 1}, glm::vec3{1, 0, 0});
+
    // smooth camera movement
    Camera::position = zeno(Camera::position, position, 0.1);
 

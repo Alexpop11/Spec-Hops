@@ -6,18 +6,11 @@ layout(location = 1) in vec2 texCoord;
 
 out vec2 v_TexCoord;
 
-uniform float u_AspectRatio;
-uniform vec2 u_Position;
-
+uniform mat4 u_MVP;
 
 void main()
 {
-    vec4 adjustedPosition = vec4(position.xy, 0.0, 1.0);
-    adjustedPosition.xy += u_Position;
-    adjustedPosition.xy /= 18;
-    adjustedPosition.xy -= 0.5;
-    adjustedPosition.y *= u_AspectRatio;
-    gl_Position = adjustedPosition;
+    gl_Position = u_MVP * vec4(position, 0.0, 1.0);
     v_TexCoord = texCoord;
 }
 
