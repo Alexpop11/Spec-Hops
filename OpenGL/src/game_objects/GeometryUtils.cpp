@@ -268,7 +268,7 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
       return PathD();
    }
 
-   for (int i = 0; i < filtered_points.size(); i++) {
+   for (size_t i = 0; i < filtered_points.size(); i++) {
       const auto& point  = filtered_points[i];
       const auto  vertex = glm::vec2(point.point.x, point.point.y);
 
