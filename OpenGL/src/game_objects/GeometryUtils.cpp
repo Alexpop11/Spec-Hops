@@ -114,18 +114,22 @@ std::optional<glm::vec2> RayIntersect(const glm::vec2& ray_origin, double dx, do
 
          auto intersection_opt = RaySegmentIntersect(ray_origin, dx, dy, {pa.x, pa.y}, {pb.x, pb.y});
          if (intersection_opt) {
-            auto current_distance = length2(intersection_opt.value(), ray_origin);
-            if (current_distance < closest_distance) {
-               closest_distance     = current_distance;
-               closest_intersection = intersection_opt;
+            auto current_distance = length2(*intersection_opt, ray_origin);
+            if (current_distance > 0.1) {
+               if (current_distance < closest_distance) {
+                  closest_distance     = current_distance;
+                  closest_intersection = intersection_opt;
+                  std::cout << "closest intersection: " << closest_intersection->x << ", " << closest_intersection->y
+                            << " with length2: " << current_distance << std::endl;
+               }
             }
          }
       }
    }
+   std::cout << "returning closest intersection: " << closest_intersection->x << ", " << closest_intersection->y
+             << " with length2: " << closest_distance << std::endl;
    return closest_intersection;
 }
-
-
 
 // Function to compute intersection between two line segments
 std::optional<glm::vec2> LineSegmentIntersect(const glm::vec2& line1_start, const glm::vec2& line1_end,
@@ -169,17 +173,16 @@ std::optional<glm::vec2> LineIntersect(const glm::vec2& line1_start, const glm::
       for (size_t i = 0; i < polygon.size(); ++i) {
          const auto& pa = polygon[i];
          const auto& pb = polygon[(i + 1) % polygon.size()];
-         // skip if the line is too close to the point we're casting from
-         if (distancePointToLineSegment(line1_start, {pa.x, pa.y}, {pb.x, pb.y}) < 0.1) {
-            continue;
-         }
 
          auto intersection_opt = LineSegmentIntersect(line1_start, line1_end, {pa.x, pa.y}, {pb.x, pb.y});
          if (intersection_opt) {
-            auto current_distance = length2(intersection_opt.value(), line1_start);
-            if (current_distance < closest_distance) {
-               closest_distance     = current_distance;
-               closest_intersection = intersection_opt;
+            auto current_distance = length2(*intersection_opt, line1_start);
+
+            if (current_distance > 0.1) {
+               if (current_distance < closest_distance) {
+                  closest_distance     = current_distance;
+                  closest_intersection = intersection_opt;
+               }
             }
          }
       }
@@ -198,24 +201,37 @@ bool isPointObstructed(const glm::vec2& position, const glm::vec2& point, const 
 bool adjacentInVectorCircular(size_t a, size_t b, size_t size) {
    return a == b || abs(static_cast<int>(a) - static_cast<int>(b)) == 1 || (a == 0 && b == size - 1);
 }
+enum class Side { LEFT, RIGHT, ON_LINE };
+
+Side pointSide(const glm::vec2& point, const glm::vec2& linePoint, const glm::vec2& lineDirection) {
+   glm::vec2 pointVector  = point - linePoint;
+   float     crossProduct = lineDirection.x * pointVector.y - lineDirection.y * pointVector.x;
+
+   if (crossProduct > 0) {
+      return Side::LEFT;
+   } else if (crossProduct < 0) {
+      return Side::RIGHT;
+   } else {
+      return Side::ON_LINE;
+   }
+}
 
 PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles) {
+   enum class PointType { Start, End, Middle };
+
    // Struct to hold a point along with its angle and type
    struct TaggedPoint {
-      PointD point;
-      double angle;
-      size_t path_index;
-      size_t paths_index;
+      PointD    point;
+      double    angle;
+      PointType end;
    };
 
    std::vector<TaggedPoint> all_points;
 
-   // For each obstacle
    for (size_t i = 0; i < obstacles.size(); i++) {
       const auto&              polygon = obstacles[i];
       std::vector<TaggedPoint> tagged_points;
 
-      // Compute angle for each vertex and collect them
       for (size_t j = 0; j < polygon.size(); j++) {
          const auto& pt = polygon[j];
          glm::vec2   vertex(pt.x, pt.y);
@@ -223,10 +239,23 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
          double      dy    = vertex.y - position.y;
          double      angle = atan2(dy, dx);
 
-         tagged_points.emplace_back(pt, angle, j, i);
+         auto prev = polygon[(j - 1 + polygon.size()) % polygon.size()];
+         auto next = polygon[(j + 1) % polygon.size()];
+
+         Side side1 = pointSide(vertex, {prev.x, prev.y}, {dx, dy});
+         Side side2 = pointSide(vertex, {next.x, next.y}, {dx, dy});
+
+         if (side1 == Side::RIGHT && side2 == Side::RIGHT) {
+            Renderer::DebugLine(vertex + glm::vec2{0.1f, 0.1f}, vertex, glm::vec3(1, 0, 0));
+            tagged_points.emplace_back(pt, angle, PointType::Start);
+         } else if (side1 == Side::LEFT && side2 == Side::LEFT) {
+            Renderer::DebugLine(vertex + glm::vec2{0.1f, 0.1f}, vertex, glm::vec3(0, 1, 0));
+            tagged_points.emplace_back(pt, angle, PointType::End);
+         } else {
+            tagged_points.emplace_back(pt, angle, PointType::Middle);
+         }
       }
 
-      // Add tagged points to the global list
       all_points.insert(all_points.end(), tagged_points.begin(), tagged_points.end());
    }
 
@@ -242,61 +271,44 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
       }
    }
 
-   std::vector<TaggedPoint> visibility_polygon;
+   std::vector<glm::vec2> visibility_polygon;
    if (filtered_points.empty()) {
       return PathD();
    }
 
    for (int i = 0; i < filtered_points.size(); i++) {
-      const auto& point          = filtered_points[i];
-      const auto& previous_point = !visibility_polygon.empty() ? visibility_polygon.back() : filtered_points.back();
-      const auto& next_point     = filtered_points[(i + 1) % filtered_points.size()];
+      const auto& point  = filtered_points[i];
+      const auto  vertex = glm::vec2(point.point.x, point.point.y);
 
-      auto extend_before = (previous_point.paths_index != point.paths_index) ||
-                           (!adjacentInVectorCircular(previous_point.path_index, point.path_index,
-                                                      obstacles[previous_point.paths_index].size()));
-      auto extend_after =
-         (next_point.paths_index != point.paths_index) ||
-         (!adjacentInVectorCircular(next_point.path_index, point.path_index, obstacles[next_point.paths_index].size()));
-
-      std::optional<TaggedPoint> extendedPoint;
-      if (extend_before || extend_after) {
-         const auto vertex         = glm::vec2(point.point.x, point.point.y);
-         glm::vec2  direction      = glm::normalize(vertex - position);
-         auto       extendedVertex = RayIntersect(position, direction.x, direction.y, obstacles);
-
-         if (extend_before) {
-            Renderer::DebugLine(vertex, vertex + direction, glm::vec3(1, 0, 0));
-         }
-         if (extend_after) {
-            Renderer::DebugLine(vertex, vertex + direction, glm::vec3(0, 1, 0));
-         }
-         if (extend_before && extend_after) {
-            std::cout << "extendBefore and extendAfter" << std::endl;
-         }
-         if (extendedVertex) {
-            extendedPoint = TaggedPoint(PointD(extendedVertex->x, extendedVertex->y), point.angle, point.path_index,
-                                        point.paths_index);
+      std::optional<glm::vec2> extendedPoint;
+      if (point.end != PointType::Middle) {
+         glm::vec2 direction = glm::normalize(vertex - position);
+         extendedPoint       = RayIntersect(vertex, direction.x, direction.y, obstacles);
+         if (length2(*extendedPoint, vertex) < 0.5) {
+            std::cout << "vertex super close to extended: " << length2(*extendedPoint, vertex) << std::endl;
          }
       }
 
-      if (extend_before && extendedPoint) {
-         visibility_polygon.emplace_back(*extendedPoint);
+      if (point.end == PointType::Start) {
+         if (extendedPoint) {
+            visibility_polygon.push_back(*extendedPoint);
+         }
       }
 
-      visibility_polygon.emplace_back(point);
+      visibility_polygon.emplace_back(point.point.x, point.point.y);
 
-      if (extend_after && extendedPoint) {
-         visibility_polygon.emplace_back(*extendedPoint);
+      if (point.end == PointType::End) {
+         if (extendedPoint) {
+            visibility_polygon.push_back(*extendedPoint);
+         }
       }
    }
 
    PathD path;
    for (const auto& point : visibility_polygon) {
-      path.emplace_back(point.point.x, point.point.y);
+      path.emplace_back(point.x, point.y);
    }
 
-   // The visibility polygon is already sorted by angle
    return path;
 }
 
