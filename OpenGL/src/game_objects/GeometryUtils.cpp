@@ -115,7 +115,7 @@ std::optional<glm::vec2> RayIntersect(const glm::vec2& ray_origin, double dx, do
          auto intersection_opt = RaySegmentIntersect(ray_origin, dx, dy, {pa.x, pa.y}, {pb.x, pb.y});
          if (intersection_opt) {
             auto current_distance = length2(*intersection_opt, ray_origin);
-            if (current_distance > 0.1) {
+            if (current_distance > 0.01) {
                if (current_distance < closest_distance) {
                   closest_distance     = current_distance;
                   closest_intersection = intersection_opt;
@@ -177,8 +177,7 @@ std::optional<glm::vec2> LineIntersect(const glm::vec2& line1_start, const glm::
          auto intersection_opt = LineSegmentIntersect(line1_start, line1_end, {pa.x, pa.y}, {pb.x, pb.y});
          if (intersection_opt) {
             auto current_distance = length2(*intersection_opt, line1_start);
-
-            if (current_distance > 0.1) {
+            if (current_distance > 0.01) {
                if (current_distance < closest_distance) {
                   closest_distance     = current_distance;
                   closest_intersection = intersection_opt;
@@ -246,10 +245,8 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
          Side side2 = pointSide(vertex, {next.x, next.y}, {dx, dy});
 
          if (side1 == Side::RIGHT && side2 == Side::RIGHT) {
-            Renderer::DebugLine(vertex + glm::vec2{0.1f, 0.1f}, vertex, glm::vec3(1, 0, 0));
             tagged_points.emplace_back(pt, angle, PointType::Start);
          } else if (side1 == Side::LEFT && side2 == Side::LEFT) {
-            Renderer::DebugLine(vertex + glm::vec2{0.1f, 0.1f}, vertex, glm::vec3(0, 1, 0));
             tagged_points.emplace_back(pt, angle, PointType::End);
          } else {
             tagged_points.emplace_back(pt, angle, PointType::Middle);
