@@ -41,6 +41,8 @@ void GameObject::setUpShader(Renderer& renderer) {
 
       // Set up model matrix (object transformation)
       glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f));
+      model           = glm::rotate(model, rotation * 3.14159f / 180.0f, glm::vec3(0, 0, 1));
+      model           = glm::scale(model, glm::vec3(scale, scale, 1));
 
       // Calculate MVP matrix
       glm::mat4 mvp = proj * view * model;

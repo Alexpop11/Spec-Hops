@@ -40,6 +40,8 @@ public:
    std::string name;
    int         drawPriority;
    glm::vec2   position;
+   float       rotation = 0;
+   float       scale    = 1.0f;
 
 private:
    // Add any private members here if needed
