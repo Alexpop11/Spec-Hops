@@ -20,10 +20,6 @@ public:
    glm::vec2 start;
    glm::vec2 end;
    glm::vec4 color;
-   Line(const glm::vec2& s, const glm::vec2& e, const glm::vec4& c)
-      : start(s)
-      , end(e)
-      , color(c) {}
 };
 class Renderer {
 public:
