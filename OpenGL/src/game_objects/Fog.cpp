@@ -11,7 +11,9 @@ using namespace GeometryUtils;
 
 Fog::Fog()
    : GameObject("Fog of War", DrawPriority::Fog, {0, 0}) {
-   shader = Shader::create(Renderer::ResPath() + "Shaders/fog.shader");
+   shader       = Shader::create(Renderer::ResPath() + "Shaders/fog.shader");
+   mainFogColor = {0.1, 0.1, 0.1, 1};
+   tintFogColor = {0.1, 0.1, 0.1, 0.7};
 }
 
 void Fog::setUpShader(Renderer& renderer) {
@@ -58,7 +60,7 @@ void Fog::render(Renderer& renderer) {
    clipper.Execute(ClipType::Difference, FillRule::NonZero, invisibilityPaths);
 
    // Render the invisibility regions
-   renderPolyTree(renderer, invisibilityPaths, {0, 0, 0, 1});
+   renderPolyTree(renderer, invisibilityPaths, mainFogColor);
 
    if (showAllWalls) {
       // Tint all the walls that are not visible
@@ -68,7 +70,7 @@ void Fog::render(Renderer& renderer) {
       PolyTreeD tintPaths;
       tint.Execute(ClipType::Difference, FillRule::NonZero, tintPaths);
 
-      renderPolyTree(renderer, tintPaths, {0, 0, 0, 0.5});
+      renderPolyTree(renderer, tintPaths, tintFogColor);
    }
 }
 
