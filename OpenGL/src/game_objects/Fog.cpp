@@ -46,6 +46,10 @@ void Fog::render(Renderer& renderer) {
 
    // Compute the visibility polygon and add it as the clip
    clipper.AddClip({ComputeVisibilityPolygon(player->position, flattened)});
+   bool showAllWalls = true;
+   if (showAllWalls) {
+      clipper.AddClip({flattened});
+   }
 
    // Compute the difference to get invisibility regions
    PolyTreeD invisibilityPaths;
