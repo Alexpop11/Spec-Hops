@@ -20,6 +20,7 @@ void Fog::setUpShader(Renderer& renderer) {
 
 void Fog::render(Renderer& renderer) {
    GameObject::render(renderer);
+   bool showAllWalls = true;
 
    // Collect all tile bounds
    std::vector<std::vector<glm::vec2>> allBounds;
@@ -44,23 +45,41 @@ void Fog::render(Renderer& renderer) {
    }
    clipper.AddSubject(hullPaths);
 
-   // Compute the visibility polygon and add it as the clip
-   clipper.AddClip({ComputeVisibilityPolygon(player->position, flattened)});
-   bool showAllWalls = true;
+   // Compute the visibility polygon
+   auto visibility = ComputeVisibilityPolygon(player->position, flattened);
+
+   // Compute the areas occluded
+   clipper.AddClip({visibility});
    if (showAllWalls) {
       clipper.AddClip({flattened});
    }
-
    // Compute the difference to get invisibility regions
    PolyTreeD invisibilityPaths;
    clipper.Execute(ClipType::Difference, FillRule::NonZero, invisibilityPaths);
 
    // Render the invisibility regions
-   for (auto& hullRegion : invisibilityPaths) {
-      std::vector<PointD>              hull         = hullRegion->Polygon();
-      std::vector<std::vector<PointD>> invisibility = {hull};
-      for (auto& visibleRegion : *hullRegion) {
-         invisibility.push_back(visibleRegion->Polygon());
+   renderPolyTree(renderer, invisibilityPaths, {0, 0, 0, 1});
+
+   if (showAllWalls) {
+      // Tint all the walls that are not visible
+      ClipperD tint;
+      tint.AddSubject({flattened});
+      tint.AddClip({visibility});
+      PolyTreeD tintPaths;
+      tint.Execute(ClipType::Difference, FillRule::NonZero, tintPaths);
+
+      renderPolyTree(renderer, tintPaths, {0, 0, 0, 0.5});
+   }
+}
+
+void Fog::update() {}
+
+void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree, glm::vec4 color) const {
+   for (auto& shadedRegion : polytree) {
+      std::vector<PointD>              shaded       = shadedRegion->Polygon();
+      std::vector<std::vector<PointD>> invisibility = {shaded};
+      for (auto& holeRegion : *shadedRegion) {
+         invisibility.push_back(holeRegion->Polygon());
       }
 
       // Triangulate the invisibility regions
@@ -81,10 +100,10 @@ void Fog::render(Renderer& renderer) {
       auto va = std::make_shared<VertexArray>(vb, layout);
       auto ib = std::make_shared<IndexBuffer>(indices);
 
+      shader->SetUniform4f("u_Color", color);
+
       if (va && ib && shader) {
          renderer.Draw(*va, *ib, *shader);
       }
    }
 }
-
-void Fog::update() {}
