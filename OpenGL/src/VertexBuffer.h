@@ -1,6 +1,6 @@
 #pragma once
 #include <utility>
-#include "WeakMemoizeConstructor.h"
+#include "WeakMemoizeConstructor.hpp"
 #include "Utils.h"
 
 #include <GL/glew.h>

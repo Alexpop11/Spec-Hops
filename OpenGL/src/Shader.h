@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <filesystem>
-#include "WeakMemoizeConstructor.h"
+#include "WeakMemoizeConstructor.hpp"
 #include <glm/glm.hpp>
 #include "Utils.h"
 
