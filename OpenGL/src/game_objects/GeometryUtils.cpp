@@ -246,24 +246,24 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
          Side nextSide = pointSide(vertex, next, {dx, dy});
 
          if (prevSide == Side::RIGHT && nextSide == Side::RIGHT) {
-            tagged_points.emplace_back(pt, angle, PointType::Start);
+            tagged_points.push_back(TaggedPoint{pt, angle, PointType::Start});
             if (cull_frontfaces) {
-               obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+               obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
             }
          } else if (prevSide == Side::LEFT && nextSide == Side::LEFT) {
-            tagged_points.emplace_back(pt, angle, PointType::End);
+            tagged_points.push_back(TaggedPoint{pt, angle, PointType::End});
             if (!cull_frontfaces) {
-               obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+               obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
             }
          } else if (prevSide == Side::LEFT && nextSide == Side::RIGHT) {
             if (cull_frontfaces) {
-               tagged_points.emplace_back(pt, angle, PointType::Middle);
-               obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+               tagged_points.push_back(TaggedPoint{pt, angle, PointType::Middle});
+               obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
             }
          } else {
             if (!cull_frontfaces) {
-               tagged_points.emplace_back(pt, angle, PointType::Middle);
-               obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+               tagged_points.push_back(TaggedPoint{pt, angle, PointType::Middle});
+               obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
             }
          }
       }
