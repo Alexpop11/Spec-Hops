@@ -103,22 +103,21 @@ float distancePointToLineSegment(const glm::vec2& point, const glm::vec2& lineSt
    return glm::distance(point, projection);
 }
 
-std::optional<glm::vec2> RayIntersect(const glm::vec2& ray_origin, double dx, double dy, const PathsD& scene) {
+std::optional<glm::vec2> RayIntersect(const glm::vec2& ray_origin, double dx, double dy,
+                                      const std::vector<std::array<glm::vec2, 2>>& obstructionLines) {
    float                    closest_distance = std::numeric_limits<float>::max();
    std::optional<glm::vec2> closest_intersection;
-   for (const auto& polygon : scene) {
-      for (size_t i = 0; i < polygon.size(); ++i) {
-         const auto& pa = polygon[i];
-         const auto& pb = polygon[(i + 1) % polygon.size()];
+   for (const auto& line : obstructionLines) {
+      const auto& pa = line[0];
+      const auto& pb = line[1];
 
-         auto intersection_opt = RaySegmentIntersect(ray_origin, dx, dy, {pa.x, pa.y}, {pb.x, pb.y});
-         if (intersection_opt) {
-            auto current_distance = length2(*intersection_opt, ray_origin);
-            if (current_distance > 0.01) {
-               if (current_distance < closest_distance) {
-                  closest_distance     = current_distance;
-                  closest_intersection = intersection_opt;
-               }
+      auto intersection_opt = RaySegmentIntersect(ray_origin, dx, dy, {pa.x, pa.y}, {pb.x, pb.y});
+      if (intersection_opt) {
+         auto current_distance = length2(*intersection_opt, ray_origin);
+         if (current_distance > 0.01) {
+            if (current_distance < closest_distance) {
+               closest_distance     = current_distance;
+               closest_intersection = intersection_opt;
             }
          }
       }
@@ -161,22 +160,21 @@ std::optional<glm::vec2> LineSegmentIntersect(const glm::vec2& line1_start, cons
 }
 
 
-std::optional<glm::vec2> LineIntersect(const glm::vec2& line1_start, const glm::vec2& line1_end, const PathsD& scene) {
+std::optional<glm::vec2> LineIntersect(const glm::vec2& line1_start, const glm::vec2& line1_end,
+                                       const std::vector<std::array<glm::vec2, 2>>& obstructionLines) {
    float                    closest_distance = std::numeric_limits<float>::max();
    std::optional<glm::vec2> closest_intersection;
-   for (const auto& polygon : scene) {
-      for (size_t i = 0; i < polygon.size(); ++i) {
-         const auto& pa = polygon[i];
-         const auto& pb = polygon[(i + 1) % polygon.size()];
+   for (const auto& line : obstructionLines) {
+      const auto& pa = line[0];
+      const auto& pb = line[1];
 
-         auto intersection_opt = LineSegmentIntersect(line1_start, line1_end, {pa.x, pa.y}, {pb.x, pb.y});
-         if (intersection_opt) {
-            auto current_distance = length2(*intersection_opt, line1_start);
-            if (current_distance > 0.01) {
-               if (current_distance < closest_distance) {
-                  closest_distance     = current_distance;
-                  closest_intersection = intersection_opt;
-               }
+      auto intersection_opt = LineSegmentIntersect(line1_start, line1_end, {pa.x, pa.y}, {pb.x, pb.y});
+      if (intersection_opt) {
+         auto current_distance = length2(*intersection_opt, line1_start);
+         if (current_distance > 0.01) {
+            if (current_distance < closest_distance) {
+               closest_distance     = current_distance;
+               closest_intersection = intersection_opt;
             }
          }
       }
@@ -184,8 +182,9 @@ std::optional<glm::vec2> LineIntersect(const glm::vec2& line1_start, const glm::
    return closest_intersection;
 }
 
-bool isPointObstructed(const glm::vec2& position, const glm::vec2& point, const PathsD& scene) {
-   auto intersection_opt = LineIntersect(position, point, scene);
+bool isPointObstructed(const glm::vec2& position, const glm::vec2& point,
+                       const std::vector<std::array<glm::vec2, 2>>& obstructionLines) {
+   auto intersection_opt = LineIntersect(position, point, obstructionLines);
    if (intersection_opt) {
       return length2(intersection_opt.value(), position) < length2(point, position);
    }
@@ -220,6 +219,9 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
       PointType end;
    };
 
+   // Create a new vector of paths in which to store the lines the player can't see through
+   std::vector<std::array<glm::vec2, 2>> obstructionLines;
+
    std::vector<TaggedPoint> all_points;
 
    for (size_t i = 0; i < obstacles.size(); i++) {
@@ -233,18 +235,24 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
          double      dy    = vertex.y - position.y;
          double      angle = atan2(dy, dx);
 
-         auto prev = polygon[(j - 1 + polygon.size()) % polygon.size()];
-         auto next = polygon[(j + 1) % polygon.size()];
+         auto prevPoint = polygon[(j - 1 + polygon.size()) % polygon.size()];
+         auto prev      = glm::vec2{prevPoint.x, prevPoint.y};
+         auto nextPoint = polygon[(j + 1) % polygon.size()];
+         auto next      = glm::vec2{nextPoint.x, nextPoint.y};
 
-         Side side1 = pointSide(vertex, {prev.x, prev.y}, {dx, dy});
-         Side side2 = pointSide(vertex, {next.x, next.y}, {dx, dy});
+         Side prevSide = pointSide(vertex, prev, {dx, dy});
+         Side nextSide = pointSide(vertex, next, {dx, dy});
 
-         if (side1 == Side::RIGHT && side2 == Side::RIGHT) {
+         if (prevSide == Side::RIGHT && nextSide == Side::RIGHT) {
             tagged_points.emplace_back(pt, angle, PointType::Start);
-         } else if (side1 == Side::LEFT && side2 == Side::LEFT) {
+            obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+         } else if (prevSide == Side::LEFT && nextSide == Side::LEFT) {
             tagged_points.emplace_back(pt, angle, PointType::End);
-         } else {
+         } else if (prevSide == Side::LEFT && nextSide == Side::RIGHT) {
             tagged_points.emplace_back(pt, angle, PointType::Middle);
+            obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+         } else {
+            // Draw nothing here to implement "frontface culling"
          }
       }
 
@@ -269,7 +277,7 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
          }
       }
 
-      if (!isPointObstructed(position, {point.point.x, point.point.y}, obstacles)) {
+      if (!isPointObstructed(position, {point.point.x, point.point.y}, obstructionLines)) {
          filtered_points.push_back(pointCopy);
       }
    }
@@ -286,7 +294,7 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
       std::optional<glm::vec2> extendedPoint;
       if (point.end != PointType::Middle) {
          glm::vec2 direction = glm::normalize(vertex - position);
-         extendedPoint       = RayIntersect(vertex, direction.x, direction.y, obstacles);
+         extendedPoint       = RayIntersect(vertex, direction.x, direction.y, obstructionLines);
          if (length2(*extendedPoint, vertex) < 0.5) {
             std::cout << "vertex super close to extended: " << length2(*extendedPoint, vertex) << std::endl;
          }
