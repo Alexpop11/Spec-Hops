@@ -21,7 +21,6 @@ enum class DrawPriority {
    Bomb,
    Character,
    Fog,
-   UnbreakableWall,
 };
 
 class GameObject {

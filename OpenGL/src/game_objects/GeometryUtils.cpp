@@ -210,6 +210,8 @@ Side pointSide(const glm::vec2& point, const glm::vec2& linePoint, const glm::ve
 }
 
 PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles) {
+   bool cull_frontfaces = false;
+
    enum class PointType { Start, End, Middle };
 
    // Struct to hold a point along with its angle and type
@@ -245,14 +247,24 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
 
          if (prevSide == Side::RIGHT && nextSide == Side::RIGHT) {
             tagged_points.emplace_back(pt, angle, PointType::Start);
-            obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+            if (cull_frontfaces) {
+               obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+            }
          } else if (prevSide == Side::LEFT && nextSide == Side::LEFT) {
             tagged_points.emplace_back(pt, angle, PointType::End);
+            if (!cull_frontfaces) {
+               obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+            }
          } else if (prevSide == Side::LEFT && nextSide == Side::RIGHT) {
-            tagged_points.emplace_back(pt, angle, PointType::Middle);
-            obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+            if (cull_frontfaces) {
+               tagged_points.emplace_back(pt, angle, PointType::Middle);
+               obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+            }
          } else {
-            // Draw nothing here to implement "frontface culling"
+            if (!cull_frontfaces) {
+               tagged_points.emplace_back(pt, angle, PointType::Middle);
+               obstructionLines.emplace_back(std::array<glm::vec2, 2>{vertex, next});
+            }
          }
       }
 

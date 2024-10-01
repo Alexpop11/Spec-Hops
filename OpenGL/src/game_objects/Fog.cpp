@@ -13,7 +13,7 @@ Fog::Fog()
    : GameObject("Fog of War", DrawPriority::Fog, {0, 0}) {
    shader       = Shader::create(Renderer::ResPath() + "Shaders/fog.shader");
    mainFogColor = {0.1, 0.1, 0.1, 1};
-   tintFogColor = {0.1, 0.1, 0.1, 0.7};
+   tintFogColor = {0.1, 0.1, 0.1, 0};
 }
 
 void Fog::setUpShader(Renderer& renderer) {
@@ -22,7 +22,7 @@ void Fog::setUpShader(Renderer& renderer) {
 
 void Fog::render(Renderer& renderer) {
    GameObject::render(renderer);
-   bool showAllWalls = true;
+   bool showWalls = true;
 
    // Collect all tile bounds
    std::vector<std::vector<glm::vec2>> allBounds;
@@ -33,6 +33,7 @@ void Fog::render(Renderer& renderer) {
 
    // Get the player
    auto player = World::getFirst<Player>(); // Simplified retrieval of the first player
+   shader->SetUniform2f("uPlayerPosition", player->position);
 
    // Compute the union of all tile bounds
    PolyTreeD combined;
@@ -52,7 +53,7 @@ void Fog::render(Renderer& renderer) {
 
    // Compute the areas occluded
    clipper.AddClip({visibility});
-   if (showAllWalls) {
+   if (showWalls) {
       clipper.AddClip({flattened});
    }
    // Compute the difference to get invisibility regions
@@ -60,9 +61,9 @@ void Fog::render(Renderer& renderer) {
    clipper.Execute(ClipType::Difference, FillRule::NonZero, invisibilityPaths);
 
    // Render the invisibility regions
-   renderPolyTree(renderer, invisibilityPaths, mainFogColor);
+   renderPolyTree(renderer, invisibilityPaths, mainFogColor, mainFogColor);
 
-   if (showAllWalls) {
+   if (showWalls) {
       // Tint all the walls that are not visible
       ClipperD tint;
       tint.AddSubject({flattened});
@@ -70,18 +71,19 @@ void Fog::render(Renderer& renderer) {
       PolyTreeD tintPaths;
       tint.Execute(ClipType::Difference, FillRule::NonZero, tintPaths);
 
-      renderPolyTree(renderer, tintPaths, tintFogColor);
+      renderPolyTree(renderer, tintPaths, mainFogColor, tintFogColor);
    }
 }
 
 void Fog::update() {}
 
-void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree, glm::vec4 color) const {
+void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree, glm::vec4 color, glm::vec4 bandColor) const {
    for (auto& shadedRegion : polytree) {
       std::vector<PointD>              shaded       = shadedRegion->Polygon();
       std::vector<std::vector<PointD>> invisibility = {shaded};
       for (auto& holeRegion : *shadedRegion) {
          invisibility.push_back(holeRegion->Polygon());
+         renderPolyTree(renderer, *holeRegion, color, bandColor);
       }
 
       // Triangulate the invisibility regions
@@ -103,6 +105,7 @@ void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree, glm::vec
       auto ib = std::make_shared<IndexBuffer>(indices);
 
       shader->SetUniform4f("u_Color", color);
+      shader->SetUniform4f("u_BandColor", bandColor);
 
       if (va && ib && shader) {
          renderer.Draw(*va, *ib, *shader);

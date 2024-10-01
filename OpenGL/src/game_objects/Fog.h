@@ -14,5 +14,6 @@ public:
    glm::vec4 tintFogColor;
 
 private:
-   virtual void renderPolyTree(Renderer& renderer, const Clipper2Lib::PolyTreeD& polytree, glm::vec4 color) const;
+   virtual void renderPolyTree(Renderer& renderer, const Clipper2Lib::PolyTreeD& polytree, glm::vec4 color,
+                               glm::vec4 bandColor) const;
 };
