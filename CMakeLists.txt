@@ -16,7 +16,7 @@ set( CXX_STANDARD_REQUIRED ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 if(NOT MSVC)
-   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-pedantic;-Wall;-Wextra;-Wcast-qual;-Wdisabled-optimization;-Winit-self;-Wmissing-include-dirs;-Wswitch-default;-Wno-unused;-Wno-cast-qual;-Wno-unused-parameter>")
+   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-pedantic;-Wall;-Wextra;-Wcast-qual;-Wdisabled-optimization;-Winit-self;-Wmissing-include-dirs;;-Wno-unused;-Wno-cast-qual;-Wno-unused-parameter>")
    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
       add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wlogical-op;-Wstrict-null-sentinel>")
    endif()
