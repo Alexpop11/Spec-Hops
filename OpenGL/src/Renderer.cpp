@@ -46,7 +46,7 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
 void Renderer::DrawLine(glm::vec2 start, glm::vec2 end, glm::vec4 color) {
    lineShader.Bind();
    lineShader.SetUniform4f("u_Color", color);
-   lineShader.SetUniform2f("u_StartPos", glm::vec2(start.x, start.y));
+   lineShader.SetUniform2f("u_StartPos", start);
    lineShader.SetUniform2f("u_EndPos", glm::vec2(end.x, end.y));
    lineShader.SetUniform1f("u_Width", 0.1f);
 
