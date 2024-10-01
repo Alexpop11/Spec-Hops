@@ -30,6 +30,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Print status of submodules
+        run: |
+          git submodule update --init --recursive
+          git submodule status
+
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
