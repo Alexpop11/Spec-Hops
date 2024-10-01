@@ -10,7 +10,7 @@ using namespace Clipper2Lib;
 using namespace GeometryUtils;
 
 Fog::Fog()
-   : GameObject("Fog of War", 6, {0, 0}) {
+   : GameObject("Fog of War", DrawPriority::Fog, {0, 0}) {
    shader = Shader::create(Renderer::ResPath() + "Shaders/fog.shader");
 }
 

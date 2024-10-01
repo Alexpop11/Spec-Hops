@@ -5,7 +5,7 @@
 
 
 Character::Character(const std::string& name, int tile_x, int tile_y, std::string texturepath)
-   : SquareObject(name, 2, tile_x, tile_y, texturepath) {}
+   : SquareObject(name, DrawPriority::Character, tile_x, tile_y, texturepath) {}
 
 void Character::update() {
    SquareObject::update();

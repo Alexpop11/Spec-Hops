@@ -7,7 +7,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 
-GameObject::GameObject(const std::string& name, int drawPriority, glm::vec2 position)
+GameObject::GameObject(const std::string& name, DrawPriority drawPriority, glm::vec2 position)
    : name(name)
    , drawPriority(drawPriority)
    , position(position) {
