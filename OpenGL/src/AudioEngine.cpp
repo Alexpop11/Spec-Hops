@@ -49,7 +49,7 @@ AudioEngine::AudioEngine()
    , Bomb_Sound(getSound("Bomb1.wav"))
    , Death_Sound(getSound("Death2.wav"))
    , Bullet_Sound(getSound("Bullet.wav"))
-   , Hurt_Sound(getSound("ouch.wav"))
+   , Hurt_Sound(getSound("ouch2.wav"))
    , Bomb_Place(getSound("bomb_place.wav"))
    , Bomb_Tick(getSound("bomb_tick.wav")) {}
 
