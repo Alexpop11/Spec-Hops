@@ -7,6 +7,34 @@
 
 std::string Renderer::res_path;
 
+glm::mat4 CalculateMVP(std::tuple<int, int> windowSize, const glm::vec2& objectPosition, float objectRotationDegrees,
+                       float objectScale) {
+   // Retrieve window size from the renderer
+   auto [width, height] = windowSize;
+
+   // Calculate aspect ratio
+   float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+
+   // Create orthographic projection matrix
+   float     orthoWidth = Camera::scale * aspectRatio;
+   glm::mat4 projection =
+      glm::ortho(-orthoWidth / 2.0f, orthoWidth / 2.0f, -Camera::scale / 2.0f, Camera::scale / 2.0f, -1.0f, 1.0f);
+
+   // Create view matrix
+   glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-Camera::position, 0.0f));
+
+   // Create model matrix
+   glm::mat4 model           = glm::translate(glm::mat4(1.0f), glm::vec3(objectPosition, 0.0f));
+   float     rotationRadians = glm::radians(objectRotationDegrees);
+   model                     = glm::rotate(model, rotationRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+   model                     = glm::scale(model, glm::vec3(objectScale, objectScale, 1.0f));
+
+   // Combine matrices to form MVP
+   glm::mat4 mvp = projection * view * model;
+
+   return mvp;
+}
+
 Renderer::Renderer(GLFWwindow* window)
    : window(window)
    , lineShader(Shader(Renderer::ResPath() + "shaders/line.shader")) {
@@ -50,20 +78,7 @@ void Renderer::DrawLine(glm::vec2 start, glm::vec2 end, glm::vec4 color) {
    lineShader.SetUniform2f("u_EndPos", end);
    lineShader.SetUniform1f("u_Width", 0.1f);
 
-   auto [width, height] = WindowSize();
-   // Calculate aspect ratio
-   float aspectRatio = float(width) / float(height);
-   // Set up orthographic projection matrix centered at (0,0)
-   float     orthoWidth = Camera::scale * aspectRatio;
-   glm::mat4 proj       = glm::ortho(-orthoWidth / 2.0f, orthoWidth / 2.0f,       // Left, Right
-                                     -Camera::scale / 2.0f, Camera::scale / 2.0f, // Bottom, Top
-                                     -1.0f, 1.0f);                                // Near, Far
-   // Set up view matrix (camera transformation)
-   glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-Camera::position, 0.0f));
-   // Set up model matrix (identity matrix or specific transformations if needed)
-   glm::mat4 model = glm::mat4(1.0f);
-   // Calculate MVP matrix
-   glm::mat4 mvp = proj * view * model;
+   auto mvp = CalculateMVP(WindowSize(), {0, 0}, 0, 1);
    // Pass MVP matrix to the shader
    lineShader.SetUniformMat4f("u_MVP", mvp);
 

@@ -36,10 +36,17 @@
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
 #define GL_SILENCE_DEPRECATION
+
 #if defined(IMGUI_IMPL_OPENGL_ES2)
    #include <GLES2/gl2.h>
 #endif
+#include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
+// Utility function to draw text without any frame
+void DrawTextOverlay(const char* text, float x, float y, ImU32 color = IM_COL32(255, 255, 255, 255)) {
+   ImDrawList* draw_list = ImGui::GetForegroundDrawList();
+   draw_list->AddText(ImVec2(x, y), color, text);
+}
 
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
    int            width, height, channels;
@@ -111,15 +118,6 @@ int main(void) {
    GLCall(glEnable(GL_BLEND));
    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-   if (glewInit() != GLEW_OK)
-      std::cout << "Error!" << std::endl;
-
-   std::cout << "current version of GL: " << glGetString(GL_VERSION) << std::endl;
-
-   // Enable blending
-   GLCall(glEnable(GL_BLEND));
-   GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
    // Initialize ImGui
    IMGUI_CHECKVERSION();
    ImGui::CreateContext();
@@ -130,8 +128,8 @@ int main(void) {
    ImGui_ImplGlfw_InitForOpenGL(window, true);
    ImGui_ImplOpenGL3_Init(glsl_version);
 
-   // Continue with your renderer and world setup
    Renderer renderer(window);
+
    World::LoadMap("maps/SpaceShip.txt");
    World::gameobjects.push_back(std::make_unique<Fog>());
 
@@ -146,24 +144,13 @@ int main(void) {
       currentTime          = glfwGetTime();
       Input::deltaTime     = currentTime - lastFrameTime;
 
-      // set the viewport size
+      // Set the viewport size
       auto [width, height] = renderer.WindowSize();
       glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
       sortGameObjectsByPriority(World::gameobjects);
       renderer.Clear();
       Input::updateKeyStates(window);
-
-      // gather all different shaders that are currently in use, and check if we need to
-      // recompile the shader because the file was changed.
-      // -------------------------------------------------------------------------------
-      /* std::set<std::shared_ptr<Shader>> shaders;
-      for (auto& gameobject : World::gameobjects) {
-         if (gameobject->shader && !shaders.contains(gameobject->shader)) {
-            shaders.insert(gameobject->shader);
-            gameobject->shader->UpdateIfNeeded();
-         }
-      }*/
 
       World::UpdateObjects();
 
@@ -175,13 +162,11 @@ int main(void) {
          World::shouldTick = false;
       }
 
-      // render all objects
-      // ------------------
+      // Render all objects
       for (auto& gameobject : World::gameobjects)
          gameobject->render(renderer);
 
-      // render debug lines
-      // ------------------
+      // Render debug lines
       renderer.DrawDebug();
 
       // Start the Dear ImGui frame
@@ -189,25 +174,32 @@ int main(void) {
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
 
-      // Example ImGui window with text
+      // Example ImGui window with text (optional)
       {
-         ImGui::Begin("Debug Info"); // Create a window called "Debug Info"
-         ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+         ImGui::Begin("Performance Info");
+         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
          ImGui::End();
       }
+
+      // Draw text without any frame
+      DrawTextOverlay("Hello, World!", 50.0f, 50.0f, IM_COL32(255, 255, 0, 255));    // Yellow text at (50, 50)
+      DrawTextOverlay("Player Health: 100", 50.0f, 80.0f, IM_COL32(0, 255, 0, 255)); // Green text at (50, 80)
 
       // Render ImGui
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-      // swap front and back buffers
-      // ---------------------------
+      // Swap front and back buffers
       glfwSwapBuffers(window);
 
       // Poll for and process events
-      // ---------------------------
       glfwPollEvents();
    }
+
+   // Cleanup ImGui
+   ImGui_ImplOpenGL3_Shutdown();
+   ImGui_ImplGlfw_Shutdown();
+   ImGui::DestroyContext();
 
    glfwTerminate();
    return 0;

@@ -55,3 +55,6 @@ private:
    void                      DrawLine(glm::vec2 start, glm::vec2 end, glm::vec4 color);
    static std::vector<Line>& GetDebugLines();
 };
+
+glm::mat4 CalculateMVP(std::tuple<int, int> windowSize, const glm::vec2& objectPosition, float objectRotationDegrees,
+                       float objectScale);
