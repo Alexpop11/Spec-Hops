@@ -31,7 +31,15 @@
 #include "Texture.h"
 #include "game_objects/Fog.h"
 
-#include "WeakMemoizeConstructor.hpp"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include <stdio.h>
+#define GL_SILENCE_DEPRECATION
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+   #include <GLES2/gl2.h>
+#endif
+
 
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
    int            width, height, channels;
@@ -103,8 +111,27 @@ int main(void) {
    GLCall(glEnable(GL_BLEND));
    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-   Renderer renderer(window);
+   if (glewInit() != GLEW_OK)
+      std::cout << "Error!" << std::endl;
 
+   std::cout << "current version of GL: " << glGetString(GL_VERSION) << std::endl;
+
+   // Enable blending
+   GLCall(glEnable(GL_BLEND));
+   GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+   // Initialize ImGui
+   IMGUI_CHECKVERSION();
+   ImGui::CreateContext();
+   ImGuiIO& io = ImGui::GetIO();
+   (void)io;
+   ImGui::StyleColorsDark();
+   const char* glsl_version = "#version 330";
+   ImGui_ImplGlfw_InitForOpenGL(window, true);
+   ImGui_ImplOpenGL3_Init(glsl_version);
+
+   // Continue with your renderer and world setup
+   Renderer renderer(window);
    World::LoadMap("maps/SpaceShip.txt");
    World::gameobjects.push_back(std::make_unique<Fog>());
 
@@ -156,6 +183,22 @@ int main(void) {
       // render debug lines
       // ------------------
       renderer.DrawDebug();
+
+      // Start the Dear ImGui frame
+      ImGui_ImplOpenGL3_NewFrame();
+      ImGui_ImplGlfw_NewFrame();
+      ImGui::NewFrame();
+
+      // Example ImGui window with text
+      {
+         ImGui::Begin("Debug Info"); // Create a window called "Debug Info"
+         ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+         ImGui::End();
+      }
+
+      // Render ImGui
+      ImGui::Render();
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
       // swap front and back buffers
       // ---------------------------
