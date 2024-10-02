@@ -49,7 +49,9 @@ public:
    Sound Bomb_Sound;
    Sound Death_Sound;
    Sound Bullet_Sound;
-   Sound Hurt_sound;
+   Sound Hurt_Sound;
+   Sound Bomb_Place;
+   Sound Bomb_Tick;
 };
 
 AudioEngine& audio();

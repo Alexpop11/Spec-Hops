@@ -59,7 +59,7 @@ void Player::hurt() {
    if (health > 0) {
       health--;
       tintColor = {1.0, 0.0, 0.0, 0.5};
-      audio().Hurt_sound.play();
+      audio().Hurt_Sound.play();
    } 
    if (health == 0) {
       audio().Death_Sound.play();
@@ -126,6 +126,7 @@ void Player::tickUpdate() {
    if (Input::keys_pressed[GLFW_KEY_SPACE]) {
       if (hasBomb && bombCoolDown <= 0) {
          World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
+         audio().Bomb_Place.play();
          bombCoolDown = 3;
       }
    }

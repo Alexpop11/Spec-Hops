@@ -26,6 +26,7 @@ void Mine::tickUpdate() {
          tintColor.a    = 1;
       } else {
          tintColor.a    = 0;
+         audio().Bomb_Tick.play();
          red_last_frame = false;
       }
       if (ExplodeTick > 24) {
@@ -43,6 +44,7 @@ void Mine::tickUpdate() {
             character->hurt();
             std::cout << "Mine damaged player. their health is now " << character->health << std::endl;
          }
+         audio().Bomb_Sound.play();
          ShouldDestroy = true;
       }
    }

@@ -49,7 +49,9 @@ AudioEngine::AudioEngine()
    , Bomb_Sound(getSound("Bomb1.wav"))
    , Death_Sound(getSound("Death2.wav"))
    , Bullet_Sound(getSound("Bullet.wav"))
-   , Hurt_sound(getSound("ouch.wav")) {}
+   , Hurt_Sound(getSound("ouch.wav"))
+   , Bomb_Place(getSound("bomb_place.wav"))
+   , Bomb_Tick(getSound("bomb_tick.wav")) {}
 
 Sound AudioEngine::getSound(const std::string& name) {
    return Sound(Renderer::ResPath() + "Sounds/" + name, &engine.engine);
