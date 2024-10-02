@@ -4,8 +4,10 @@ project(SpaceBoom)
 
 set(CMAKE_CXX_STANDARD 23)
 
+set(VENDOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor)
+
 # Add application code
-file(GLOB cpp_files "src/*.c" "src/*.cpp" "src/game_objects/*.cpp" "src/game_objects/enemies/*.cpp")
+file(GLOB cpp_files "src/*.c" "src/*.cpp" "src/game_objects/*.cpp" "src/game_objects/enemies/*.cpp" "${VENDOR_DIR}/imgui/*.cpp")
 file(GLOB header_files "src/*.h" "src/game_objects/*.h" "src/game_objects/enemies/*.h")
 
 # Add resource files
@@ -18,7 +20,6 @@ CPMAddPackage(
   VERSION 1.0
 )
 
-set(VENDOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
 
 # Add GLFW
@@ -67,6 +68,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${VENDOR_DIR}/stb_image
     ${VENDOR_DIR}/earcut
     ${VENDOR_DIR}/Clipper2/CPP/Clipper2Lib/include
+    ${VENDOR_DIR}/imgui/
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

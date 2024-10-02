@@ -70,3 +70,6 @@ void Character::die() {
    tintColor.b = 0.3f;
    tintColor.a = 0.5f;
 }
+
+void Character::hurt() {
+}

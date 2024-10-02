@@ -18,10 +18,11 @@ Background::Background(const std::string& name)
 
 void Background::setUpShader(Renderer& renderer) {
    GameObject::setUpShader(renderer);
+   auto [width, height] = renderer.WindowSize();
+   shader->SetUniform2f("u_Resolution", {(float)width, (float)height});
 }
 
 void Background::render(Renderer& renderer) {
-
    GameObject::render(renderer);
 
    // draw if va, ib, and shader are set:

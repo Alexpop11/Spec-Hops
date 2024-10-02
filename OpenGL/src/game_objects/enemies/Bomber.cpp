@@ -25,6 +25,7 @@ void Bomber::move(int new_x, int new_y) {
             if (!nearbyPlayers.empty()) {
                auto player = nearbyPlayers[0];
                World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
+               audio().Bomb_Place.play();
                Character::move(tile_x - sign(player->tile_x - tile_x), tile_y);
                Character::move(tile_x, tile_y - sign(player->tile_y - tile_y));
             }
@@ -81,6 +82,7 @@ void Bomber::tickUpdate() {
       if (std::abs(tile_x - player->tile_x) + std::abs(tile_y - player->tile_y) < 2) {
          // Drop a bomb
          World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
+         audio().Bomb_Place.play();
 
          // Move away from player after dropping bomb
          move(tile_x - sign(player->tile_x - tile_x), tile_y);

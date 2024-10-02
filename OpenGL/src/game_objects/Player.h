@@ -9,6 +9,7 @@ public:
    virtual void tickUpdate() override;
    bool         key_pressed_last_frame = false;
    virtual void move(int new_x, int new_y) override;
+   virtual void         hurt() override;
    bool         second_step = false;
 
    // Powerups

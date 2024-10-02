@@ -27,9 +27,9 @@ void Player::move(int new_x, int new_y) {
 
 void Player::update() {
    Character::update();
-
    // smooth camera movement
    Camera::position = zeno(Camera::position, position, 0.1);
+   tintColor.a = zeno(tintColor.a, 0.0, 0.05);
 
    bool key_pressed_this_frame = false;
 
@@ -53,6 +53,18 @@ void Player::update() {
       World::shouldTick = true;
    }
    key_pressed_last_frame = key_pressed_this_frame;
+}
+
+void Player::hurt() {
+   if (health > 0) {
+      health--;
+      tintColor = {1.0, 0.0, 0.0, 0.5};
+      audio().Hurt_Sound.play();
+   } 
+   if (health == 0) {
+      audio().Death_Sound.play();
+      die();
+   }
 }
 
 void Player::tickUpdate() {
@@ -114,6 +126,7 @@ void Player::tickUpdate() {
    if (Input::keys_pressed[GLFW_KEY_SPACE]) {
       if (hasBomb && bombCoolDown <= 0) {
          World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
+         audio().Bomb_Place.play();
          bombCoolDown = 3;
       }
    }
@@ -128,10 +141,5 @@ void Player::tickUpdate() {
       } else {
          tintColor = {0.75, 0.75, 0.0, 0.5};
       }
-   }
-
-   if (health <= 0) {
-      die();
-      audio().Death_Sound.play();
    }
 }
