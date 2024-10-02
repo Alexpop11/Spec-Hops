@@ -12,6 +12,7 @@ public:
    virtual void tickUpdate() override;
    void         die();
    int          health = 1;
+   virtual void        hurt();
 
    // Powerups
    bool hasBomb      = true;

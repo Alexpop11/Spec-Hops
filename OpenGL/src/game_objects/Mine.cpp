@@ -40,7 +40,7 @@ void Mine::tickUpdate() {
             return (std::abs(tile_x - character.tile_x) + std::abs(tile_y - character.tile_y) < 3);
          });
          for (auto* character : nearbyCharacters) {
-            character->health -= 1;
+            character->hurt();
             std::cout << "Mine damaged player. their health is now " << character->health << std::endl;
          }
          ShouldDestroy = true;
