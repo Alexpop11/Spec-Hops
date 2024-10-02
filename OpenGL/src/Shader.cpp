@@ -187,7 +187,7 @@ uint32_t Shader::GetUniformLocation(const std::string& name) {
 
    GLCall(int location = glGetUniformLocation(m_RendererID, name.c_str()));
    if (location == -1 && name.find("u_StartTime") == std::string::npos && name.find("u_Color") == std::string::npos &&
-       name.find("u_Time") == std::string::npos && name.find("u_Resolution") == std::string::npos) {
+       name.find("u_Time") == std::string::npos && name.find("u_MVP") == std::string::npos) {
 
       std::cout << "Warning: uniform '" << name << "' doesn't exist for shader at " << m_FilePath << "!" << std::endl;
    }
