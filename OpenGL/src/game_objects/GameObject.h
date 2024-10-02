@@ -15,9 +15,17 @@
 #include "../VertexArray.h"
 #include "../Shader.h"
 
+enum class DrawPriority {
+   Background,
+   Floor,
+   Bomb,
+   Character,
+   Fog,
+};
+
 class GameObject {
 public:
-   GameObject(const std::string& name, int drawPriority, glm::vec2 position);
+   GameObject(const std::string& name, DrawPriority drawPriority, glm::vec2 position);
    GameObject(GameObject&& mE)            = default;
    GameObject& operator=(GameObject&& mE) = default;
 
@@ -37,9 +45,11 @@ public:
    std::shared_ptr<VertexBuffer> vb;
    std::shared_ptr<IndexBuffer>  ib;
 
-   std::string name;
-   int         drawPriority;
-   glm::vec2   position;
+   std::string  name;
+   DrawPriority drawPriority;
+   glm::vec2    position;
+   float        rotation = 0;
+   float        scale    = 1.0f;
 
 private:
    // Add any private members here if needed

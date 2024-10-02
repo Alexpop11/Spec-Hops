@@ -31,7 +31,7 @@
 #include "Texture.h"
 #include "game_objects/Fog.h"
 
-#include "WeakMemoizeConstructor.h"
+#include "WeakMemoizeConstructor.hpp"
 
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
    int            width, height, channels;
@@ -140,6 +140,8 @@ int main(void) {
 
       World::UpdateObjects();
 
+      sortGameObjectsByPriority(World::gameobjects);
+
       if (World::shouldTick || lastTick + (1.0 / TICKS_PER_SECOND) <= currentTime) {
          World::TickObjects();
          lastTick          = currentTime;
@@ -150,6 +152,10 @@ int main(void) {
       // ------------------
       for (auto& gameobject : World::gameobjects)
          gameobject->render(renderer);
+
+      // render debug lines
+      // ------------------
+      renderer.DrawDebug();
 
       // swap front and back buffers
       // ---------------------------

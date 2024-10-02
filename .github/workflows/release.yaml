@@ -1,6 +1,8 @@
-name: Release SpaceBoom
+name: Build SpaceBoom
 
 on:
+  pull_request:
+    branches: [master] # Adjust this if your main branch has a different name
   release:
     types: [created]
 
@@ -27,6 +29,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Print status of submodules
+        run: |
+          git submodule update --init --recursive
+          git submodule status
 
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -55,28 +62,30 @@ jobs:
           cmake --build build --config Release
 
       - name: Prepare release package
+        if: github.event_name == 'release'
         run: |
           mkdir release
           cp build/OpenGL/SpaceBoom${{ matrix.os == 'windows-latest' && '.exe' || '' }} release/${{ matrix.output_name }}
           cp -r OpenGL/res release/res
 
       - name: Set executable permissions (macOS)
-        if: matrix.os != 'windows-latest'
+        if: github.event_name == 'release' && matrix.os != 'windows-latest'
         run: |
           chmod +x release/${{ matrix.output_name }}
 
       - name: Create release archive (Unix)
-        if: matrix.os != 'windows-latest'
+        if: github.event_name == 'release' && matrix.os != 'windows-latest'
         run: |
           cd release
           zip -r ../${{ matrix.output_name }}.zip .
 
       - name: Create release archive (Windows)
-        if: matrix.os == 'windows-latest'
+        if: github.event_name == 'release' && matrix.os == 'windows-latest'
         run: |
           Compress-Archive -Path release\* -DestinationPath ${{ matrix.output_name }}.zip
 
       - name: Upload Release Asset
+        if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}

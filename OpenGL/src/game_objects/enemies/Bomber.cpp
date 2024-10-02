@@ -2,7 +2,7 @@
 
 Bomber::Bomber(const std::string& name, float x, float y)
    : Character(name, x, y, "Textures/enemy.png") {
-   drawPriority = 3;
+   drawPriority = DrawPriority::Character;
    health       = 1;
 }
 

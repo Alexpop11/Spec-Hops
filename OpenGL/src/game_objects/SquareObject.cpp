@@ -1,24 +1,21 @@
 #include "SquareObject.h"
 
-SquareObject::SquareObject(const std::string& name, int drawPriority, int tile_x, int tile_y, std::string texturePath)
+SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, int tile_x, int tile_y,
+                           std::string texturePath)
    : GameObject(name, drawPriority, {tile_x, tile_y})
    , tile_x(tile_x)
    , tile_y(tile_y) {
    texture = Texture::create(Renderer::ResPath() + texturePath);
    shader  = Shader::create(Renderer::ResPath() + "shaders/shader.shader");
 
-   std::array<float, 16> positions = {
-      -0.5f, -0.5f, 0.0f, 0.0f, // 0
-      0.5f,  -0.5f, 1.0f, 0.0f, // 1
-      0.5f,  0.5f,  1.0f, 1.0f, // 2
-      -0.5f, 0.5f,  0.0f, 1.0f  // 3
+   std::array<glm::vec2, 8> positions = {
+      glm::vec2(-0.5f, -0.5f), glm::vec2(0.0f, 0.0f), // 0
+      glm::vec2(0.5f, -0.5f),  glm::vec2(1.0f, 0.0f), // 1
+      glm::vec2(0.5f, 0.5f),   glm::vec2(1.0f, 1.0f), // 2
+      glm::vec2(-0.5f, 0.5f),  glm::vec2(0.0f, 1.0f)  // 3
    };
 
    std::array<uint32_t, 6> indices = {0, 1, 2, 2, 3, 0};
-
-   uint32_t vao;
-   GLCall(glGenVertexArrays(1, &vao));
-   GLCall(glBindVertexArray(vao));
 
    vb = VertexBuffer::create(positions);
    VertexBufferLayout layout;

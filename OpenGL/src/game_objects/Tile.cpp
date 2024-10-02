@@ -1,7 +1,7 @@
 #include "Tile.h"
 
 Tile::Tile(const std::string& name, bool wall, bool unbreakable, float x, float y)
-   : SquareObject(name, 2, x, y, "Textures/alt-wall-bright.png")
+   : SquareObject(name, DrawPriority::Floor, x, y, "Textures/alt-wall-bright.png")
    , wall(wall)
    , unbreakable(unbreakable) {
    wallTextureUnbreakable = Texture::create(Renderer::ResPath() + "Textures/alt-wall-unbreakable.png");

@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <tuple>
+#include <vector> // Include vector header
 
 #include "res_path.hpp"
 #include "VertexArray.h"
@@ -14,7 +15,12 @@
 #include "AudioEngine.h"
 #include "Shader.h"
 
-
+class Line {
+public:
+   glm::vec2 start;
+   glm::vec2 end;
+   glm::vec4 color;
+};
 class Renderer {
 public:
    Renderer(GLFWwindow* window);
@@ -27,10 +33,12 @@ public:
 
    void                 Clear() const;
    void                 Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
-   void                 Line(glm::vec2 start, glm::vec2 end, glm::vec3 color);
+   void                 DrawDebug();
    std::tuple<int, int> WindowSize() const;
 
    static const std::string& ResPath();
+   static void               DebugLine(glm::vec2 start, glm::vec2 end, glm::vec3 color);
+   static void               DebugLine(glm::vec2 start, glm::vec2 end, glm::vec4 color);
 
    // Window pointer
    GLFWwindow* window;
@@ -41,6 +49,9 @@ public:
    std::shared_ptr<IndexBuffer>  lineIb;
    std::shared_ptr<VertexArray>  lineVa;
 
+
 private:
-   static std::string res_path;
+   static std::string        res_path;
+   void                      DrawLine(glm::vec2 start, glm::vec2 end, glm::vec4 color);
+   static std::vector<Line>& GetDebugLines();
 };

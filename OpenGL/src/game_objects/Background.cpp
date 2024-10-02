@@ -1,10 +1,9 @@
 #include "Background.h"
 #include <array>
 
-Background::Background(const std::string& name, int drawPriority, float x, float y)
-   : GameObject(name, drawPriority, {x, y}) {
-   shader       = Shader::create(Renderer::ResPath() + "shaders/stars.shader");
-   drawPriority = 0;
+Background::Background(const std::string& name)
+   : GameObject(name, DrawPriority::Background, {0, 0}) {
+   shader = Shader::create(Renderer::ResPath() + "shaders/stars.shader");
 
    std::array<float, 8> positions = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
 

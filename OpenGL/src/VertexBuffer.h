@@ -1,18 +1,20 @@
 #pragma once
-#include <utility> // for std::swap
-#include "WeakMemoizeConstructor.h"
+#include <utility>
+#include "WeakMemoizeConstructor.hpp"
 #include "Utils.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <type_traits>
 
 class VertexBuffer {
 private:
    wrap_t<uint32_t> m_RendererID;
 
 public:
-   template <typename T, size_t N>
-   VertexBuffer(const std::array<T, N>& data) {
+   template <typename Container>
+   VertexBuffer(const Container& data) {
+      using T = typename Container::value_type;
       static_assert(std::is_trivially_copyable_v<T>, "Data must be trivially copyable");
 
       GLCall(glGenBuffers(1, &m_RendererID));
@@ -35,10 +37,3 @@ public:
    // Declare the global memoized constructor
    DECLARE_GLOBAL_MEMOIZED_CONSTRUCTOR(VertexBuffer)
 };
-
-namespace std {
-template <>
-struct hash<VertexBuffer> {
-   std::size_t operator()(const VertexBuffer& vb) const { return std::hash<uint32_t>{}(vb.GetRendererID()); }
-};
-} // namespace std

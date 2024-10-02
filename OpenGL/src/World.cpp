@@ -41,7 +41,7 @@ void World::LoadMap(const std::string& map_path) {
          size_t y = total_rows - row;
          if (c != '\n') {
             if (c == 'b') { // Background
-               gameobjects.push_back(std::make_unique<Background>(Background("Background", 0, 0, 0)));
+               gameobjects.push_back(std::make_unique<Background>(Background("Background")));
             }
             if (c == 'p') { // player
                gameobjects.push_back(std::make_unique<Player>(Player("Coolbox", (float)x, (float)y)));

@@ -1,3 +1,4 @@
+// World.h
 #pragma once
 
 #include <functional>
@@ -20,9 +21,33 @@ public:
       return filteredObjects;
    }
 
+   // Implemented getAll<T>()
+   template <typename T>
+   static std::vector<T*> getAll() {
+      std::vector<T*> allObjects;
+      for (auto& gameobject : gameobjects) {
+         T* castedObject = dynamic_cast<T*>(gameobject.get());
+         if (castedObject) {
+            allObjects.push_back(castedObject);
+         }
+      }
+      return allObjects;
+   }
+
+   // Implemented getFirst<T>()
+   template <typename T>
+   static T* getFirst() {
+      for (auto& gameobject : gameobjects) {
+         T* castedObject = dynamic_cast<T*>(gameobject.get());
+         if (castedObject) {
+            return castedObject;
+         }
+      }
+      return nullptr;
+   }
+
    template <typename T>
    static std::vector<T*> at(int x, int y) {
-      std::vector<T*> filteredObjects;
       return where<T>([&](const T& obj) { return obj.tile_x == x && obj.tile_y == y; });
    }
 

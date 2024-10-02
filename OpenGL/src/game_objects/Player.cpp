@@ -9,7 +9,7 @@
 
 Player::Player(const std::string& name, int tile_x, int tile_y)
    : Character(name, tile_x, tile_y, "Textures/alternate-player.png") {
-   drawPriority     = 3;
+   drawPriority     = DrawPriority::Character;
    health           = 3;
    Camera::position = {tile_x, tile_y};
 }
@@ -27,6 +27,7 @@ void Player::move(int new_x, int new_y) {
 
 void Player::update() {
    Character::update();
+
    // smooth camera movement
    Camera::position = zeno(Camera::position, position, 0.1);
 

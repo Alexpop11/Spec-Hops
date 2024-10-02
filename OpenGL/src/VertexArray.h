@@ -1,7 +1,7 @@
 #pragma once
 #include "VertexBuffer.h"
 #include <utility> // for std::swap
-#include "WeakMemoizeConstructor.h"
+#include "WeakMemoizeConstructor.hpp"
 #include <vector>
 #include <tuple>
 #include <array>

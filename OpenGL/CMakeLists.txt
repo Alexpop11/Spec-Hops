@@ -65,7 +65,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${VENDOR_DIR}/glm
     ${VENDOR_DIR}/miniaudio
     ${VENDOR_DIR}/stb_image
-    ${VENDOR_DIR}/stb_image
+    ${VENDOR_DIR}/earcut
     ${VENDOR_DIR}/Clipper2/CPP/Clipper2Lib/include
 )
 

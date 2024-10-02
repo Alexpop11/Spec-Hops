@@ -4,4 +4,5 @@
 class Camera {
 public:
    static glm::vec2 position;
+   static float scale;
 };
