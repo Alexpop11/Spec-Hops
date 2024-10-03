@@ -73,7 +73,7 @@ jobs:
         if: github.event_name == 'release'
         run: |
           mkdir release
-          cp build/OpenGL/SpaceBoom${{ matrix.os == 'windows-latest' && '.exe' || '' }} release/${{ matrix.output_name }}
+          cp build/OpenGL/${{ matrix.os == 'windows-latest' && 'Release/' || '' }}SpaceBoom${{ matrix.os == 'windows-latest' && '.exe' || '' }} release/${{ matrix.output_name }}
           cp -r OpenGL/res release/res
 
       - name: Set executable permissions (macOS)
