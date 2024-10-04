@@ -15,6 +15,8 @@
 #include "AudioEngine.h"
 #include "Shader.h"
 
+#include "imgui.h"
+
 class Line {
 public:
    glm::vec2 start;
@@ -23,7 +25,7 @@ public:
 };
 class Renderer {
 public:
-   Renderer(GLFWwindow* window);
+   Renderer(GLFWwindow* window, ImGuiIO* io);
    ~Renderer();
 
    Renderer(const Renderer&)             = delete;
@@ -43,11 +45,17 @@ public:
    // Window pointer
    GLFWwindow* window;
 
+   // IMGUI IO
+   ImGuiIO* io;
+
    // Shader for rendering lines
    Shader                        lineShader;
    std::shared_ptr<VertexBuffer> lineVb;
    std::shared_ptr<IndexBuffer>  lineIb;
    std::shared_ptr<VertexArray>  lineVa;
+
+   static ImFont* jacquard12_big;
+   static ImFont* jacquard12_small;
 
 
 private:

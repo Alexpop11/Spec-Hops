@@ -7,6 +7,12 @@
 
 std::string Renderer::res_path;
 
+ImFont* load_font(ImGuiIO* io, const std::string& font_name, int size) {
+   auto    f    = Renderer::ResPath() + font_name;
+   ImFont* font = io->Fonts->AddFontFromFileTTF(f.c_str(), size);
+   return font;
+}
+
 glm::mat4 CalculateMVP(std::tuple<int, int> windowSize, const glm::vec2& objectPosition, float objectRotationDegrees,
                        float objectScale) {
    // Retrieve window size from the renderer
@@ -35,8 +41,9 @@ glm::mat4 CalculateMVP(std::tuple<int, int> windowSize, const glm::vec2& objectP
    return mvp;
 }
 
-Renderer::Renderer(GLFWwindow* window)
+Renderer::Renderer(GLFWwindow* window, ImGuiIO* io)
    : window(window)
+   , io(io)
    , lineShader(Shader(Renderer::ResPath() + "shaders/line.shader")) {
    std::array<float, 8> positions = {
       0.0f, -0.5f, // Bottom-left
@@ -56,6 +63,9 @@ Renderer::Renderer(GLFWwindow* window)
    layout.Push<float>(2);
    lineVa = std::make_shared<VertexArray>(lineVb, layout);
    lineIb = IndexBuffer::create(indices);
+
+   Renderer::jacquard12_big   = load_font(io, "fonts/Jacquard12.ttf", 40);
+   Renderer::jacquard12_small = load_font(io, "fonts/Jacquard12.ttf", 18);
 }
 
 Renderer::~Renderer() {}
@@ -134,3 +144,6 @@ void Renderer::DrawDebug() {
    }
    GetDebugLines().clear(); // Clear the vector after drawing
 }
+
+ImFont* Renderer::jacquard12_big   = nullptr;
+ImFont* Renderer::jacquard12_small = nullptr;

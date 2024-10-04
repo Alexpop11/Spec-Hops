@@ -12,6 +12,8 @@ Player::Player(const std::string& name, int tile_x, int tile_y)
    drawPriority     = DrawPriority::Character;
    health           = 3;
    Camera::position = {tile_x, tile_y};
+
+   healthText = std::make_unique<Text>("Health", Renderer::jacquard12_big, glm::vec2{20, 20});
 }
 
 void Player::move(int new_x, int new_y) {
@@ -29,7 +31,7 @@ void Player::update() {
    Character::update();
    // smooth camera movement
    Camera::position = zeno(Camera::position, position, 0.1);
-   tintColor.a = zeno(tintColor.a, 0.0, 0.05);
+   tintColor.a      = zeno(tintColor.a, 0.0, 0.05);
 
    bool key_pressed_this_frame = false;
 
@@ -53,6 +55,8 @@ void Player::update() {
       World::shouldTick = true;
    }
    key_pressed_last_frame = key_pressed_this_frame;
+
+   healthText->name = "Health: " + std::to_string(health);
 }
 
 void Player::hurt() {
@@ -60,7 +64,7 @@ void Player::hurt() {
       health--;
       tintColor = {1.0, 0.0, 0.0, 0.5};
       audio().Hurt_Sound.play();
-   } 
+   }
    if (health == 0) {
       audio().Death_Sound.play();
       die();

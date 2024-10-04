@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "World.h"
+#include <algorithm>
 
 #include "Renderer.h"
 #include "game_objects/Player.h"
@@ -73,8 +74,24 @@ void World::LoadMap(const std::string& map_path) {
    }
 }
 
+void sortGameObjectsByPriority(std::vector<std::unique_ptr<GameObject>>& gameObjects) {
+   std::sort(gameObjects.begin(), gameObjects.end(),
+             [](const std::unique_ptr<GameObject>& a, const std::unique_ptr<GameObject>& b) {
+                return a->drawPriority < b->drawPriority;
+             });
+}
+
+void sortGameObjectsByPriority(std::vector<GameObject*>& gameObjects) {
+   std::sort(gameObjects.begin(), gameObjects.end(),
+             [](const GameObject* a, const GameObject* b) { return a->drawPriority < b->drawPriority; });
+}
+
+
 void World::UpdateObjects() {
-   for (auto& gameobject : gameobjects) {
+   auto objects = get_gameobjects();
+   sortGameObjectsByPriority(objects);
+
+   for (auto& gameobject : objects) {
       gameobject->update();
    }
 
@@ -90,7 +107,19 @@ void World::UpdateObjects() {
 }
 
 void World::TickObjects() {
-   for (auto& gameobject : gameobjects) {
+   auto objects = get_gameobjects();
+   sortGameObjectsByPriority(objects);
+
+   for (auto& gameobject : objects) {
       gameobject->tickUpdate();
+   }
+}
+
+void World::RenderObjects(Renderer& renderer) {
+   auto objects = get_gameobjects();
+   sortGameObjectsByPriority(objects);
+
+   for (auto& gameobject : objects) {
+      gameobject->render(renderer);
    }
 }

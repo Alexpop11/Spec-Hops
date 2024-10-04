@@ -21,6 +21,7 @@ enum class DrawPriority {
    Bomb,
    Character,
    Fog,
+   UI,
 };
 
 class GameObject {
@@ -33,6 +34,8 @@ public:
    virtual ~GameObject() = default;
    float CreationTime    = (float)glfwGetTime();
    bool  ShouldDestroy   = false;
+
+   virtual std::vector<GameObject*> children() { return {}; }
 
    virtual void setUpShader(Renderer& renderer);
    virtual void render(Renderer& renderer);

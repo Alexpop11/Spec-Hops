@@ -42,12 +42,6 @@
 #endif
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
-// Utility function to draw text without any frame
-void DrawTextOverlay(const char* text, float x, float y, ImU32 color = IM_COL32(255, 255, 255, 255)) {
-   ImDrawList* draw_list = ImGui::GetForegroundDrawList();
-   draw_list->AddText(ImVec2(x, y), color, text);
-}
-
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
    int            width, height, channels;
    unsigned char* pixels = stbi_load(iconPath, &width, &height, &channels, 4);
@@ -66,13 +60,6 @@ void key_callback(GLFWwindow* window, int key, int /* scancode */, int action, i
       std::cout << "Escape key was pressed" << std::endl;
       glfwSetWindowShouldClose(window, GLFW_TRUE);
    }
-}
-
-void sortGameObjectsByPriority(std::vector<std::unique_ptr<GameObject>>& gameObjects) {
-   std::sort(gameObjects.begin(), gameObjects.end(),
-             [](const std::unique_ptr<GameObject>& a, const std::unique_ptr<GameObject>& b) {
-                return a->drawPriority < b->drawPriority;
-             });
 }
 
 int main(void) {
@@ -128,7 +115,7 @@ int main(void) {
    ImGui_ImplGlfw_InitForOpenGL(window, true);
    ImGui_ImplOpenGL3_Init(glsl_version);
 
-   Renderer renderer(window);
+   Renderer renderer(window, &io);
 
    World::LoadMap("maps/SpaceShip.txt");
    World::gameobjects.push_back(std::make_unique<Fog>());
@@ -148,13 +135,12 @@ int main(void) {
       auto [width, height] = renderer.WindowSize();
       glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
-      sortGameObjectsByPriority(World::gameobjects);
+      auto gameobjects = World::get_gameobjects();
+
       renderer.Clear();
       Input::updateKeyStates(window);
 
       World::UpdateObjects();
-
-      sortGameObjectsByPriority(World::gameobjects);
 
       if (World::shouldTick || lastTick + (1.0 / TICKS_PER_SECOND) <= currentTime) {
          World::TickObjects();
@@ -162,28 +148,25 @@ int main(void) {
          World::shouldTick = false;
       }
 
-      // Render all objects
-      for (auto& gameobject : World::gameobjects)
-         gameobject->render(renderer);
-
-      // Render debug lines
-      renderer.DrawDebug();
-
       // Start the Dear ImGui frame
       ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
 
-      // Example ImGui window with text (optional)
-      {
-         ImGui::Begin("Performance Info");
-         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-         ImGui::End();
-      }
+      // Render all objects
+      World::RenderObjects(renderer);
 
-      // Draw text without any frame
-      // DrawTextOverlay("Hello, World!", 50.0f, 50.0f, IM_COL32(255, 255, 0, 255));    // Yellow text at (50, 50)
-      // DrawTextOverlay("Player Health: 100", 50.0f, 80.0f, IM_COL32(0, 255, 0, 255)); // Green text at (50, 80)
+      // Render debug lines
+      renderer.DrawDebug();
+
+      // Performance info
+      {
+         ImGui::PushFont(renderer.jacquard12_small);
+         ImGui::Begin("Performance Info");
+         ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+         ImGui::End();
+         ImGui::PopFont();
+      }
 
       // Render ImGui
       ImGui::Render();

@@ -307,7 +307,7 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
       if (point.end != PointType::Middle) {
          glm::vec2 direction = glm::normalize(vertex - position);
          extendedPoint       = RayIntersect(vertex, direction.x, direction.y, obstructionLines);
-         if (length2(*extendedPoint, vertex) < 0.5) {
+         if (extendedPoint && length2(*extendedPoint, vertex) < 0.1) {
             std::cout << "vertex super close to extended: " << length2(*extendedPoint, vertex) << std::endl;
          }
       }
