@@ -13,7 +13,7 @@ Player::Player(const std::string& name, int tile_x, int tile_y)
    health           = 3;
    Camera::position = {tile_x, tile_y};
 
-   healthText = std::make_unique<Text>("Health: 100", Renderer::jacquard12_big, glm::vec2{20, 20});
+   healthText = std::make_unique<Text>("Health", Renderer::jacquard12_big, glm::vec2{20, 20});
 }
 
 void Player::move(int new_x, int new_y) {
@@ -55,6 +55,8 @@ void Player::update() {
       World::shouldTick = true;
    }
    key_pressed_last_frame = key_pressed_this_frame;
+
+   healthText->name = "Health: " + std::to_string(health);
 }
 
 void Player::hurt() {

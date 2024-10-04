@@ -159,7 +159,7 @@ int main(void) {
       // Render debug lines
       renderer.DrawDebug();
 
-      // Example ImGui window with text (optional)
+      // Performance info
       {
          ImGui::PushFont(renderer.jacquard12_small);
          ImGui::Begin("Performance Info");
