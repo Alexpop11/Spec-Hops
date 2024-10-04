@@ -62,13 +62,6 @@ void key_callback(GLFWwindow* window, int key, int /* scancode */, int action, i
    }
 }
 
-void sortGameObjectsByPriority(std::vector<std::unique_ptr<GameObject>>& gameObjects) {
-   std::sort(gameObjects.begin(), gameObjects.end(),
-             [](const std::unique_ptr<GameObject>& a, const std::unique_ptr<GameObject>& b) {
-                return a->drawPriority < b->drawPriority;
-             });
-}
-
 int main(void) {
 
    const float TICKS_PER_SECOND = 12.0f;
@@ -142,13 +135,12 @@ int main(void) {
       auto [width, height] = renderer.WindowSize();
       glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
-      sortGameObjectsByPriority(World::gameobjects);
+      auto gameobjects = World::get_gameobjects();
+
       renderer.Clear();
       Input::updateKeyStates(window);
 
       World::UpdateObjects();
-
-      sortGameObjectsByPriority(World::gameobjects);
 
       if (World::shouldTick || lastTick + (1.0 / TICKS_PER_SECOND) <= currentTime) {
          World::TickObjects();
@@ -162,8 +154,7 @@ int main(void) {
       ImGui::NewFrame();
 
       // Render all objects
-      for (auto& gameobject : World::gameobjects)
-         gameobject->render(renderer);
+      World::RenderObjects(renderer);
 
       // Render debug lines
       renderer.DrawDebug();

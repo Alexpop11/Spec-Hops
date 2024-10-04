@@ -3,6 +3,7 @@
 
 #include <functional>
 #include "game_objects/GameObject.h"
+#include "Renderer.h"
 
 class World {
 public:
@@ -65,5 +66,6 @@ public:
 
    static void UpdateObjects();
    static void TickObjects();
+   static void RenderObjects(Renderer& renderer);
    static bool shouldTick;
 };

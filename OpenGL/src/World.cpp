@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "World.h"
+#include <algorithm>
 
 #include "Renderer.h"
 #include "game_objects/Player.h"
@@ -73,7 +74,17 @@ void World::LoadMap(const std::string& map_path) {
    }
 }
 
+void sortGameObjectsByPriority(std::vector<std::unique_ptr<GameObject>>& gameObjects) {
+   std::sort(gameObjects.begin(), gameObjects.end(),
+             [](const std::unique_ptr<GameObject>& a, const std::unique_ptr<GameObject>& b) {
+                return a->drawPriority < b->drawPriority;
+             });
+}
+
+
 void World::UpdateObjects() {
+   sortGameObjectsByPriority(gameobjects);
+
    for (auto& gameobject : gameobjects) {
       gameobject->update();
    }
@@ -90,7 +101,17 @@ void World::UpdateObjects() {
 }
 
 void World::TickObjects() {
+   sortGameObjectsByPriority(gameobjects);
+
    for (auto& gameobject : gameobjects) {
       gameobject->tickUpdate();
+   }
+}
+
+void World::RenderObjects(Renderer& renderer) {
+   sortGameObjectsByPriority(gameobjects);
+
+   for (auto& gameobject : World::gameobjects) {
+      gameobject->render(renderer);
    }
 }
