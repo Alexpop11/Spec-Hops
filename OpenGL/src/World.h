@@ -8,6 +8,16 @@ class World {
 public:
    static std::vector<std::unique_ptr<GameObject>> gameobjects;
    static std::vector<std::unique_ptr<GameObject>> gameobjectstoadd;
+   static std::vector<GameObject*>                 get_gameobjects() {
+      // return a vector of all gameobjects and their gameobjects.children
+      std::vector<GameObject*> allGameObjects;
+      for (auto& gameobject : gameobjects) {
+         allGameObjects.push_back(gameobject.get());
+         auto children = gameobject->children();
+         allGameObjects.insert(allGameObjects.end(), children.begin(), children.end());
+      }
+      return allGameObjects;
+   }
 
    template <typename T>
    static std::vector<T*> where(std::function<bool(const T&)> condition) {

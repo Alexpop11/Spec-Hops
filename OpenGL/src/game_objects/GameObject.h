@@ -35,6 +35,8 @@ public:
    float CreationTime    = (float)glfwGetTime();
    bool  ShouldDestroy   = false;
 
+   virtual std::vector<GameObject*> children() { return {}; }
+
    virtual void setUpShader(Renderer& renderer);
    virtual void render(Renderer& renderer);
    virtual void update();

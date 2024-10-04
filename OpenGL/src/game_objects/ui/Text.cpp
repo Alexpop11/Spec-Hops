@@ -1,4 +1,4 @@
-#include "UiText.h"
+#include "Text.h"
 
 #include "imgui.h"
 
@@ -7,13 +7,16 @@ void DrawTextOverlay(std::string& text, glm::vec2 position, ImU32 color = IM_COL
    draw_list->AddText(ImVec2(position.x, position.y), color, text.c_str());
 }
 
-UiText::UiText(const std::string& text, glm::vec2 position)
-   : GameObject(text, DrawPriority::UI, position) {}
+Text::Text(const std::string& text, ImFont* font, glm::vec2 position)
+   : GameObject(text, DrawPriority::UI, position)
+   , font(font) {}
 
-void UiText::setUpShader(Renderer& renderer) {}
+void Text::setUpShader(Renderer& renderer) {}
 
-void UiText::render(Renderer& renderer) {
+void Text::render(Renderer& renderer) {
+   ImGui::PushFont(font);
    DrawTextOverlay(name, position, IM_COL32(255, 255, 255, 255));
+   ImGui::PopFont();
 }
 
-void UiText::update() {}
+void Text::update() {}

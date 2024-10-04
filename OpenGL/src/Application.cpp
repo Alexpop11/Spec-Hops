@@ -30,7 +30,6 @@
 #include "game_objects/enemies/Bomber.h"
 #include "Texture.h"
 #include "game_objects/Fog.h"
-#include "game_objects/ui/UiText.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -127,7 +126,6 @@ int main(void) {
 
    World::LoadMap("maps/SpaceShip.txt");
    World::gameobjects.push_back(std::make_unique<Fog>());
-   World::gameobjects.push_back(std::make_unique<UiText>("Hello world", glm::vec2{20, 20}));
 
    double currentTime = glfwGetTime();
    double lastTick    = Input::startTime;
