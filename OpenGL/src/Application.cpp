@@ -30,6 +30,7 @@
 #include "game_objects/enemies/Bomber.h"
 #include "Texture.h"
 #include "game_objects/Fog.h"
+#include "game_objects/ui/UiText.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -41,12 +42,6 @@
    #include <GLES2/gl2.h>
 #endif
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
-
-// Utility function to draw text without any frame
-void DrawTextOverlay(const char* text, float x, float y, ImU32 color = IM_COL32(255, 255, 255, 255)) {
-   ImDrawList* draw_list = ImGui::GetForegroundDrawList();
-   draw_list->AddText(ImVec2(x, y), color, text);
-}
 
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
    int            width, height, channels;
@@ -128,10 +123,11 @@ int main(void) {
    ImGui_ImplGlfw_InitForOpenGL(window, true);
    ImGui_ImplOpenGL3_Init(glsl_version);
 
-   Renderer renderer(window);
+   Renderer renderer(window, &io);
 
    World::LoadMap("maps/SpaceShip.txt");
    World::gameobjects.push_back(std::make_unique<Fog>());
+   World::gameobjects.push_back(std::make_unique<UiText>("Hello world", glm::vec2{20, 20}));
 
    double currentTime = glfwGetTime();
    double lastTick    = Input::startTime;
@@ -162,6 +158,11 @@ int main(void) {
          World::shouldTick = false;
       }
 
+      // Start the Dear ImGui frame
+      ImGui_ImplOpenGL3_NewFrame();
+      ImGui_ImplGlfw_NewFrame();
+      ImGui::NewFrame();
+
       // Render all objects
       for (auto& gameobject : World::gameobjects)
          gameobject->render(renderer);
@@ -169,21 +170,14 @@ int main(void) {
       // Render debug lines
       renderer.DrawDebug();
 
-      // Start the Dear ImGui frame
-      ImGui_ImplOpenGL3_NewFrame();
-      ImGui_ImplGlfw_NewFrame();
-      ImGui::NewFrame();
-
       // Example ImGui window with text (optional)
       {
+         ImGui::PushFont(renderer.jacquard12_small);
          ImGui::Begin("Performance Info");
-         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+         ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
          ImGui::End();
+         ImGui::PopFont();
       }
-
-      // Draw text without any frame
-      // DrawTextOverlay("Hello, World!", 50.0f, 50.0f, IM_COL32(255, 255, 0, 255));    // Yellow text at (50, 50)
-      // DrawTextOverlay("Player Health: 100", 50.0f, 80.0f, IM_COL32(0, 255, 0, 255)); // Green text at (50, 80)
 
       // Render ImGui
       ImGui::Render();

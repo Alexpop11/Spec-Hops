@@ -21,6 +21,7 @@ enum class DrawPriority {
    Bomb,
    Character,
    Fog,
+   UI,
 };
 
 class GameObject {
