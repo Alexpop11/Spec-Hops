@@ -72,4 +72,8 @@ void Character::die() {
 }
 
 void Character::hurt() {
+   if (health > 0) {
+      health--;
+      tintColor = {1.0, 0.0, 0.0, 0.5};
+   }
 }

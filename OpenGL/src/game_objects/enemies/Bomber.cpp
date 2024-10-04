@@ -39,6 +39,7 @@ void Bomber::update() {
    Character::update();
    if (health <= 0) {
       ShouldDestroy = true;
+      audio().Enemy_Hurt.play();
    }
 }
 
