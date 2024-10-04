@@ -81,11 +81,17 @@ void sortGameObjectsByPriority(std::vector<std::unique_ptr<GameObject>>& gameObj
              });
 }
 
+void sortGameObjectsByPriority(std::vector<GameObject*>& gameObjects) {
+   std::sort(gameObjects.begin(), gameObjects.end(),
+             [](const GameObject* a, const GameObject* b) { return a->drawPriority < b->drawPriority; });
+}
+
 
 void World::UpdateObjects() {
-   sortGameObjectsByPriority(gameobjects);
+   auto objects = get_gameobjects();
+   sortGameObjectsByPriority(objects);
 
-   for (auto& gameobject : gameobjects) {
+   for (auto& gameobject : objects) {
       gameobject->update();
    }
 
@@ -101,17 +107,19 @@ void World::UpdateObjects() {
 }
 
 void World::TickObjects() {
-   sortGameObjectsByPriority(gameobjects);
+   auto objects = get_gameobjects();
+   sortGameObjectsByPriority(objects);
 
-   for (auto& gameobject : gameobjects) {
+   for (auto& gameobject : objects) {
       gameobject->tickUpdate();
    }
 }
 
 void World::RenderObjects(Renderer& renderer) {
-   sortGameObjectsByPriority(gameobjects);
+   auto objects = get_gameobjects();
+   sortGameObjectsByPriority(objects);
 
-   for (auto& gameobject : World::gameobjects) {
+   for (auto& gameobject : objects) {
       gameobject->render(renderer);
    }
 }
