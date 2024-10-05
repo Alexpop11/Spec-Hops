@@ -71,6 +71,24 @@ int main(void) {
    WGPUInstanceDescriptor desc = {};
    desc.nextInChain            = nullptr;
 
+   // By default Dawn runs callbacks only when the device “ticks”, so the error callbacks are invoked in a different
+   // call stack than where the error occurred, making the breakpoint less informative. To force Dawn to invoke error
+   // callbacks as soon as there is an error, we enable an instance toggle:
+#ifdef WEBGPU_BACKEND_DAWN
+   // Make sure the uncaptured error callback is called as soon as an error
+   // occurs rather than at the next call to "wgpuDeviceTick".
+   WGPUDawnTogglesDescriptor toggles;
+   toggles.chain.next          = nullptr;
+   toggles.chain.sType         = WGPUSType_DawnTogglesDescriptor;
+   toggles.disabledToggleCount = 0;
+   toggles.enabledToggleCount  = 1;
+   const char* toggleName      = "enable_immediate_error_handling";
+   toggles.enabledToggles      = &toggleName;
+
+   desc.nextInChain = &toggles.chain;
+#endif // WEBGPU_BACKEND_DAWN
+
+
    // We create the instance using this descriptor
    WGPUInstance instance = wgpuCreateInstance(&desc);
 
@@ -154,6 +172,47 @@ int main(void) {
    std::cout << " - backendType: 0x" << info.backendType << std::endl;
    std::cout << std::dec; // Restore decimal numbers
 
+   // Get a device
+   std::cout << "Requesting device..." << std::endl;
+
+   WGPUDeviceDescriptor deviceDesc     = {};
+   deviceDesc.nextInChain              = nullptr;
+   deviceDesc.label                    = "My Device"; // anything works here, that's your call
+   deviceDesc.requiredFeatureCount     = 0;           // we do not require any specific feature
+   deviceDesc.requiredLimits           = nullptr;     // we do not require any specific limit
+   deviceDesc.defaultQueue.nextInChain = nullptr;
+   deviceDesc.defaultQueue.label       = "The default queue";
+   // A function that is invoked whenever the device stops being available.
+   // Important! The deviceLostCallback must outlive the device, so that when the latter gets destroyed the callback is
+   // still valid. Keep this in mind when refactoring later.
+   deviceDesc.deviceLostCallback = [](WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
+      std::cout << "Device lost: reason " << reason;
+      if (message)
+         std::cout << " (" << message << ")";
+      std::cout << std::endl;
+   };
+
+   // [...] Build device descriptor
+   WGPUDevice device = requestDeviceSync(adapter, &deviceDesc);
+
+   inspectDevice(device);
+
+   std::cout << "Got device: " << device << std::endl;
+
+   // The uncaptured error callback is invoked whenever we misuse the API, and gives very informative feedback about
+   // what went wrong.
+   auto onDeviceError = [](WGPUErrorType type, char const* message, void* /* pUserData */) {
+      // If you use a debugger, put a breakpoint in this callback.
+      std::cout << "Uncaptured device error: type " << type;
+      if (message)
+         std::cout << " (" << message << ")";
+      std::cout << std::endl;
+   };
+   wgpuDeviceSetUncapturedErrorCallback(device, onDeviceError, nullptr /* pUserData */);
+
+
+   // Release the device
+   wgpuDeviceRelease(device);
 
    // Release the adapter now that it is no longer needed.
    wgpuAdapterRelease(adapter);
