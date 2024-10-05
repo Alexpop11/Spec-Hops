@@ -192,6 +192,7 @@ int main(void) {
       std::cout << std::endl;
    };
 
+
    // [...] Build device descriptor
    WGPUDevice device = requestDeviceSync(adapter, &deviceDesc);
 
@@ -209,7 +210,56 @@ int main(void) {
       std::cout << std::endl;
    };
    wgpuDeviceSetUncapturedErrorCallback(device, onDeviceError, nullptr /* pUserData */);
+   // The device is ready to use!
 
+   // Get a queue
+   WGPUQueue queue = wgpuDeviceGetQueue(device);
+
+   auto onQueueWorkDone = [](WGPUQueueWorkDoneStatus status, void* /* pUserData */) {
+      std::cout << "Queued work finished with status: " << status << std::endl;
+   };
+   wgpuQueueOnSubmittedWorkDone(queue, onQueueWorkDone, nullptr /* pUserData */);
+
+
+   // Get a command encoder
+   WGPUCommandEncoderDescriptor encoderDesc = {};
+   encoderDesc.nextInChain                  = nullptr;
+   encoderDesc.label                        = "My command encoder";
+   WGPUCommandEncoder encoder               = wgpuDeviceCreateCommandEncoder(device, &encoderDesc);
+
+   // We can now use the encoder to write instructions. Since we do not have any object to manipulate yet we stick with
+   // simple debug placeholder for now:
+   wgpuCommandEncoderInsertDebugMarker(encoder, "Do one thing");
+   wgpuCommandEncoderInsertDebugMarker(encoder, "Do another thing");
+
+   // And then finally generating the command from the encoder also requires an extra descriptor:
+   WGPUCommandBufferDescriptor cmdBufferDescriptor = {};
+   cmdBufferDescriptor.nextInChain                 = nullptr;
+   cmdBufferDescriptor.label                       = "Command buffer";
+   WGPUCommandBuffer command                       = wgpuCommandEncoderFinish(encoder, &cmdBufferDescriptor);
+   wgpuCommandEncoderRelease(encoder); // release encoder after it's finished
+
+   // Finally submit the command queue
+   std::cout << "Submitting command..." << std::endl;
+   wgpuQueueSubmit(queue, 1, &command);
+   wgpuCommandBufferRelease(command);
+   std::cout << "Command submitted." << std::endl;
+
+   // we need to wait a little bit, and importantly to call tick/poll the device so that it updates its awaiting tasks.
+   // This is a part of the API that is not standard yet, so we must adapt our implementation to the backend:
+   for (int i = 0; i < 5; ++i) {
+      std::cout << "Tick/Poll device..." << std::endl;
+#if defined(WEBGPU_BACKEND_DAWN)
+      wgpuDeviceTick(device);
+#elif defined(WEBGPU_BACKEND_WGPU)
+      wgpuDevicePoll(device, false, nullptr);
+#elif defined(WEBGPU_BACKEND_EMSCRIPTEN)
+      emscripten_sleep(100);
+#endif
+   }
+
+   // Release the queue
+   wgpuQueueRelease(queue);
 
    // Release the device
    wgpuDeviceRelease(device);
