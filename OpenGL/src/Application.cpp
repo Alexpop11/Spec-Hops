@@ -53,14 +53,36 @@ using namespace wgpu;
 
 // We embed the source of the shader module here
 const char* shaderSource = R"(
+/**
+ * A structure with fields labeled with vertex attribute locations can be used
+ * as input to the entry point of a shader.
+ */
+struct VertexInput {
+    @location(0) position: vec2f,
+    @location(1) color: vec3f,
+};
+
+/**
+ * A structure with fields labeled with builtins and locations can also be used
+ * as *output* of the vertex shader, which is also the input of the fragment
+ * shader.
+ */
+struct VertexOutput {
+    @builtin(position) position: vec4f,
+    @location(0) color: vec3f,
+};
+
 @vertex
-fn vs_main(@location(0) in_vertex_position: vec2f) -> @builtin(position) vec4f {
-    return vec4f(in_vertex_position, 0.0, 1.0);
+fn vs_main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput; // create the output struct
+    out.position = vec4f(in.position, 0.0, 1.0); // same as what we used to directly return
+    out.color = in.color; // forward the color attribute to the fragment shader
+    return out;
 }
 
 @fragment
-fn fs_main() -> @location(0) vec4f {
-	return vec4f(0.0, 0.4, 1.0, 1.0);
+fn fs_main(in: VertexOutput) -> @location(0) vec4f {
+    return vec4f(in.color, 1.0); // use the interpolated color coming from the vertex shader
 }
 )";
 
@@ -179,12 +201,18 @@ public:
    void InitializeBuffers() {
       // Vertex buffer data
       // There are 2 floats per vertex, one for x and one for y.
-      std::vector<float> vertexData = {// Define a first triangle:
-                                       -0.5, -0.5, +0.5, -0.5, +0.0, +0.5,
+      std::vector<float> vertexData = {// x0,  y0,  r0,  g0,  b0
+                                       -0.5, -0.5, 1.0, 0.0, 0.0,
 
-                                       // Add a second triangle:
-                                       -0.55f, -0.5, -0.05f, +0.5, -0.55f, +0.5};
-      vertexCount                   = static_cast<uint32_t>(vertexData.size() / 2);
+                                       // x1,  y1,  r1,  g1,  b1
+                                       +0.5, -0.5, 0.0, 1.0, 0.0,
+
+                                       // ...
+                                       +0.0, +0.5, 0.0, 0.0, 1.0, -0.55f, -0.5, 1.0, 1.0, 0.0, -0.05f, +0.5, 1.0, 0.0,
+                                       1.0, -0.55f, +0.5, 0.0, 1.0, 1.0};
+
+      // We now divide the vector size by 5 fields.
+      vertexCount = static_cast<uint32_t>(vertexData.size() / 5);
 
       // Create vertex buffer
       BufferDescriptor bufferDesc;
@@ -219,21 +247,21 @@ public:
       // Create the render pipeline
       wgpu::RenderPipelineDescriptor pipelineDesc;
 
-      VertexAttribute positionAttrib;
-      // == For each attribute, describe its layout, i.e., how to interpret the raw data ==
-      // Corresponds to @location(...)
-      positionAttrib.shaderLocation = 0;
-      // Means vec2f in the shader
-      positionAttrib.format = VertexFormat::Float32x2;
-      // Index of the first element
-      positionAttrib.offset = 0;
+      std::vector<VertexAttribute> vertexAttribs(2);
+      vertexAttribs[0].shaderLocation = 0; // @location(0)
+      vertexAttribs[0].format         = VertexFormat::Float32x2;
+      vertexAttribs[0].offset         = 0;
+      vertexAttribs[1].shaderLocation = 1;                       // @location(1)
+      vertexAttribs[1].format         = VertexFormat::Float32x3; // different type!
+      vertexAttribs[1].offset         = 2 * sizeof(float);       // non null offset!
+
 
 
       wgpu::VertexBufferLayout vertexBufferLayout;
       // == Common to attributes from the same buffer ==
-      vertexBufferLayout.attributeCount = 1;
-      vertexBufferLayout.attributes     = &positionAttrib;
-      vertexBufferLayout.arrayStride    = 2 * sizeof(float);
+      vertexBufferLayout.attributeCount = static_cast<uint32_t>(vertexAttribs.size());
+      vertexBufferLayout.attributes     = vertexAttribs.data();
+      vertexBufferLayout.arrayStride    = 5 * sizeof(float);
       vertexBufferLayout.stepMode       = VertexStepMode::Vertex;
 
       pipelineDesc.vertex.bufferCount = 1;
@@ -453,14 +481,16 @@ private:
       // Don't forget to = Default
       wgpu::RequiredLimits requiredLimits = wgpu::Default;
 
-      // We use at most 1 vertex attribute for now
-      requiredLimits.limits.maxVertexAttributes = 1;
+      // We use at most 2 vertex attribute for now
+      requiredLimits.limits.maxVertexAttributes = 2;
+      // We also never transfer more than 3 components between stages
+      requiredLimits.limits.maxInterStageShaderComponents = 3;
       // We should also tell that we use 1 vertex buffers
       requiredLimits.limits.maxVertexBuffers = 1;
       // Maximum size of a buffer is 6 vertices of 2 float each
-      requiredLimits.limits.maxBufferSize = 6 * 2 * sizeof(float);
+      requiredLimits.limits.maxBufferSize = 6 * 5 * sizeof(float);
       // Maximum stride between 2 consecutive vertices in the vertex buffer
-      requiredLimits.limits.maxVertexBufferArrayStride = 2 * sizeof(float);
+      requiredLimits.limits.maxVertexBufferArrayStride = 5 * sizeof(float);
 
       // These two limits are different because they are "minimum" limits,
       // they are the only ones we are may forward from the adapter's supported
