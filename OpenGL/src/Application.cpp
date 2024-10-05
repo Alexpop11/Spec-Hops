@@ -1,6 +1,7 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 
+#include <webgpu/webgpu.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <algorithm>
@@ -35,6 +36,9 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
+
+#include "gpu/webgpu-utils.h"
+
 #define GL_SILENCE_DEPRECATION
 
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -63,10 +67,106 @@ void key_callback(GLFWwindow* window, int key, int /* scancode */, int action, i
 }
 
 int main(void) {
+   // We create a descriptor
+   WGPUInstanceDescriptor desc = {};
+   desc.nextInChain            = nullptr;
 
+   // We create the instance using this descriptor
+   WGPUInstance instance = wgpuCreateInstance(&desc);
+
+   // We can check whether there is actually an instance created
+   if (!instance) {
+      std::cerr << "Could not initialize WebGPU!" << std::endl;
+      return 1;
+   }
+
+   // Display the object (WGPUInstance is a simple pointer, it may be
+   // copied around without worrying about its size).
+   std::cout << "WGPU instance: " << instance << std::endl;
+
+   std::cout << "Requesting adapter..." << std::endl;
+
+   WGPURequestAdapterOptions adapterOpts = {};
+   adapterOpts.nextInChain               = nullptr;
+   WGPUAdapter adapter                   = requestAdapterSync(instance, &adapterOpts);
+
+   std::cout << "Got adapter: " << adapter << std::endl;
+
+#ifndef __EMSCRIPTEN__
+   WGPUSupportedLimits supportedLimits = {};
+   supportedLimits.nextInChain         = nullptr;
+
+   #ifdef WEBGPU_BACKEND_DAWN
+   bool success = wgpuAdapterGetLimits(adapter, &supportedLimits) == WGPUStatus_Success;
+   #else
+   bool success = wgpuAdapterGetLimits(adapter, &supportedLimits);
+   #endif
+
+   if (success) {
+      std::cout << "Adapter limits:" << std::endl;
+      std::cout << " - maxTextureDimension1D: " << supportedLimits.limits.maxTextureDimension1D << std::endl;
+      std::cout << " - maxTextureDimension2D: " << supportedLimits.limits.maxTextureDimension2D << std::endl;
+      std::cout << " - maxTextureDimension3D: " << supportedLimits.limits.maxTextureDimension3D << std::endl;
+      std::cout << " - maxTextureArrayLayers: " << supportedLimits.limits.maxTextureArrayLayers << std::endl;
+   }
+#endif // NOT __EMSCRIPTEN__
+
+   std::vector<WGPUFeatureName> features;
+
+   // Call the function a first time with a null return address, just to get
+   // the entry count.
+   size_t featureCount = wgpuAdapterEnumerateFeatures(adapter, nullptr);
+
+   // Allocate memory (could be a new, or a malloc() if this were a C program)
+   features.resize(featureCount);
+
+   // Call the function a second time, with a non-null return address
+   wgpuAdapterEnumerateFeatures(adapter, features.data());
+
+   std::cout << "Adapter features:" << std::endl;
+   std::cout << std::hex; // Write integers as hexadecimal to ease comparison with webgpu.h literals
+   for (auto f : features) {
+      std::cout << " - 0x" << f << std::endl;
+   }
+   std::cout << std::dec; // Restore decimal numbers
+
+   // Get the adapter properties
+   WGPUAdapterInfo info = {};
+   info.nextInChain     = nullptr;
+   wgpuAdapterGetInfo(adapter, &info);
+   std::cout << "Adapter info:" << std::endl;
+   std::cout << " - vendorID: " << info.vendorID << std::endl;
+   if (info.vendor) {
+      std::cout << " - vendor: " << info.vendor << std::endl;
+   }
+   if (info.architecture) {
+      std::cout << " - architecture: " << info.architecture << std::endl;
+   }
+   std::cout << " - deviceID: " << info.deviceID << std::endl;
+   if (info.device) {
+      std::cout << " - name: " << info.device << std::endl;
+   }
+   if (info.description) {
+      std::cout << " - description: " << info.description << std::endl;
+   }
+   std::cout << std::hex;
+   std::cout << " - adapterType: 0x" << info.adapterType << std::endl;
+   std::cout << " - backendType: 0x" << info.backendType << std::endl;
+   std::cout << std::dec; // Restore decimal numbers
+
+
+   // Release the adapter now that it is no longer needed.
+   wgpuAdapterRelease(adapter);
+
+
+   // We clean up the WebGPU instance
+   wgpuInstanceRelease(instance);
+
+
+   /*
    const float TICKS_PER_SECOND = 3.0f;
 
-   /* Initialize the library */
+   /* Initialize the library * /
    if (!glfwInit())
       return -1;
 
@@ -92,7 +192,7 @@ int main(void) {
    std::string icon_path = Renderer::ResPath() + "images/Logo2.png";
    setWindowIcon(window, icon_path.c_str());
 
-   /* Make the window's context current */
+   /* Make the window's context current * /
    glfwMakeContextCurrent(window);
 
    glfwSwapInterval(1);
@@ -201,4 +301,5 @@ int main(void) {
 
    glfwTerminate();
    return 0;
+   */
 }
