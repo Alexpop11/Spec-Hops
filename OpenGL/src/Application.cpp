@@ -133,7 +133,8 @@ public:
       wgpu::DeviceDescriptor deviceDesc   = {};
       deviceDesc.label                    = "My Device";
       deviceDesc.requiredFeatureCount     = 0;
-      deviceDesc.requiredLimits           = nullptr;
+      RequiredLimits requiredLimits       = GetRequiredLimits(adapter);
+      deviceDesc.requiredLimits           = &requiredLimits;
       deviceDesc.defaultQueue.nextInChain = nullptr;
       deviceDesc.defaultQueue.label       = "The default queue";
       deviceDesc.deviceLostCallback = [](WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
@@ -303,6 +304,32 @@ public:
       // We no longer need to access the shader module
       shaderModule.release();
    }
+
+   RequiredLimits GetRequiredLimits(Adapter adapter) const {
+      SupportedLimits supportedLimits;
+      adapter.getLimits(&supportedLimits);
+
+      // Don't forget to = Default
+      RequiredLimits requiredLimits = Default;
+
+      // We use at most 1 vertex attribute for now
+      requiredLimits.limits.maxVertexAttributes = 1;
+      // We should also tell that we use 1 vertex buffers
+      requiredLimits.limits.maxVertexBuffers = 1;
+      // Maximum size of a buffer is 6 vertices of 2 float each
+      requiredLimits.limits.maxBufferSize = 6 * 2 * sizeof(float);
+      // Maximum stride between 2 consecutive vertices in the vertex buffer
+      requiredLimits.limits.maxVertexBufferArrayStride = 2 * sizeof(float);
+      
+      // These two limits are different because they are "minimum" limits,
+      // they are the only ones we are may forward from the adapter's supported
+      // limits.
+      requiredLimits.limits.minUniformBufferOffsetAlignment = supportedLimits.limits.minUniformBufferOffsetAlignment;
+      requiredLimits.limits.minStorageBufferOffsetAlignment = supportedLimits.limits.minStorageBufferOffsetAlignment;
+
+      return requiredLimits;
+   }
+
 
    // Uninitialize everything that was initialized
    void Terminate() {
