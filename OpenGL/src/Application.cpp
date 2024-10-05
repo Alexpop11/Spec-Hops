@@ -108,7 +108,11 @@ public:
       glfwInit();
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
       glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-      window = glfwCreateWindow(640, 480, "Spec Hops", nullptr, nullptr);
+      window                = glfwCreateWindow(640, 480, "Spec Hops", nullptr, nullptr);
+      
+      std::string icon_path = Renderer::ResPath() + "Images/Logo2.png";
+      setWindowIcon(window, icon_path.c_str());
+
 
       wgpu::Instance instance = wgpuCreateInstance(nullptr);
 
