@@ -54,16 +54,8 @@ using namespace wgpu;
 // We embed the source of the shader module here
 const char* shaderSource = R"(
 @vertex
-fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4f {
-	var p = vec2f(0.0, 0.0);
-	if (in_vertex_index == 0u) {
-		p = vec2f(-0.5, -0.5);
-	} else if (in_vertex_index == 1u) {
-		p = vec2f(0.5, -0.5);
-	} else {
-		p = vec2f(0.0, 0.5);
-	}
-	return vec4f(p, 0.0, 1.0);
+fn vs_main(@location(0) in_vertex_position: vec2f) -> @builtin(position) vec4f {
+    return vec4f(in_vertex_position, 0.0, 1.0);
 }
 
 @fragment
@@ -179,29 +171,30 @@ public:
 
       InitializePipeline();
 
-      wgpu::BufferDescriptor bufferDesc;
-      bufferDesc.label            = "Some GPU-side data buffer";
-      bufferDesc.usage            = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
-      bufferDesc.size             = 16;
-      bufferDesc.mappedAtCreation = false;
-      wgpu::Buffer buffer1        = device.createBuffer(bufferDesc);
-
-      bufferDesc.label     = "Output buffer";
-      wgpu::Buffer buffer2 = device.createBuffer(bufferDesc);
-
-      // Create some CPU-side data buffer (of size 16 bytes)
-      std::vector<uint8_t> numbers(16);
-      for (uint8_t i = 0; i < 16; ++i)
-         numbers[i] = i;
-      // `numbers` now contains [ 0, 1, 2, ... ]
-
-      // Copy this from `numbers` (RAM) to `buffer1` (VRAM)
-      queue.writeBuffer(buffer1, 0, numbers.data(), numbers.size());
-
-      buffer1.release();
-      buffer2.release();
+      InitializeBuffers();
 
       return true;
+   }
+
+   void InitializeBuffers() {
+      // Vertex buffer data
+      // There are 2 floats per vertex, one for x and one for y.
+      std::vector<float> vertexData = {// Define a first triangle:
+                                       -0.5, -0.5, +0.5, -0.5, +0.0, +0.5,
+
+                                       // Add a second triangle:
+                                       -0.55f, -0.5, -0.05f, +0.5, -0.55f, +0.5};
+      vertexCount                   = static_cast<uint32_t>(vertexData.size() / 2);
+
+      // Create vertex buffer
+      BufferDescriptor bufferDesc;
+      bufferDesc.size             = vertexData.size() * sizeof(float);
+      bufferDesc.usage            = BufferUsage::CopyDst | BufferUsage::Vertex; // Vertex usage here!
+      bufferDesc.mappedAtCreation = false;
+      vertexBuffer                = device.createBuffer(bufferDesc);
+
+      // Upload geometry data to the buffer
+      queue.writeBuffer(vertexBuffer, 0, vertexData.data(), bufferDesc.size);
    }
 
    void InitializePipeline() {
@@ -226,9 +219,25 @@ public:
       // Create the render pipeline
       wgpu::RenderPipelineDescriptor pipelineDesc;
 
-      // We do not use any vertex buffer for this first simplistic example
-      pipelineDesc.vertex.bufferCount = 0;
-      pipelineDesc.vertex.buffers     = nullptr;
+      VertexAttribute positionAttrib;
+      // == For each attribute, describe its layout, i.e., how to interpret the raw data ==
+      // Corresponds to @location(...)
+      positionAttrib.shaderLocation = 0;
+      // Means vec2f in the shader
+      positionAttrib.format = VertexFormat::Float32x2;
+      // Index of the first element
+      positionAttrib.offset = 0;
+
+
+      wgpu::VertexBufferLayout vertexBufferLayout;
+      // == Common to attributes from the same buffer ==
+      vertexBufferLayout.attributeCount = 1;
+      vertexBufferLayout.attributes     = &positionAttrib;
+      vertexBufferLayout.arrayStride    = 2 * sizeof(float);
+      vertexBufferLayout.stepMode       = VertexStepMode::Vertex;
+
+      pipelineDesc.vertex.bufferCount = 1;
+      pipelineDesc.vertex.buffers     = &vertexBufferLayout;
 
       // NB: We define the 'shaderModule' in the second part of this chapter.
       // Here we tell that the programmable vertex shader stage is described
@@ -304,6 +313,7 @@ public:
 
    // Uninitialize everything that was initialized
    void Terminate() {
+      vertexBuffer.release();
       pipeline.release();
       surface.unconfigure();
       queue.release();
@@ -350,8 +360,12 @@ public:
 
       // Select which render pipeline to use
       renderPass.setPipeline(pipeline);
-      // Draw 1 instance of a 3-vertices shape
-      renderPass.draw(3, 1, 0, 0);
+      // Set vertex buffer while encoding the render pass
+      renderPass.setVertexBuffer(0, vertexBuffer, 0, vertexBuffer.getSize());
+
+      // We use the `vertexCount` variable instead of hard-coding the vertex count
+      renderPass.draw(vertexCount, 1, 0, 0);
+
 
       renderPass.end();
       renderPass.release();
@@ -432,12 +446,12 @@ private:
       return targetView;
    }
 
-   RequiredLimits GetRequiredLimits(Adapter adapter) const {
-      SupportedLimits supportedLimits;
+   wgpu::RequiredLimits GetRequiredLimits(Adapter adapter) const {
+      wgpu::SupportedLimits supportedLimits;
       adapter.getLimits(&supportedLimits);
 
       // Don't forget to = Default
-      RequiredLimits requiredLimits = Default;
+      wgpu::RequiredLimits requiredLimits = wgpu::Default;
 
       // We use at most 1 vertex attribute for now
       requiredLimits.limits.maxVertexAttributes = 1;
@@ -464,6 +478,8 @@ private:
    std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
    wgpu::TextureFormat                  surfaceFormat = wgpu::TextureFormat::Undefined;
    wgpu::RenderPipeline                 pipeline;
+   Buffer                               vertexBuffer;
+   uint32_t                             vertexCount;
 };
 
 int main(void) {
