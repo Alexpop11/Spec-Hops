@@ -66,210 +66,288 @@ void key_callback(GLFWwindow* window, int key, int /* scancode */, int action, i
    }
 }
 
-int main(void) {
-   // We create a descriptor
-   WGPUInstanceDescriptor desc = {};
-   desc.nextInChain            = nullptr;
+void deviceLost(WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
+   std::cout << "Device lost: reason " << reason;
+   if (message)
+      std::cout << " (" << message << ")";
+   std::cout << std::endl;
+}
 
-   // By default Dawn runs callbacks only when the device “ticks”, so the error callbacks are invoked in a different
-   // call stack than where the error occurred, making the breakpoint less informative. To force Dawn to invoke error
-   // callbacks as soon as there is an error, we enable an instance toggle:
+
+class Application {
+public:
+   // Initialize everything and return true if it went all right
+   bool Initialize() {
+      // We create a descriptor
+      WGPUInstanceDescriptor desc = {};
+      desc.nextInChain            = nullptr;
+
+      // By default Dawn runs callbacks only when the device “ticks”, so the error callbacks are invoked in a different
+      // call stack than where the error occurred, making the breakpoint less informative. To force Dawn to invoke error
+      // callbacks as soon as there is an error, we enable an instance toggle:
 #ifdef WEBGPU_BACKEND_DAWN
-   // Make sure the uncaptured error callback is called as soon as an error
-   // occurs rather than at the next call to "wgpuDeviceTick".
-   WGPUDawnTogglesDescriptor toggles;
-   toggles.chain.next          = nullptr;
-   toggles.chain.sType         = WGPUSType_DawnTogglesDescriptor;
-   toggles.disabledToggleCount = 0;
-   toggles.enabledToggleCount  = 1;
-   const char* toggleName      = "enable_immediate_error_handling";
-   toggles.enabledToggles      = &toggleName;
+      // Make sure the uncaptured error callback is called as soon as an error
+      // occurs rather than at the next call to "wgpuDeviceTick".
+      WGPUDawnTogglesDescriptor toggles;
+      toggles.chain.next          = nullptr;
+      toggles.chain.sType         = WGPUSType_DawnTogglesDescriptor;
+      toggles.disabledToggleCount = 0;
+      toggles.enabledToggleCount  = 1;
+      const char* toggleName      = "enable_immediate_error_handling";
+      toggles.enabledToggles      = &toggleName;
 
-   desc.nextInChain = &toggles.chain;
+      desc.nextInChain = &toggles.chain;
 #endif // WEBGPU_BACKEND_DAWN
 
 
-   // We create the instance using this descriptor
-   WGPUInstance instance = wgpuCreateInstance(&desc);
+      // We create the instance using this descriptor
+      WGPUInstance instance = wgpuCreateInstance(&desc);
 
-   // We can check whether there is actually an instance created
-   if (!instance) {
-      std::cerr << "Could not initialize WebGPU!" << std::endl;
+      // We can check whether there is actually an instance created
+      if (!instance) {
+         std::cerr << "Could not initialize WebGPU!" << std::endl;
+         return 1;
+      }
+
+      // Display the object (WGPUInstance is a simple pointer, it may be
+      // copied around without worrying about its size).
+      std::cout << "WGPU instance: " << instance << std::endl;
+
+      std::cout << "Requesting adapter..." << std::endl;
+
+      WGPURequestAdapterOptions adapterOpts = {};
+      adapterOpts.nextInChain               = nullptr;
+      WGPUAdapter adapter                   = requestAdapterSync(instance, &adapterOpts);
+
+      std::cout << "Got adapter: " << adapter << std::endl;
+
+#ifndef __EMSCRIPTEN__
+      WGPUSupportedLimits supportedLimits = {};
+      supportedLimits.nextInChain         = nullptr;
+
+   #ifdef WEBGPU_BACKEND_DAWN
+      bool success = wgpuAdapterGetLimits(adapter, &supportedLimits) == WGPUStatus_Success;
+   #else
+      bool success = wgpuAdapterGetLimits(adapter, &supportedLimits);
+   #endif
+
+      if (success) {
+         std::cout << "Adapter limits:" << std::endl;
+         std::cout << " - maxTextureDimension1D: " << supportedLimits.limits.maxTextureDimension1D << std::endl;
+         std::cout << " - maxTextureDimension2D: " << supportedLimits.limits.maxTextureDimension2D << std::endl;
+         std::cout << " - maxTextureDimension3D: " << supportedLimits.limits.maxTextureDimension3D << std::endl;
+         std::cout << " - maxTextureArrayLayers: " << supportedLimits.limits.maxTextureArrayLayers << std::endl;
+      }
+#endif // NOT __EMSCRIPTEN__
+
+      std::vector<WGPUFeatureName> features;
+
+      // Call the function a first time with a null return address, just to get
+      // the entry count.
+      size_t featureCount = wgpuAdapterEnumerateFeatures(adapter, nullptr);
+
+      // Allocate memory (could be a new, or a malloc() if this were a C program)
+      features.resize(featureCount);
+
+      // Call the function a second time, with a non-null return address
+      wgpuAdapterEnumerateFeatures(adapter, features.data());
+
+      std::cout << "Adapter features:" << std::endl;
+      std::cout << std::hex; // Write integers as hexadecimal to ease comparison with webgpu.h literals
+      for (auto f : features) {
+         std::cout << " - 0x" << f << std::endl;
+      }
+      std::cout << std::dec; // Restore decimal numbers
+
+      // Get the adapter properties
+      WGPUAdapterInfo info = {};
+      info.nextInChain     = nullptr;
+      wgpuAdapterGetInfo(adapter, &info);
+      std::cout << "Adapter info:" << std::endl;
+      std::cout << " - vendorID: " << info.vendorID << std::endl;
+      if (info.vendor) {
+         std::cout << " - vendor: " << info.vendor << std::endl;
+      }
+      if (info.architecture) {
+         std::cout << " - architecture: " << info.architecture << std::endl;
+      }
+      std::cout << " - deviceID: " << info.deviceID << std::endl;
+      if (info.device) {
+         std::cout << " - name: " << info.device << std::endl;
+      }
+      if (info.description) {
+         std::cout << " - description: " << info.description << std::endl;
+      }
+      std::cout << std::hex;
+      std::cout << " - adapterType: 0x" << info.adapterType << std::endl;
+      std::cout << " - backendType: 0x" << info.backendType << std::endl;
+      std::cout << std::dec; // Restore decimal numbers
+
+      // Get a device
+      std::cout << "Requesting device..." << std::endl;
+
+      WGPUDeviceDescriptor deviceDesc     = {};
+      deviceDesc.nextInChain              = nullptr;
+      deviceDesc.label                    = "My Device"; // anything works here, that's your call
+      deviceDesc.requiredFeatureCount     = 0;           // we do not require any specific feature
+      deviceDesc.requiredLimits           = nullptr;     // we do not require any specific limit
+      deviceDesc.defaultQueue.nextInChain = nullptr;
+      deviceDesc.defaultQueue.label       = "The default queue";
+      // A function that is invoked whenever the device stops being available.
+      deviceDesc.deviceLostCallback = deviceLost;
+
+
+      // [...] Build device descriptor
+      device = requestDeviceSync(adapter, &deviceDesc);
+
+      inspectDevice(device);
+
+      std::cout << "Got device: " << device << std::endl;
+
+      // The uncaptured error callback is invoked whenever we misuse the API, and gives very informative feedback about
+      // what went wrong.
+      auto onDeviceError = [](WGPUErrorType type, char const* message, void* /* pUserData */) {
+         // If you use a debugger, put a breakpoint in this callback.
+         std::cout << "Uncaptured device error: type " << type;
+         if (message)
+            std::cout << " (" << message << ")";
+         std::cout << std::endl;
+      };
+      wgpuDeviceSetUncapturedErrorCallback(device, onDeviceError, nullptr /* pUserData */);
+      // The device is ready to use!
+
+      // Get a queue
+      queue = wgpuDeviceGetQueue(device);
+
+      auto onQueueWorkDone = [](WGPUQueueWorkDoneStatus status, void* /* pUserData */) {
+         std::cout << "Queued work finished with status: " << status << std::endl;
+      };
+      wgpuQueueOnSubmittedWorkDone(queue, onQueueWorkDone, nullptr /* pUserData */);
+
+
+      // Get a command encoder
+      WGPUCommandEncoderDescriptor encoderDesc = {};
+      encoderDesc.nextInChain                  = nullptr;
+      encoderDesc.label                        = "My command encoder";
+      WGPUCommandEncoder encoder               = wgpuDeviceCreateCommandEncoder(device, &encoderDesc);
+
+      // We can now use the encoder to write instructions. Since we do not have any object to manipulate yet we stick
+      // with simple debug placeholder for now:
+      wgpuCommandEncoderInsertDebugMarker(encoder, "Do one thing");
+      wgpuCommandEncoderInsertDebugMarker(encoder, "Do another thing");
+
+      // And then finally generating the command from the encoder also requires an extra descriptor:
+      WGPUCommandBufferDescriptor cmdBufferDescriptor = {};
+      cmdBufferDescriptor.nextInChain                 = nullptr;
+      cmdBufferDescriptor.label                       = "Command buffer";
+      WGPUCommandBuffer command                       = wgpuCommandEncoderFinish(encoder, &cmdBufferDescriptor);
+      wgpuCommandEncoderRelease(encoder); // release encoder after it's finished
+
+      // Finally submit the command queue
+      std::cout << "Submitting command..." << std::endl;
+      wgpuQueueSubmit(queue, 1, &command);
+      wgpuCommandBufferRelease(command);
+      std::cout << "Command submitted." << std::endl;
+
+      // we need to wait a little bit, and importantly to call tick/poll the device so that it updates its awaiting
+      // tasks. This is a part of the API that is not standard yet, so we must adapt our implementation to the backend:
+      for (int i = 0; i < 5; ++i) {
+         std::cout << "Tick/Poll device..." << std::endl;
+#if defined(WEBGPU_BACKEND_DAWN)
+         wgpuDeviceTick(device);
+#elif defined(WEBGPU_BACKEND_WGPU)
+         wgpuDevicePoll(device, false, nullptr);
+#elif defined(WEBGPU_BACKEND_EMSCRIPTEN)
+         emscripten_sleep(100);
+#endif
+      }
+
+      // Intermediate steps towards getting a device that may be released during initialization
+      wgpuAdapterRelease(adapter);
+      wgpuInstanceRelease(instance);
+
+      // Initialize GLFW
+      if (!glfwInit())
+         return -1;
+
+      glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // Tell GLFW not to worry about the graphics API
+      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+      glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+      // Get the primary monitor
+      GLFWmonitor*       primaryMonitor = glfwGetPrimaryMonitor();
+      const GLFWvidmode* mode           = glfwGetVideoMode(primaryMonitor);
+
+      // Create a fullscreen window
+      window = glfwCreateWindow(mode->width, mode->height, "Spec Hops", NULL, NULL);
+      if (!window) {
+         std::cerr << "Failed to create GLFW window" << std::endl;
+         glfwTerminate();
+         return -1;
+      }
+
+      glfwSetKeyCallback(window, key_callback);
+
+      // Set the window icon
+      std::string icon_path = Renderer::ResPath() + "Images/Logo2.png";
+      setWindowIcon(window, icon_path.c_str());
+
+      // Make the window's context current
+      glfwMakeContextCurrent(window);
+
+      glfwSwapInterval(1);
+
+      return true;
+   }
+
+   // Uninitialize everything that was initialized
+   void Terminate() {
+      std::cout << "Terminating application" << std::endl;
+      // Release the queue
+      wgpuQueueRelease(queue);
+
+      // Release the device
+      wgpuDeviceRelease(device);
+
+      // Close the window and terminate GLFW
+      glfwDestroyWindow(window);
+      glfwTerminate();
+   }
+
+   // Draw a frame and handle events
+   void MainLoop() {
+      // Check whether the user clicked on the close button (and any other
+      // mouse/key event, which we don't use so far)
+      glfwPollEvents();
+   }
+
+   // Return true as long as the main loop should keep on running
+   bool IsRunning() { return !glfwWindowShouldClose(window); }
+
+private:
+   GLFWwindow* window;
+   WGPUDevice  device;
+   WGPUQueue   queue;
+};
+
+int main(void) {
+
+   Application app;
+
+   // Not Emscripten-friendly
+   if (!app.Initialize()) {
       return 1;
    }
 
-   // Display the object (WGPUInstance is a simple pointer, it may be
-   // copied around without worrying about its size).
-   std::cout << "WGPU instance: " << instance << std::endl;
-
-   std::cout << "Requesting adapter..." << std::endl;
-
-   WGPURequestAdapterOptions adapterOpts = {};
-   adapterOpts.nextInChain               = nullptr;
-   WGPUAdapter adapter                   = requestAdapterSync(instance, &adapterOpts);
-
-   std::cout << "Got adapter: " << adapter << std::endl;
-
-#ifndef __EMSCRIPTEN__
-   WGPUSupportedLimits supportedLimits = {};
-   supportedLimits.nextInChain         = nullptr;
-
-   #ifdef WEBGPU_BACKEND_DAWN
-   bool success = wgpuAdapterGetLimits(adapter, &supportedLimits) == WGPUStatus_Success;
-   #else
-   bool success = wgpuAdapterGetLimits(adapter, &supportedLimits);
-   #endif
-
-   if (success) {
-      std::cout << "Adapter limits:" << std::endl;
-      std::cout << " - maxTextureDimension1D: " << supportedLimits.limits.maxTextureDimension1D << std::endl;
-      std::cout << " - maxTextureDimension2D: " << supportedLimits.limits.maxTextureDimension2D << std::endl;
-      std::cout << " - maxTextureDimension3D: " << supportedLimits.limits.maxTextureDimension3D << std::endl;
-      std::cout << " - maxTextureArrayLayers: " << supportedLimits.limits.maxTextureArrayLayers << std::endl;
-   }
-#endif // NOT __EMSCRIPTEN__
-
-   std::vector<WGPUFeatureName> features;
-
-   // Call the function a first time with a null return address, just to get
-   // the entry count.
-   size_t featureCount = wgpuAdapterEnumerateFeatures(adapter, nullptr);
-
-   // Allocate memory (could be a new, or a malloc() if this were a C program)
-   features.resize(featureCount);
-
-   // Call the function a second time, with a non-null return address
-   wgpuAdapterEnumerateFeatures(adapter, features.data());
-
-   std::cout << "Adapter features:" << std::endl;
-   std::cout << std::hex; // Write integers as hexadecimal to ease comparison with webgpu.h literals
-   for (auto f : features) {
-      std::cout << " - 0x" << f << std::endl;
-   }
-   std::cout << std::dec; // Restore decimal numbers
-
-   // Get the adapter properties
-   WGPUAdapterInfo info = {};
-   info.nextInChain     = nullptr;
-   wgpuAdapterGetInfo(adapter, &info);
-   std::cout << "Adapter info:" << std::endl;
-   std::cout << " - vendorID: " << info.vendorID << std::endl;
-   if (info.vendor) {
-      std::cout << " - vendor: " << info.vendor << std::endl;
-   }
-   if (info.architecture) {
-      std::cout << " - architecture: " << info.architecture << std::endl;
-   }
-   std::cout << " - deviceID: " << info.deviceID << std::endl;
-   if (info.device) {
-      std::cout << " - name: " << info.device << std::endl;
-   }
-   if (info.description) {
-      std::cout << " - description: " << info.description << std::endl;
-   }
-   std::cout << std::hex;
-   std::cout << " - adapterType: 0x" << info.adapterType << std::endl;
-   std::cout << " - backendType: 0x" << info.backendType << std::endl;
-   std::cout << std::dec; // Restore decimal numbers
-
-   // Get a device
-   std::cout << "Requesting device..." << std::endl;
-
-   WGPUDeviceDescriptor deviceDesc     = {};
-   deviceDesc.nextInChain              = nullptr;
-   deviceDesc.label                    = "My Device"; // anything works here, that's your call
-   deviceDesc.requiredFeatureCount     = 0;           // we do not require any specific feature
-   deviceDesc.requiredLimits           = nullptr;     // we do not require any specific limit
-   deviceDesc.defaultQueue.nextInChain = nullptr;
-   deviceDesc.defaultQueue.label       = "The default queue";
-   // A function that is invoked whenever the device stops being available.
-   // Important! The deviceLostCallback must outlive the device, so that when the latter gets destroyed the callback is
-   // still valid. Keep this in mind when refactoring later.
-   deviceDesc.deviceLostCallback = [](WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
-      std::cout << "Device lost: reason " << reason;
-      if (message)
-         std::cout << " (" << message << ")";
-      std::cout << std::endl;
-   };
-
-
-   // [...] Build device descriptor
-   WGPUDevice device = requestDeviceSync(adapter, &deviceDesc);
-
-   inspectDevice(device);
-
-   std::cout << "Got device: " << device << std::endl;
-
-   // The uncaptured error callback is invoked whenever we misuse the API, and gives very informative feedback about
-   // what went wrong.
-   auto onDeviceError = [](WGPUErrorType type, char const* message, void* /* pUserData */) {
-      // If you use a debugger, put a breakpoint in this callback.
-      std::cout << "Uncaptured device error: type " << type;
-      if (message)
-         std::cout << " (" << message << ")";
-      std::cout << std::endl;
-   };
-   wgpuDeviceSetUncapturedErrorCallback(device, onDeviceError, nullptr /* pUserData */);
-   // The device is ready to use!
-
-   // Get a queue
-   WGPUQueue queue = wgpuDeviceGetQueue(device);
-
-   auto onQueueWorkDone = [](WGPUQueueWorkDoneStatus status, void* /* pUserData */) {
-      std::cout << "Queued work finished with status: " << status << std::endl;
-   };
-   wgpuQueueOnSubmittedWorkDone(queue, onQueueWorkDone, nullptr /* pUserData */);
-
-
-   // Get a command encoder
-   WGPUCommandEncoderDescriptor encoderDesc = {};
-   encoderDesc.nextInChain                  = nullptr;
-   encoderDesc.label                        = "My command encoder";
-   WGPUCommandEncoder encoder               = wgpuDeviceCreateCommandEncoder(device, &encoderDesc);
-
-   // We can now use the encoder to write instructions. Since we do not have any object to manipulate yet we stick with
-   // simple debug placeholder for now:
-   wgpuCommandEncoderInsertDebugMarker(encoder, "Do one thing");
-   wgpuCommandEncoderInsertDebugMarker(encoder, "Do another thing");
-
-   // And then finally generating the command from the encoder also requires an extra descriptor:
-   WGPUCommandBufferDescriptor cmdBufferDescriptor = {};
-   cmdBufferDescriptor.nextInChain                 = nullptr;
-   cmdBufferDescriptor.label                       = "Command buffer";
-   WGPUCommandBuffer command                       = wgpuCommandEncoderFinish(encoder, &cmdBufferDescriptor);
-   wgpuCommandEncoderRelease(encoder); // release encoder after it's finished
-
-   // Finally submit the command queue
-   std::cout << "Submitting command..." << std::endl;
-   wgpuQueueSubmit(queue, 1, &command);
-   wgpuCommandBufferRelease(command);
-   std::cout << "Command submitted." << std::endl;
-
-   // we need to wait a little bit, and importantly to call tick/poll the device so that it updates its awaiting tasks.
-   // This is a part of the API that is not standard yet, so we must adapt our implementation to the backend:
-   for (int i = 0; i < 5; ++i) {
-      std::cout << "Tick/Poll device..." << std::endl;
-#if defined(WEBGPU_BACKEND_DAWN)
-      wgpuDeviceTick(device);
-#elif defined(WEBGPU_BACKEND_WGPU)
-      wgpuDevicePoll(device, false, nullptr);
-#elif defined(WEBGPU_BACKEND_EMSCRIPTEN)
-      emscripten_sleep(100);
-#endif
+   // Not emscripten-friendly
+   while (app.IsRunning()) {
+      app.MainLoop();
    }
 
-   // Release the queue
-   wgpuQueueRelease(queue);
+   app.Terminate();
 
-   // Release the device
-   wgpuDeviceRelease(device);
-
-   // Release the adapter now that it is no longer needed.
-   wgpuAdapterRelease(adapter);
-
-
-   // We clean up the WebGPU instance
-   wgpuInstanceRelease(instance);
+   return 0;
 
 
    /*
