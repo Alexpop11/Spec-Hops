@@ -108,8 +108,8 @@ public:
       glfwInit();
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
       glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-      window                = glfwCreateWindow(640, 480, "Spec Hops", nullptr, nullptr);
-      
+      window = glfwCreateWindow(640, 480, "Spec Hops", nullptr, nullptr);
+
       std::string icon_path = Renderer::ResPath() + "Images/Logo2.png";
       setWindowIcon(window, icon_path.c_str());
 
@@ -124,6 +124,8 @@ public:
       adapterOpts.compatibleSurface           = surface;
       wgpu::Adapter adapter                   = instance.requestAdapter(adapterOpts);
       std::cout << "Got adapter: " << adapter << std::endl;
+
+      PrintAdapterInfo(adapter);
 
       instance.release();
 
@@ -177,6 +179,32 @@ public:
       InitializePipeline();
 
       return true;
+   }
+
+   void PrintAdapterInfo(wgpu::Adapter& adapter) {
+      // Get the adapter properties
+      wgpu::AdapterInfo info = {};
+      info.nextInChain       = nullptr;
+      adapter.getInfo(&info);
+      std::cout << "Adapter info:" << std::endl;
+      std::cout << " - vendorID: " << info.vendorID << std::endl;
+      if (info.vendor) {
+         std::cout << " - vendor: " << info.vendor << std::endl;
+      }
+      if (info.architecture) {
+         std::cout << " - architecture: " << info.architecture << std::endl;
+      }
+      std::cout << " - deviceID: " << info.deviceID << std::endl;
+      if (info.device) {
+         std::cout << " - name: " << info.device << std::endl;
+      }
+      if (info.description) {
+         std::cout << " - description: " << info.description << std::endl;
+      }
+      std::cout << std::hex;
+      std::cout << " - adapterType: 0x" << info.adapterType << std::endl;
+      std::cout << " - backendType: 0x" << info.backendType << std::endl;
+      std::cout << std::dec; // Restore decimal numbers
    }
 
    void InitializePipeline() {
