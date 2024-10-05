@@ -21,9 +21,16 @@ CPMAddPackage(
 )
 
 
+# Add WebGPU
+FetchContent_Declare(
+  webgpu
+  GIT_REPOSITORY https://github.com/eliemichel/WebGPU-distribution
+  GIT_TAG        dawn
+)
+FetchContent_MakeAvailable(webgpu)
 
 # Add GLFW
-add_subdirectory(${VENDOR_DIR}/glfw)
+# add_subdirectory(${VENDOR_DIR}/glfw)
 
 # Add GLEW
 set(BUILD_UTILS OFF CACHE BOOL "" FORCE)
@@ -78,6 +85,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     glm::glm
     xxHash::xxhash
     Clipper2
+    webgpu
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/res_path.hpp.in
