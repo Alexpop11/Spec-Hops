@@ -179,33 +179,29 @@ public:
 
       InitializePipeline();
 
-      return true;
-   }
+      wgpu::BufferDescriptor bufferDesc;
+      bufferDesc.label            = "Some GPU-side data buffer";
+      bufferDesc.usage            = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+      bufferDesc.size             = 16;
+      bufferDesc.mappedAtCreation = false;
+      wgpu::Buffer buffer1        = device.createBuffer(bufferDesc);
 
-   void PrintAdapterInfo(wgpu::Adapter& adapter) {
-      // Get the adapter properties
-      wgpu::AdapterInfo info = {};
-      info.nextInChain       = nullptr;
-      adapter.getInfo(&info);
-      std::cout << "Adapter info:" << std::endl;
-      std::cout << " - vendorID: " << info.vendorID << std::endl;
-      if (info.vendor) {
-         std::cout << " - vendor: " << info.vendor << std::endl;
-      }
-      if (info.architecture) {
-         std::cout << " - architecture: " << info.architecture << std::endl;
-      }
-      std::cout << " - deviceID: " << info.deviceID << std::endl;
-      if (info.device) {
-         std::cout << " - name: " << info.device << std::endl;
-      }
-      if (info.description) {
-         std::cout << " - description: " << info.description << std::endl;
-      }
-      std::cout << std::hex;
-      std::cout << " - adapterType: 0x" << info.adapterType << std::endl;
-      std::cout << " - backendType: 0x" << info.backendType << std::endl;
-      std::cout << std::dec; // Restore decimal numbers
+      bufferDesc.label     = "Output buffer";
+      wgpu::Buffer buffer2 = device.createBuffer(bufferDesc);
+
+      // Create some CPU-side data buffer (of size 16 bytes)
+      std::vector<uint8_t> numbers(16);
+      for (uint8_t i = 0; i < 16; ++i)
+         numbers[i] = i;
+      // `numbers` now contains [ 0, 1, 2, ... ]
+
+      // Copy this from `numbers` (RAM) to `buffer1` (VRAM)
+      queue.writeBuffer(buffer1, 0, numbers.data(), numbers.size());
+
+      buffer1.release();
+      buffer2.release();
+
+      return true;
    }
 
    void InitializePipeline() {
@@ -301,35 +297,10 @@ public:
 
       pipeline = device.createRenderPipeline(pipelineDesc);
 
+
       // We no longer need to access the shader module
       shaderModule.release();
    }
-
-   RequiredLimits GetRequiredLimits(Adapter adapter) const {
-      SupportedLimits supportedLimits;
-      adapter.getLimits(&supportedLimits);
-
-      // Don't forget to = Default
-      RequiredLimits requiredLimits = Default;
-
-      // We use at most 1 vertex attribute for now
-      requiredLimits.limits.maxVertexAttributes = 1;
-      // We should also tell that we use 1 vertex buffers
-      requiredLimits.limits.maxVertexBuffers = 1;
-      // Maximum size of a buffer is 6 vertices of 2 float each
-      requiredLimits.limits.maxBufferSize = 6 * 2 * sizeof(float);
-      // Maximum stride between 2 consecutive vertices in the vertex buffer
-      requiredLimits.limits.maxVertexBufferArrayStride = 2 * sizeof(float);
-      
-      // These two limits are different because they are "minimum" limits,
-      // they are the only ones we are may forward from the adapter's supported
-      // limits.
-      requiredLimits.limits.minUniformBufferOffsetAlignment = supportedLimits.limits.minUniformBufferOffsetAlignment;
-      requiredLimits.limits.minStorageBufferOffsetAlignment = supportedLimits.limits.minStorageBufferOffsetAlignment;
-
-      return requiredLimits;
-   }
-
 
    // Uninitialize everything that was initialized
    void Terminate() {
@@ -340,28 +311,6 @@ public:
       device.release();
       glfwDestroyWindow(window);
       glfwTerminate();
-   }
-
-   wgpu::TextureView GetNextSurfaceTextureView() {
-      wgpu::SurfaceTexture surfaceTexture;
-      surface.getCurrentTexture(&surfaceTexture);
-      if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::Success) {
-         return nullptr;
-      }
-      wgpu::Texture texture = surfaceTexture.texture;
-
-      wgpu::TextureViewDescriptor viewDescriptor;
-      viewDescriptor.label           = "Surface texture view";
-      viewDescriptor.format          = texture.getFormat();
-      viewDescriptor.dimension       = wgpu::TextureViewDimension::_2D;
-      viewDescriptor.baseMipLevel    = 0;
-      viewDescriptor.mipLevelCount   = 1;
-      viewDescriptor.baseArrayLayer  = 0;
-      viewDescriptor.arrayLayerCount = 1;
-      viewDescriptor.aspect          = wgpu::TextureAspect::All;
-      wgpu::TextureView targetView   = texture.createView(viewDescriptor);
-
-      return targetView;
    }
 
    // Draw a frame and handle events
@@ -435,6 +384,79 @@ public:
    bool IsRunning() { return !glfwWindowShouldClose(window); }
 
 private:
+   void PrintAdapterInfo(wgpu::Adapter& adapter) {
+      // Get the adapter properties
+      wgpu::AdapterInfo info = {};
+      info.nextInChain       = nullptr;
+      adapter.getInfo(&info);
+      std::cout << "Adapter info:" << std::endl;
+      std::cout << " - vendorID: " << info.vendorID << std::endl;
+      if (info.vendor) {
+         std::cout << " - vendor: " << info.vendor << std::endl;
+      }
+      if (info.architecture) {
+         std::cout << " - architecture: " << info.architecture << std::endl;
+      }
+      std::cout << " - deviceID: " << info.deviceID << std::endl;
+      if (info.device) {
+         std::cout << " - name: " << info.device << std::endl;
+      }
+      if (info.description) {
+         std::cout << " - description: " << info.description << std::endl;
+      }
+      std::cout << std::hex;
+      std::cout << " - adapterType: 0x" << info.adapterType << std::endl;
+      std::cout << " - backendType: 0x" << info.backendType << std::endl;
+      std::cout << std::dec; // Restore decimal numbers
+   }
+
+   wgpu::TextureView GetNextSurfaceTextureView() {
+      wgpu::SurfaceTexture surfaceTexture;
+      surface.getCurrentTexture(&surfaceTexture);
+      if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::Success) {
+         return nullptr;
+      }
+      wgpu::Texture texture = surfaceTexture.texture;
+
+      wgpu::TextureViewDescriptor viewDescriptor;
+      viewDescriptor.label           = "Surface texture view";
+      viewDescriptor.format          = texture.getFormat();
+      viewDescriptor.dimension       = wgpu::TextureViewDimension::_2D;
+      viewDescriptor.baseMipLevel    = 0;
+      viewDescriptor.mipLevelCount   = 1;
+      viewDescriptor.baseArrayLayer  = 0;
+      viewDescriptor.arrayLayerCount = 1;
+      viewDescriptor.aspect          = wgpu::TextureAspect::All;
+      wgpu::TextureView targetView   = texture.createView(viewDescriptor);
+
+      return targetView;
+   }
+
+   RequiredLimits GetRequiredLimits(Adapter adapter) const {
+      SupportedLimits supportedLimits;
+      adapter.getLimits(&supportedLimits);
+
+      // Don't forget to = Default
+      RequiredLimits requiredLimits = Default;
+
+      // We use at most 1 vertex attribute for now
+      requiredLimits.limits.maxVertexAttributes = 1;
+      // We should also tell that we use 1 vertex buffers
+      requiredLimits.limits.maxVertexBuffers = 1;
+      // Maximum size of a buffer is 6 vertices of 2 float each
+      requiredLimits.limits.maxBufferSize = 6 * 2 * sizeof(float);
+      // Maximum stride between 2 consecutive vertices in the vertex buffer
+      requiredLimits.limits.maxVertexBufferArrayStride = 2 * sizeof(float);
+
+      // These two limits are different because they are "minimum" limits,
+      // they are the only ones we are may forward from the adapter's supported
+      // limits.
+      requiredLimits.limits.minUniformBufferOffsetAlignment = supportedLimits.limits.minUniformBufferOffsetAlignment;
+      requiredLimits.limits.minStorageBufferOffsetAlignment = supportedLimits.limits.minStorageBufferOffsetAlignment;
+
+      return requiredLimits;
+   }
+
    GLFWwindow*                          window;
    wgpu::Device                         device;
    wgpu::Queue                          queue;
