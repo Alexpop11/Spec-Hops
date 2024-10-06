@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(VENDOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
 # Add application code
-file(GLOB cpp_files "src/*.c" "src/*.cpp" "src/game_objects/*.cpp" "src/game_objects/enemies/*.cpp" "src/game_objects/ui/*.cpp" "${VENDOR_DIR}/imgui/*.cpp" "src/gpu/*.cpp")
-file(GLOB header_files "src/*.h" "src/game_objects/*.h" "src/game_objects/enemies/*.h" "src/game_objects/ui/*.h" "src/gpu/*.h")
+file(GLOB cpp_files "src/Application.cpp", "src/rendering/*.cpp")
+file(GLOB header_files "src/Application.h", "src/rendering/*.h")
 
 # Add resource files
 file(GLOB_RECURSE res_files "res/*")
@@ -30,13 +30,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(webgpu)
 
-
 add_subdirectory(${VENDOR_DIR}/glfw3webgpu)
-
-
-# Add GLEW
-set(BUILD_UTILS OFF CACHE BOOL "" FORCE)
-add_subdirectory(${VENDOR_DIR}/glew/build/cmake)
 
 # Add GLM
 add_subdirectory(${VENDOR_DIR}/glm)
@@ -82,7 +76,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     glfw
-    glew_s
     OpenGL::GL
     glm::glm
     xxHash::xxhash

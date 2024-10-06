@@ -26,13 +26,14 @@ public:
 
    static Application& get();
 
-   bool initialized;
+   bool        initialized;
+   std::string res_path;
 
 private:
-   void PrintAdapterInfo(wgpu::Adapter& adapter);
+   void InitializeResPath();
 
-   wgpu::TextureView GetNextSurfaceTextureView();
-
+   void                 PrintAdapterInfo(wgpu::Adapter& adapter);
+   wgpu::TextureView    GetNextSurfaceTextureView();
    wgpu::RequiredLimits GetRequiredLimits(wgpu::Adapter& adapter) const;
 
    GLFWwindow*                          window;

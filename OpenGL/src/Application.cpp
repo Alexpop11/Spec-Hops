@@ -6,7 +6,6 @@
 
 #include "Application.h"
 
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <memory>
@@ -16,33 +15,13 @@
 #include <sstream>
 #include <set>
 
+#include "res_path.hpp"
+
 #define STB_IMAGE_IMPLEMENTATION // for icon
 #include "stb_image.h"
 
-#include "Renderer.h"
-#include "VertexBuffer.h"
-#include "VertexBufferLayout.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "Shader.h"
-#include "game_objects/GameObject.h"
-#include "Input.h"
-#include "World.h"
-#include "game_objects/Player.h"
-#include "game_objects/Background.h"
-#include "game_objects/Camera.h"
-#include "game_objects/Tile.h"
-#include "game_objects/enemies/Bomber.h"
-#include "Texture.h"
-#include "game_objects/Fog.h"
-
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-#include <stdio.h>
-
 #include <glfw3webgpu.h>
-#include "gpu/webgpu-utils.h"
+#include "rendering/webgpu-utils.h"
 
 #define GL_SILENCE_DEPRECATION
 
@@ -117,8 +96,8 @@ Application::Application() {
    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
    window = glfwCreateWindow(640, 480, "Spec Hops", nullptr, nullptr);
 
-   std::string icon_path = Renderer::ResPath() + "Images/Logo2.png";
-   setWindowIcon(window, icon_path.c_str());
+   // std::string icon_path = Renderer::ResPath() + "Images/Logo2.png";
+   // setWindowIcon(window, icon_path.c_str());
 
 
    wgpu::Instance instance = wgpuCreateInstance(nullptr);
@@ -188,6 +167,8 @@ Application::Application() {
 
    InitializeBuffers();
 
+   InitializeResPath();
+
    initialized = true;
 }
 
@@ -229,6 +210,26 @@ void Application::InitializeBuffers() {
    indexBuffer      = device.createBuffer(bufferDesc);
 
    queue.writeBuffer(indexBuffer, 0, indexData.data(), bufferDesc.size);
+}
+
+void Application::InitializeResPath() {
+   namespace fs = std::filesystem;
+
+   if (res_path.empty()) {
+      // Get the path of the executable
+      fs::path exe_path = fs::weakly_canonical(fs::path("/proc/self/exe"));
+      fs::path exe_dir  = exe_path.parent_path();
+
+      // Check for "res/shaders" relative to the executable's directory
+      if (fs::exists(exe_dir / "res" / "shaders")) {
+         res_path = (exe_dir / "res").string() + "/";
+      } else if (fs::exists(RES_PATH "/res/shaders")) {
+         res_path = RES_PATH "/res/";
+      } else {
+         std::cout << "Resource directory not found relative to " << exe_dir << " or " << RES_PATH << std::endl;
+         res_path = "./res/";
+      }
+   }
 }
 
 void Application::InitializePipeline() {
