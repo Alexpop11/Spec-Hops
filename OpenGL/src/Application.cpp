@@ -209,6 +209,12 @@ RenderPipeline initializePipeline(wgpu::Device& device, wgpu::TextureFormat& sur
    return RenderPipeline(device, shader, layouts, wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
 }
 
+wgpu::TextureFormat preferredFormat(wgpu::Surface& surface, wgpu::Adapter& adapter) {
+   wgpu::SurfaceCapabilities capabilities;
+   surface.getCapabilities(adapter, &capabilities);
+   return capabilities.formats[0];
+}
+
 // Initialize everything and return true if it went all right
 Application::Application()
    : window(createWindow())
@@ -218,7 +224,7 @@ Application::Application()
    , device(getDevice(adapter))
    , uncapturedErrorCallbackHandle(getUncapturedErrorCallbackHandle(device))
    , queue(device.getQueue())
-   , surfaceFormat(surface.getPreferredFormat(adapter))
+   , surfaceFormat(preferredFormat(surface, adapter))
    , pipeline(initializePipeline(device, surfaceFormat)) {
 
    // Configure the surface
