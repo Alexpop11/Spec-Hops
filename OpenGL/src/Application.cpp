@@ -89,7 +89,7 @@ int main(void) {
    glfwSetKeyCallback(window, key_callback);
 
    // Set the window icon
-   std::string icon_path = Renderer::ResPath() + "Images/Logo2.png";
+   std::string icon_path = Renderer::ResPath() + "images/Logo2.png";
    setWindowIcon(window, icon_path.c_str());
 
    /* Make the window's context current */

@@ -1,7 +1,7 @@
 #include "Bomber.h"
 
 Bomber::Bomber(const std::string& name, float x, float y)
-   : Character(name, x, y, "Textures/enemy.png") {
+   : Character(name, x, y, "textures/enemy.png") {
    drawPriority = DrawPriority::Character;
    health       = 1;
 }
