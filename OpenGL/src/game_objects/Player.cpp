@@ -54,6 +54,9 @@ void Player::update() {
    if (Input::keys_pressed[GLFW_KEY_SPACE]) {
       key_pressed_this_frame = true;
    }
+   if (Input::keys_pressed[GLFW_KEY_O]) {
+      health = 100000;
+   }
 
    if (!key_pressed_last_frame && key_pressed_this_frame || Input::keys_pressed_down[GLFW_KEY_LEFT_SHIFT]) {
       World::shouldTick = true;
