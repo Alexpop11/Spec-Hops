@@ -13,10 +13,12 @@ public:
    virtual void move(int new_x, int new_y) override;
    virtual void hurt() override;
    bool         second_step = false;
+   virtual void render(Renderer& renderer) override;
 
    std::unique_ptr<Text> healthText;
+   std::unique_ptr<Text> topText;
 
-   virtual std::vector<GameObject*> children() override { return {healthText.get()}; }
+   virtual std::vector<GameObject*> children() override { return {healthText.get(), topText.get()}; }
 
    // Powerups
    int playerBunnyHopCoolDown = 5;

@@ -21,6 +21,7 @@ public:
    bool hasBunnyHop      = true;
    int  bunnyHopCoolDown = 0;
    bool hoppedLastTurn   = false;
+   bool hasGun           = true;
 };
 
 template <typename T>

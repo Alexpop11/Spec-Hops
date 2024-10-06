@@ -64,7 +64,7 @@ void key_callback(GLFWwindow* window, int key, int /* scancode */, int action, i
 
 int main(void) {
 
-   const float TICKS_PER_SECOND = 12.0f;
+   const float TICKS_PER_SECOND = 3.0f;
 
    /* Initialize the library */
    if (!glfwInit())

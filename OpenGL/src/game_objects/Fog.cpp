@@ -21,6 +21,7 @@ void Fog::setUpShader(Renderer& renderer) {
 }
 
 void Fog::render(Renderer& renderer) {
+   
    GameObject::render(renderer);
    bool showWalls = true;
 

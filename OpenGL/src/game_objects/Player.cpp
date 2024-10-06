@@ -14,6 +14,7 @@ Player::Player(const std::string& name, int tile_x, int tile_y)
    Camera::position = {tile_x, tile_y};
 
    healthText = std::make_unique<Text>("Health", Renderer::jacquard12_big, glm::vec2{20, 20});
+   topText = std::make_unique<Text>("Hello!", Renderer::Pixelify, glm::vec2{1280,650});
 }
 
 void Player::move(int new_x, int new_y) {
@@ -51,12 +52,29 @@ void Player::update() {
       key_pressed_this_frame = true;
    }
 
-   if (!key_pressed_last_frame && key_pressed_this_frame) {
+   if (!key_pressed_last_frame && key_pressed_this_frame || Input::keys_pressed_down[GLFW_KEY_LEFT_SHIFT]) {
       World::shouldTick = true;
    }
    key_pressed_last_frame = key_pressed_this_frame;
 
    healthText->name = "Health: " + std::to_string(health);
+
+   // When user clicks the mouse, 
+
+}
+
+void Player::render(Renderer& renderer) {
+   Character::render(renderer);
+   if (Input::mouse_pressed_down) {
+      Renderer::DebugLine(position, renderer.MousePos(), {1, 0, 0, 1});
+      // get what is at mouse position
+      for (auto& character : World::at<Character>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
+         character->hurt();
+        }
+      for (auto& bomb : World::at<Bomb>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
+         bomb->explode();
+      }
+   }
 }
 
 void Player::hurt() {
@@ -74,7 +92,7 @@ void Player::hurt() {
 void Player::tickUpdate() {
    if (moved_last_tick) {
       moved_last_tick = false;
-      return;
+      //return;
    }
    // This logic is already in character, but it's not applying to the player for some reason - so for now I'm just
    // going to copy it here. pls help Powerup cooldowns

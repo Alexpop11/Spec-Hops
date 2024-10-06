@@ -7,6 +7,8 @@ class Input {
 public:
    static bool  keys_pressed[GLFW_KEY_LAST];
    static bool  keys_pressed_down[GLFW_KEY_LAST];
+   static bool  mouse_pressed;
+   static bool  mouse_pressed_down;
    static float startTime;
    static float deltaTime;
 
@@ -23,6 +25,9 @@ public:
       for (int key = 0; key < GLFW_KEY_LAST; ++key) {
          keys_pressed_down[key] = !keys_pressed_last_frame[key] && keys_pressed[key];
       }
+      
+      mouse_pressed_down = !mouse_pressed && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+      mouse_pressed      = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
    }
 };
 

@@ -32,6 +32,9 @@ public:
    Renderer(Renderer&& other)            = default;
    Renderer& operator=(const Renderer&)  = delete;
    Renderer& operator=(Renderer&& other) = default;
+   glm::vec2 ScreenToWorldPosition(const glm::vec2& screenPos);
+   glm::vec2 MousePos();
+
 
    void                 Clear() const;
    void                 Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
@@ -56,6 +59,7 @@ public:
 
    static ImFont* jacquard12_big;
    static ImFont* jacquard12_small;
+   static ImFont* Pixelify;
 
 
 private:

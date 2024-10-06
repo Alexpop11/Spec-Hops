@@ -41,7 +41,44 @@ glm::mat4 CalculateMVP(std::tuple<int, int> windowSize, const glm::vec2& objectP
    return mvp;
 }
 
-Renderer::Renderer(GLFWwindow* window, ImGuiIO* io)
+glm::vec2 Renderer::ScreenToWorldPosition(const glm::vec2& screenPos) {
+   // Retrieve window size from the renderer
+   auto [width, height] = WindowSize();
+
+   // Calculate aspect ratio
+   float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+
+   // Calculate orthographic projection matrix
+   float     orthoWidth = Camera::scale * aspectRatio;
+   glm::mat4 projection =
+      glm::ortho(-orthoWidth / 2.0f, orthoWidth / 2.0f, -Camera::scale / 2.0f, Camera::scale / 2.0f, -1.0f, 1.0f);
+
+   // Create view matrix
+   glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-Camera::position, 0.0f));
+
+   // Inverse of MVP
+   glm::mat4 invVP = glm::inverse(projection * view);
+
+   // Normalize screen coordinates (convert to [-1, 1] range)
+   glm::vec2 normalizedScreenPos;
+   normalizedScreenPos.x = (2.0f * screenPos.x) / width - 1.0f;
+   normalizedScreenPos.y = 1.0f - (2.0f * screenPos.y) / height;
+
+   // Convert to world space by applying the inverse matrix
+   glm::vec4 clipSpacePos  = glm::vec4(normalizedScreenPos, 0.0f, 1.0f);
+   glm::vec4 worldSpacePos = invVP * clipSpacePos;
+
+   // Return world position with z=0
+   return glm::vec2(worldSpacePos.x, worldSpacePos.y);
+}
+
+glm::vec2 Renderer::MousePos() {
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+    return ScreenToWorldPosition({static_cast<float>(x), static_cast<float>(y)});
+}
+
+   Renderer::Renderer(GLFWwindow* window, ImGuiIO* io)
    : window(window)
    , io(io)
    , lineShader(Shader(Renderer::ResPath() + "shaders/line.shader")) {
@@ -66,6 +103,7 @@ Renderer::Renderer(GLFWwindow* window, ImGuiIO* io)
 
    Renderer::jacquard12_big   = load_font(io, "fonts/Jacquard12.ttf", 40);
    Renderer::jacquard12_small = load_font(io, "fonts/Jacquard12.ttf", 18);
+   Renderer::Pixelify = load_font(io, "fonts/PixelifySans.ttf", 18);
 }
 
 Renderer::~Renderer() {}
@@ -147,3 +185,4 @@ void Renderer::DrawDebug() {
 
 ImFont* Renderer::jacquard12_big   = nullptr;
 ImFont* Renderer::jacquard12_small = nullptr;
+ImFont* Renderer::Pixelify         = nullptr;
