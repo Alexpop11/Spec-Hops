@@ -73,12 +73,20 @@ glm::vec2 Renderer::ScreenToWorldPosition(const glm::vec2& screenPos) {
 }
 
 glm::vec2 Renderer::MousePos() {
-    double x, y;
-    glfwGetCursorPos(window, &x, &y);
-    return ScreenToWorldPosition({static_cast<float>(x), static_cast<float>(y)});
+   double x, y;
+   float  xscale, yscale;
+
+   glfwGetCursorPos(window, &x, &y);
+   glfwGetWindowContentScale(window, &xscale, &yscale);
+
+   x *= xscale;
+   y *= yscale;
+
+
+   return ScreenToWorldPosition({static_cast<float>(x), static_cast<float>(y)});
 }
 
-   Renderer::Renderer(GLFWwindow* window, ImGuiIO* io)
+Renderer::Renderer(GLFWwindow* window, ImGuiIO* io)
    : window(window)
    , io(io)
    , lineShader(Shader(Renderer::ResPath() + "shaders/laser.shader")) {
@@ -103,7 +111,7 @@ glm::vec2 Renderer::MousePos() {
 
    Renderer::jacquard12_big   = load_font(io, "fonts/Jacquard12.ttf", 40);
    Renderer::jacquard12_small = load_font(io, "fonts/Jacquard12.ttf", 18);
-   Renderer::Pixelify = load_font(io, "fonts/PixelifySans.ttf", 18);
+   Renderer::Pixelify         = load_font(io, "fonts/PixelifySans.ttf", 18);
 }
 
 Renderer::~Renderer() {}
