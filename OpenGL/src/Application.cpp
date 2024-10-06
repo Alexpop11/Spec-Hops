@@ -23,6 +23,10 @@
 #include <glfw3webgpu.h>
 #include "rendering/webgpu-utils.h"
 #include "rendering/Shader.h"
+#include "rendering/RenderPipeline.h"
+#include "rendering/VertexBufferLayout.h"
+
+#include "glm/glm.hpp"
 
 #define GL_SILENCE_DEPRECATION
 
@@ -239,22 +243,19 @@ void Application::InitializePipeline() {
    // Create the render pipeline
    wgpu::RenderPipelineDescriptor pipelineDesc;
 
-   std::vector<wgpu::VertexAttribute> vertexAttribs(2);
-   vertexAttribs[0].shaderLocation = 0; // @location(0)
-   vertexAttribs[0].format         = wgpu::VertexFormat::Float32x2;
-   vertexAttribs[0].offset         = 0;
-   vertexAttribs[1].shaderLocation = 1;                             // @location(1)
-   vertexAttribs[1].format         = wgpu::VertexFormat::Float32x3; // different type!
-   vertexAttribs[1].offset         = 2 * sizeof(float);             // non null offset!
 
+   VertexBufferLayout<glm::vec2, glm::vec3> layout;
+   auto [vertexBufferLayout, vertexAttribs] = layout.CreateLayout();
 
-
-   wgpu::VertexBufferLayout vertexBufferLayout;
-   // == Common to attributes from the same buffer ==
-   vertexBufferLayout.attributeCount = static_cast<uint32_t>(vertexAttribs.size());
-   vertexBufferLayout.attributes     = vertexAttribs.data();
-   vertexBufferLayout.arrayStride    = 5 * sizeof(float);
-   vertexBufferLayout.stepMode       = wgpu::VertexStepMode::Vertex;
+   // print layout and attributes
+   std::cout << "Vertex attributes: " << std::endl;
+   for (const auto& attr : *vertexAttribs) {
+      std::cout << " - Attribute | " << " offset: " << attr.offset << ", format: " << attr.format << std::endl;
+   }
+   std::cout << "Vertex buffer layout: " << std::endl;
+   std::cout << " - Stride: " << vertexBufferLayout.arrayStride << std::endl;
+   std::cout << " - Step mode: " << vertexBufferLayout.stepMode << std::endl;
+   std::cout << " - Attribute count: " << vertexBufferLayout.attributeCount << std::endl;
 
    pipelineDesc.vertex.bufferCount = 1;
    pipelineDesc.vertex.buffers     = &vertexBufferLayout;
