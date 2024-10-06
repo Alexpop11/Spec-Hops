@@ -25,27 +25,12 @@ void Mine::tickUpdate() {
          tintColor.b    = 0.2;
          tintColor.a    = 1;
       } else {
-         tintColor.a    = 0;
+         tintColor.a = 0;
          audio().Bomb_Tick.play();
          red_last_frame = false;
       }
       if (ExplodeTick > 6) {
-
-         auto nearbyWalls = World::where<Tile>(
-            [&](const Tile& tile) { return (std::abs(tile_x - tile.tile_x) + std::abs(tile_y - tile.tile_y) < 3); });
-
-         for (auto* wall : nearbyWalls) {
-            wall->explode();
-         }
-         auto nearbyCharacters = World::where<Character>([&](const Character& character) {
-            return (std::abs(tile_x - character.tile_x) + std::abs(tile_y - character.tile_y) < 3);
-         });
-         for (auto* character : nearbyCharacters) {
-            character->hurt();
-            std::cout << "Mine damaged player. their health is now " << character->health << std::endl;
-         }
-         audio().Bomb_Sound.play();
-         ShouldDestroy = true;
+         explode();
       }
    }
 }
