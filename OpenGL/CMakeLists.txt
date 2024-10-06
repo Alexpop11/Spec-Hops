@@ -24,8 +24,8 @@ CPMAddPackage(
 # Also adds Add GLFW
 FetchContent_Declare(
   webgpu
-  GIT_REPOSITORY https://github.com/eliemichel/WebGPU-distribution
-  GIT_TAG        b707daa1ec183fc924a5f242d2ae170bb2061e01
+  GIT_REPOSITORY https://github.com/anchpop/WebGPU-distribution.git
+  GIT_TAG        4c52dadb75767b5847ef62fe27bf904f43e354c2
 )
 FetchContent_MakeAvailable(webgpu)
 

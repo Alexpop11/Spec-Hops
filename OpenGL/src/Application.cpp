@@ -251,10 +251,10 @@ void Application::InitializeBuffers() {
    // The de-duplicated list of point positions
    std::vector<float> pointData = {
       // x,   y,     r,   g,   b
-      -0.5, -0.5, 1.0, 0.0, 0.0, // Point #0
-      +0.5, -0.5, 0.0, 1.0, 0.0, // Point #1
-      +0.5, +0.5, 0.0, 0.0, 1.0, // Point #2
-      -0.5, +0.5, 1.0, 1.0, 0.0  // Point #3
+      -0.5, -0.5, 1.0, 0.5, 0.5, // Point #0
+      +0.5, -0.5, 0.5, 1.0, 0.5, // Point #1
+      +0.5, +0.5, 0.5, 0.5, 1.0, // Point #2
+      -0.5, +0.5, 1.0, 1.0, 0.5  // Point #3
    };
 
    // Define index data
