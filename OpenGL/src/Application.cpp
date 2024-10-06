@@ -209,7 +209,6 @@ RenderPipeline initializePipeline(wgpu::Device& device, wgpu::TextureFormat& sur
    return RenderPipeline(device, shader, layouts, wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
 }
 
-
 // Initialize everything and return true if it went all right
 Application::Application()
    : window(createWindow())
