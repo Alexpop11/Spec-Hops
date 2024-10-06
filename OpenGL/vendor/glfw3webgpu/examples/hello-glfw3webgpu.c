@@ -6,7 +6,7 @@
  *   https://eliemichel.github.io/LearnWebGPU
  * 
  * MIT License
- * Copyright (c) 2022-2024 Elie Michel and the wgpu-native authors
+ * Copyright (c) 2022-2024 Elie Michel
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,36 +27,35 @@
  * SOFTWARE.
  */
 
-#ifndef _glfw3_webgpu_h_
-#define _glfw3_webgpu_h_
+#include "glfw3webgpu.h"
 
-#include <webgpu/webgpu.h>
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <webgpu/webgpu.h>
+#include <stdio.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+int main(int argc, char* argv[]) {
+	(void)argc;
+	(void)argv;
 
-/*! @brief Creates a WebGPU surface for the specified window.
- *
- *  This function creates a WGPUSurface object for the specified window.
- *
- *  If the surface cannot be created, this function returns `NULL`.
- *
- *  It is the responsibility of the caller to destroy the window surface. The
- *  window surface must be destroyed using `wgpuSurfaceRelease`.
- *
- *  @param[in] instance The WebGPU instance to create the surface in.
- *  @param[in] window The window to create the surface for.
- *  @return The handle of the surface.  This is set to `NULL` if an error
- *  occurred.
- *
- *  @ingroup webgpu
- */
-WGPUSurface glfwCreateWindowWGPUSurface(WGPUInstance instance, GLFWwindow* window);
+	// Init WebGPU
+	WGPUInstanceDescriptor desc;
+	desc.nextInChain = NULL;
+	WGPUInstance instance = wgpuCreateInstance(&desc);
 
-#ifdef __cplusplus
+	// Init GLFW
+	glfwInit();
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	GLFWwindow* window = glfwCreateWindow(640, 480, "Learn WebGPU", NULL, NULL);
+
+	// Here we create our WebGPU surface from the window!
+	WGPUSurface surface = glfwCreateWindowWGPUSurface(instance, window);
+	printf("surface = %p", (void*)surface);
+
+	// Terminate GLFW
+	while (!glfwWindowShouldClose(window)) glfwPollEvents();
+	glfwDestroyWindow(window);
+	glfwTerminate();
+
+	return 0;
 }
-#endif
-
-#endif // _glfw3_webgpu_h_

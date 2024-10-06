@@ -213,7 +213,7 @@ RenderPipeline initializePipeline(wgpu::Device& device, wgpu::TextureFormat& sur
 Application::Application()
    : window(createWindow())
    , instance(wgpuCreateInstance(nullptr))
-   , surface(glfwGetWGPUSurface(instance, window))
+   , surface(glfwCreateWindowWGPUSurface(instance, window))
    , adapter(getAdapter(instance, surface))
    , device(getDevice(adapter))
    , uncapturedErrorCallbackHandle(getUncapturedErrorCallbackHandle(device))
