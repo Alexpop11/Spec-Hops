@@ -64,8 +64,6 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT $
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${VENDOR_DIR}/glfw/include
-    ${VENDOR_DIR}/glew/include
     ${VENDOR_DIR}/glm
     ${VENDOR_DIR}/miniaudio
     ${VENDOR_DIR}/stb_image
@@ -75,7 +73,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    glfw
     OpenGL::GL
     glm::glm
     xxHash::xxhash

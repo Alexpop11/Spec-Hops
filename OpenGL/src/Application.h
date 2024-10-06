@@ -1,7 +1,6 @@
 
 #include <webgpu/webgpu.hpp>
 
-#include <GL/glew.h> // TODO: remove this, we don't need glew since we're using webgpu
 #include <GLFW/glfw3.h>
 
 
