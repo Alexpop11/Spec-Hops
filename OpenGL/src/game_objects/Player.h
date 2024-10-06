@@ -23,4 +23,5 @@ public:
    // Powerups
    int playerBunnyHopCoolDown = 6;
    int playerGunCooldown = 3;
+   bool hasSlomo         = true;
 };

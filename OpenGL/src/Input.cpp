@@ -7,8 +7,10 @@ float Input::deltaTime                              = 0.01;
 bool  Input::keys_pressed[GLFW_KEY_LAST]            = {false};
 bool  Input::keys_pressed_last_frame[GLFW_KEY_LAST] = {false};
 bool  Input::keys_pressed_down[GLFW_KEY_LAST]       = {false};
-bool  Input::mouse_pressed                          = false;
-bool  Input::mouse_pressed_down                     = false;
+bool  Input::left_mouse_pressed                          = false;
+bool  Input::left_mouse_pressed_down                     = false;
+bool  Input::right_mouse_pressed                          = false;
+bool  Input::right_mouse_pressed_down                     = false;
 
 float zeno(float current, float target, float timeConstant) {
    float alpha = 1.0f - std::exp(-Input::deltaTime / timeConstant);

@@ -9,6 +9,7 @@ Bomb::Bomb(const std::string& name, float x, float y)
 }
 
 void Bomb::tickUpdate() {
+   tintColor.a = zeno(tintColor.a, 0.0, 0.5);
    // Explode the bomb
    if (ExplodeTick > 6) {
       explode();

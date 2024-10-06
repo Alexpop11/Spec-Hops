@@ -43,4 +43,5 @@ void SquareObject::render(Renderer& renderer) {
 
 void SquareObject::update() {
    position = zeno(position, glm::vec2(tile_x, tile_y), 0.05);
+   tintColor.a = zeno(tintColor.a, 0.0, 0.3);
 }

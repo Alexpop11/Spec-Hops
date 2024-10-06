@@ -10,7 +10,7 @@
 Player::Player(const std::string& name, int tile_x, int tile_y)
    : Character(name, tile_x, tile_y, "Textures/alternate-player.png") {
    drawPriority     = DrawPriority::Character;
-   health           = 3;
+   health           = 5;
    Camera::position = {tile_x, tile_y};
 
    healthText = std::make_unique<Text>("Health", Renderer::jacquard12_big, glm::vec2{20, 20});
@@ -71,7 +71,7 @@ void Player::update() {
 
 void Player::render(Renderer& renderer) {
    Character::render(renderer);
-   if (Input::mouse_pressed_down) {
+   if (Input::left_mouse_pressed_down) {
       if (gunCooldown == 0) {
          Renderer::DebugLine(position, renderer.MousePos(), {1, 0, 0, 1});
          audio().Zap.play();
@@ -84,6 +84,19 @@ void Player::render(Renderer& renderer) {
             bomb->explode();
          }
             gunCooldown = playerGunCooldown;
+      }
+   }
+   if (Input::right_mouse_pressed) {
+      if (hasSlomo) {
+         Renderer::DebugLine(position, renderer.MousePos(), {1, 0, 0, 1});
+         // get what is at mouse position
+         for (auto& character : World::at<Character>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
+            character->tintColor     = {1.0, 0.5, 0.0, 0.5};
+         }
+         for (auto& bomb : World::at<Bomb>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
+            bomb->tintColor = {1.0, 0.5, 0.0, 0.5};
+         }
+      // need to figure out some way to slow tick rate and also make all things zeno at a fraction of normal speed
       }
    }
 }
