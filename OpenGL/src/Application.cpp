@@ -109,13 +109,6 @@ void key_callback(GLFWwindow* window, int key, int /* scancode */, int action, i
    }
 }
 
-void deviceLost(WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
-   std::cout << "Device lost: reason " << reason;
-   if (message)
-      std::cout << " (" << message << ")";
-   std::cout << std::endl;
-}
-
 // Initialize everything and return true if it went all right
 Application::Application() {
    // Open window
