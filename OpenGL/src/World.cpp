@@ -124,3 +124,8 @@ void World::RenderObjects(Renderer& renderer) {
       gameobject->render(renderer);
    }
 }
+
+bool World::ticksPaused() {
+   auto player = getFirst<Player>();
+   return player->pauseTicks();
+}

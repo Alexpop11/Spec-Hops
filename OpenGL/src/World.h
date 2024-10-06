@@ -11,6 +11,9 @@ public:
    static bool                                     settingTimeSpeed;
    static std::vector<std::shared_ptr<GameObject>> gameobjects;
    static std::vector<std::unique_ptr<GameObject>> gameobjectstoadd;
+
+   static bool ticksPaused();
+
    static std::vector<GameObject*>                 get_gameobjects() {
       // return a vector of all gameobjects and their gameobjects.children
       std::vector<GameObject*> allGameObjects;

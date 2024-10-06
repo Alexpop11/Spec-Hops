@@ -14,14 +14,15 @@ public:
    virtual void hurt() override;
    bool         second_step = false;
    virtual void render(Renderer& renderer) override;
+   bool         pauseTicks() { return kicking.has_value(); }
 
    std::unique_ptr<Text> healthText;
-   //std::unique_ptr<Text> topText;
+   // std::unique_ptr<Text> topText;
 
    virtual std::vector<GameObject*> children() override { return {healthText.get()}; }
 
    // Powerups
-   int playerBunnyHopCoolDown = 6;
-   int playerGunCooldown = 3;
-   bool hasSlomo         = true;
+   int  playerBunnyHopCoolDown = 6;
+   int  playerGunCooldown      = 3;
+   bool hasSlomo               = true;
 };

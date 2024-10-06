@@ -149,7 +149,7 @@ int main(void) {
 
       World::UpdateObjects();
 
-      if (World::shouldTick || lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime) {
+      if (!World::ticksPaused() && (World::shouldTick || lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime)) {
          World::TickObjects();
          lastTick          = Input::currentTime;
          World::shouldTick = false;
