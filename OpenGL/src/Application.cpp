@@ -199,30 +199,43 @@ public:
    }
 
    void InitializeBuffers() {
-      // Vertex buffer data
-      // There are 2 floats per vertex, one for x and one for y.
-      std::vector<float> vertexData = {// x0,  y0,  r0,  g0,  b0
-                                       -0.5, -0.5, 1.0, 0.0, 0.0,
+      // Define point data
+      // The de-duplicated list of point positions
+      std::vector<float> pointData = {
+         // x,   y,     r,   g,   b
+         -0.5, -0.5, 1.0, 0.0, 0.0, // Point #0
+         +0.5, -0.5, 0.0, 1.0, 0.0, // Point #1
+         +0.5, +0.5, 0.0, 0.0, 1.0, // Point #2
+         -0.5, +0.5, 1.0, 1.0, 0.0  // Point #3
+      };
 
-                                       // x1,  y1,  r1,  g1,  b1
-                                       +0.5, -0.5, 0.0, 1.0, 0.0,
+      // Define index data
+      // This is a list of indices referencing positions in the pointData
+      std::vector<uint16_t> indexData = {
+         0, 1, 2, // Triangle #0 connects points #0, #1 and #2
+         0, 2, 3  // Triangle #1 connects points #0, #2 and #3
+      };
 
-                                       // ...
-                                       +0.0, +0.5, 0.0, 0.0, 1.0, -0.55f, -0.5, 1.0, 1.0, 0.0, -0.05f, +0.5, 1.0, 0.0,
-                                       1.0, -0.55f, +0.5, 0.0, 1.0, 1.0};
-
-      // We now divide the vector size by 5 fields.
-      vertexCount = static_cast<uint32_t>(vertexData.size() / 5);
+      indexCount = static_cast<uint32_t>(indexData.size());
 
       // Create vertex buffer
       BufferDescriptor bufferDesc;
-      bufferDesc.size             = vertexData.size() * sizeof(float);
+      bufferDesc.size             = pointData.size() * sizeof(float);
       bufferDesc.usage            = BufferUsage::CopyDst | BufferUsage::Vertex; // Vertex usage here!
       bufferDesc.mappedAtCreation = false;
-      vertexBuffer                = device.createBuffer(bufferDesc);
+      pointBuffer                 = device.createBuffer(bufferDesc);
 
       // Upload geometry data to the buffer
-      queue.writeBuffer(vertexBuffer, 0, vertexData.data(), bufferDesc.size);
+      queue.writeBuffer(pointBuffer, 0, pointData.data(), bufferDesc.size);
+
+      // Create index buffer
+      // (we reuse the bufferDesc initialized for the pointBuffer)
+      bufferDesc.size  = indexData.size() * sizeof(uint16_t);
+      bufferDesc.size  = (bufferDesc.size + 3) & ~3; // round up to the next multiple of 4
+      bufferDesc.usage = BufferUsage::CopyDst | BufferUsage::Index;
+      indexBuffer      = device.createBuffer(bufferDesc);
+
+      queue.writeBuffer(indexBuffer, 0, indexData.data(), bufferDesc.size);
    }
 
    void InitializePipeline() {
@@ -341,7 +354,9 @@ public:
 
    // Uninitialize everything that was initialized
    void Terminate() {
-      vertexBuffer.release();
+      pointBuffer.release();
+      indexBuffer.release();
+
       pipeline.release();
       surface.unconfigure();
       queue.release();
@@ -374,7 +389,7 @@ public:
       renderPassColorAttachment.resolveTarget                   = nullptr;
       renderPassColorAttachment.loadOp                          = wgpu::LoadOp::Clear;
       renderPassColorAttachment.storeOp                         = wgpu::StoreOp::Store;
-      renderPassColorAttachment.clearValue                      = WGPUColor{0.9, 0.1, 0.2, 1.0};
+      renderPassColorAttachment.clearValue                      = WGPUColor{0.1, 0.1, 0.1, 1.0};
 #ifndef WEBGPU_BACKEND_WGPU
       renderPassColorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
 #endif // NOT WEBGPU_BACKEND_WGPU
@@ -389,10 +404,15 @@ public:
       // Select which render pipeline to use
       renderPass.setPipeline(pipeline);
       // Set vertex buffer while encoding the render pass
-      renderPass.setVertexBuffer(0, vertexBuffer, 0, vertexBuffer.getSize());
+      renderPass.setVertexBuffer(0, pointBuffer, 0, pointBuffer.getSize());
+
+      // The second argument must correspond to the choice of uint16_t or uint32_t
+      // we've done when creating the index buffer.
+      renderPass.setIndexBuffer(indexBuffer, IndexFormat::Uint16, 0, indexBuffer.getSize());
+
 
       // We use the `vertexCount` variable instead of hard-coding the vertex count
-      renderPass.draw(vertexCount, 1, 0, 0);
+      renderPass.drawIndexed(indexCount, 1, 0, 0, 0);
 
 
       renderPass.end();
@@ -508,8 +528,11 @@ private:
    std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
    wgpu::TextureFormat                  surfaceFormat = wgpu::TextureFormat::Undefined;
    wgpu::RenderPipeline                 pipeline;
-   Buffer                               vertexBuffer;
-   uint32_t                             vertexCount;
+
+   Buffer   pointBuffer;
+   uint32_t pointCount;
+   Buffer   indexBuffer;
+   uint32_t indexCount;
 };
 
 int main(void) {
