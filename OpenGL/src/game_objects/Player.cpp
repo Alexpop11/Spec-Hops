@@ -14,7 +14,7 @@ Player::Player(const std::string& name, int tile_x, int tile_y)
    Camera::position = {tile_x, tile_y};
 
    healthText = std::make_unique<Text>("Health", Renderer::jacquard12_big, glm::vec2{20, 20});
-   topText = std::make_unique<Text>("Hello!", Renderer::Pixelify, glm::vec2{1280,650});
+   //topText = std::make_unique<Text>("Hello!", Renderer::Pixelify, glm::vec2{1280,650});
 }
 
 bool Player::move(int new_x, int new_y) {

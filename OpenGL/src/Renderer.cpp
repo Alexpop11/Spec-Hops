@@ -81,7 +81,7 @@ glm::vec2 Renderer::MousePos() {
    Renderer::Renderer(GLFWwindow* window, ImGuiIO* io)
    : window(window)
    , io(io)
-   , lineShader(Shader(Renderer::ResPath() + "shaders/line.shader")) {
+   , lineShader(Shader(Renderer::ResPath() + "shaders/laser.shader")) {
    std::array<float, 8> positions = {
       0.0f, -0.5f, // Bottom-left
       1.0f, -0.5f, // Bottom-right

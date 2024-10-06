@@ -16,9 +16,9 @@ public:
    virtual void render(Renderer& renderer) override;
 
    std::unique_ptr<Text> healthText;
-   std::unique_ptr<Text> topText;
+   //std::unique_ptr<Text> topText;
 
-   virtual std::vector<GameObject*> children() override { return {healthText.get(), topText.get()}; }
+   virtual std::vector<GameObject*> children() override { return {healthText.get()}; }
 
    // Powerups
    int playerBunnyHopCoolDown = 6;
