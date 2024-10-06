@@ -101,8 +101,9 @@ bool Character::move(int new_x, int new_y) {
 
                   bool hitWall = knockback_distance < max_knockback_distance;
 
-                  // Optionally, apply effects to the enemy (e.g., stun)
+                  //apply effect to enemy if they hit a wall
                   other_character->kick(hitWall);
+                  audio().Impact.play();
 
                   return true; // Move succeeded with kick
                } else {
@@ -134,7 +135,7 @@ bool Character::move(int new_x, int new_y) {
 }
 
 void Character::kick(bool hitWall) {
-   stunnedLength = 3;
+   stunnedLength = 9;
    tintColor     = {1.0, 0.5, 0.0, 0.5};
 }
 

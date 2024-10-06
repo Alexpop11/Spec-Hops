@@ -9,9 +9,6 @@ Bullet::Bullet(const std::string& name, float x, float y, int direction_x, int d
    , direction_y(direction_y) {}
 
 void Bullet::tickUpdate() {
-   // Move the bullet
-   tile_x += direction_x;
-   tile_y += direction_y;
 
    // Check if the bullet hits a wall
    auto tiles = World::at<Tile>(tile_x, tile_y);
@@ -30,4 +27,8 @@ void Bullet::tickUpdate() {
       std::cout << "Bullet damaged character. Their health is now " << character->health << std::endl;
       ShouldDestroy = true;
    }
+
+   // Move the bullet
+   tile_x += direction_x;
+   tile_y += direction_y;
 }

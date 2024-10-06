@@ -54,6 +54,8 @@ public:
    Sound Bomb_Tick;
    Sound Enemy_Hurt;
    Sound Zap;
+   Sound Impact;
+   Sound Scuff;
 };
 
 AudioEngine& audio();

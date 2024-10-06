@@ -77,7 +77,7 @@ void Player::render(Renderer& renderer) {
          audio().Zap.play();
          // get what is at mouse position
          for (auto& character : World::at<Character>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
-            character->stunnedLength = 5;
+            character->stunnedLength = 6;
             character->tintColor     = {1.0, 0.5, 0.0, 0.5};
          }
          for (auto& bomb : World::at<Bomb>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
@@ -140,24 +140,28 @@ void Player::tickUpdate() {
       new_y += 1 + boostJumpCount;
       if (boostJumpCount > 0) {
          bunnyHopCoolDown = playerBunnyHopCoolDown;
+         audio().Scuff.play();
       }
    }
    if (Input::keys_pressed[GLFW_KEY_A] || Input::keys_pressed[GLFW_KEY_LEFT]) {
       new_x -= 1 + boostJumpCount;
       if (boostJumpCount > 0) {
          bunnyHopCoolDown = playerBunnyHopCoolDown;
+         audio().Scuff.play();
       }
    }
    if (Input::keys_pressed[GLFW_KEY_S] || Input::keys_pressed[GLFW_KEY_DOWN]) {
       new_y -= 1 + boostJumpCount;
       if (boostJumpCount > 0) {
          bunnyHopCoolDown = playerBunnyHopCoolDown;
+         audio().Scuff.play();
       }
    }
    if (Input::keys_pressed[GLFW_KEY_D] || Input::keys_pressed[GLFW_KEY_RIGHT]) {
       new_x += 1 + boostJumpCount;
       if (boostJumpCount > 0) {
          bunnyHopCoolDown = playerBunnyHopCoolDown;
+         audio().Scuff.play();
       }
    }
    if (Input::keys_pressed[GLFW_KEY_SPACE]) {

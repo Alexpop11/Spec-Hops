@@ -53,7 +53,9 @@ AudioEngine::AudioEngine()
    , Bomb_Place(getSound("bomb_place.wav"))
    , Bomb_Tick(getSound("bomb_tick.wav"))
    , Enemy_Hurt(getSound("enemy_ouch.wav")) 
-   , Zap(getSound("Zap.wav")) {}
+   , Zap(getSound("zap.wav"))
+   , Impact(getSound("impact.wav")) 
+   , Scuff(getSound("scuff.wav")) {}
 
 Sound AudioEngine::getSound(const std::string& name) {
    return Sound(Renderer::ResPath() + "Sounds/" + name, &engine.engine);
