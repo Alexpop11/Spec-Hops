@@ -6,7 +6,7 @@ Bomber::Bomber(const std::string& name, float x, float y)
    health       = 1;
 }
 
-void Bomber::move(int new_x, int new_y) {
+bool Bomber::move(int new_x, int new_y) {
 
    auto nearbyBombsCurrent = World::where<Bomb>(
       [&](const Bomb& bomb) { return (std::abs(tile_x - bomb.tile_x) + std::abs(tile_y - bomb.tile_y) < 3); });
@@ -27,16 +27,18 @@ void Bomber::move(int new_x, int new_y) {
                World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
                audio().Bomb_Place.play();
                Character::move(tile_x - sign(player->tile_x - tile_x), tile_y);
-               Character::move(tile_x, tile_y - sign(player->tile_y - tile_y));
+               return Character::move(tile_x, tile_y - sign(player->tile_y - tile_y));
             }
             break;
          }
       };
    }
+   return false;
 }
 
 void Bomber::update() {
    Character::update();
+   tintColor.a = zeno(tintColor.a, 0.0, 0.1);
    if (health <= 0) {
       ShouldDestroy = true;
       audio().Enemy_Hurt.play();

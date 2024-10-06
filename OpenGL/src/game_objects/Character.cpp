@@ -21,47 +21,53 @@ void Character::tickUpdate() {
    }
 }
 
-void Character::move(int new_x, int new_y) {
-   int dx    = new_x - tile_x;
-   int dy    = new_y - tile_y;
-   int steps = std::max(std::abs(dx), std::abs(dy));
+bool Character::move(int new_x, int new_y) {
+   if (stunnedLength == 0) { // The gun can stun enemies. If the character is stunned, they can't move
+      int dx    = new_x - tile_x;
+      int dy    = new_y - tile_y;
+      int steps = std::max(std::abs(dx), std::abs(dy));
 
-   for (int i = 1; i <= steps; ++i) {
-      int check_x = tile_x + (dx * i) / steps;
-      int check_y = tile_y + (dy * i) / steps;
+      for (int i = 1; i <= steps; ++i) {
+         int check_x = tile_x + (dx * i) / steps;
+         int check_y = tile_y + (dy * i) / steps;
 
-      bool spot_occupied = false;
-      for (auto& tile : World::at<Tile>(check_x, check_y)) {
-         if (tile->wall) {
-            spot_occupied = true;
-            break;
-         }
-      }
-      if (!spot_occupied) {
-         for (auto& character : World::at<Character>(check_x, check_y)) {
-            if (character != this) {
+         bool spot_occupied = false;
+         for (auto& tile : World::at<Tile>(check_x, check_y)) {
+            if (tile->wall) {
                spot_occupied = true;
                break;
             }
          }
+         if (!spot_occupied) {
+            for (auto& character : World::at<Character>(check_x, check_y)) {
+               if (character != this) {
+                  spot_occupied = true;
+                  break;
+               }
+            }
+         }
+
+         if (spot_occupied) {
+            // Move to the last unoccupied position
+            if (i <= 1 && !hoppedLastTurn) {
+               bunnyHopCoolDown = 0;
+            }
+            if (i > 1) {
+               tile_x = tile_x + (dx * (i - 1)) / steps;
+               tile_y = tile_y + (dy * (i - 1)) / steps;
+            }
+            return false;
+         }
       }
 
-      if (spot_occupied) {
-         // Move to the last unoccupied position
-         if (i <= 1 && !hoppedLastTurn) {
-            bunnyHopCoolDown = 0;
-         }
-         if (i > 1) {
-            tile_x = tile_x + (dx * (i - 1)) / steps;
-            tile_y = tile_y + (dy * (i - 1)) / steps;
-         }
-         return;
-      }
+      // If we've made it here, the entire path is clear
+      tile_x = new_x;
+      tile_y = new_y;
+      return true;
+   } else if (stunnedLength > 0) {
+      stunnedLength--;
    }
-
-   // If we've made it here, the entire path is clear
-   tile_x = new_x;
-   tile_y = new_y;
+   return false;
 }
 
 void Character::die() {

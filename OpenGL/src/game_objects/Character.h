@@ -7,12 +7,13 @@
 class Character : public SquareObject {
 public:
    Character(const std::string& name, int tile_x, int tile_y, std::string texturepath);
-   virtual void move(int new_x, int new_y);
+   virtual bool move(int new_x, int new_y);
    virtual void update() override;
    virtual void tickUpdate() override;
    void         die();
    int          health = 1;
    virtual void        hurt();
+   int stunnedLength = 0;
 
    // Powerups
    bool hasBomb      = true;
@@ -22,6 +23,7 @@ public:
    int  bunnyHopCoolDown = 0;
    bool hoppedLastTurn   = false;
    bool hasGun           = true;
+   int  gunCooldown      = 0;
 };
 
 template <typename T>

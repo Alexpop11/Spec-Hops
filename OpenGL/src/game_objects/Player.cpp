@@ -17,22 +17,25 @@ Player::Player(const std::string& name, int tile_x, int tile_y)
    topText = std::make_unique<Text>("Hello!", Renderer::Pixelify, glm::vec2{1280,650});
 }
 
-void Player::move(int new_x, int new_y) {
-   Character::move(new_x, new_y);
-   if (!second_step) {
-      audio().Walk.play();
-      second_step = true;
-   } else if (second_step) {
-      audio().Walk1.play();
-      second_step = false;
+bool Player::move(int new_x, int new_y) {
+   if (Character::move(new_x, new_y)) {
+      if (!second_step) {
+         audio().Walk.play();
+         second_step = true;
+      } else if (second_step) {
+         audio().Walk1.play();
+         second_step = false;
+      }
+      return true;
    }
+   return false;
 }
 
 void Player::update() {
    Character::update();
    // smooth camera movement
    Camera::position = zeno(Camera::position, position, 0.1);
-   tintColor.a      = zeno(tintColor.a, 0.0, 0.05);
+   tintColor.a      = zeno(tintColor.a, 0.0, 0.1);
 
    bool key_pressed_this_frame = false;
 
@@ -66,13 +69,18 @@ void Player::update() {
 void Player::render(Renderer& renderer) {
    Character::render(renderer);
    if (Input::mouse_pressed_down) {
-      Renderer::DebugLine(position, renderer.MousePos(), {1, 0, 0, 1});
-      // get what is at mouse position
-      for (auto& character : World::at<Character>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
-         character->hurt();
-        }
-      for (auto& bomb : World::at<Bomb>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
-         bomb->explode();
+      if (gunCooldown == 0) {
+         Renderer::DebugLine(position, renderer.MousePos(), {1, 0, 0, 1});
+         audio().Zap.play();
+         // get what is at mouse position
+         for (auto& character : World::at<Character>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
+            character->stunnedLength = 5;
+            character->tintColor     = {1.0, 0.5, 0.0, 0.5};
+         }
+         for (auto& bomb : World::at<Bomb>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
+            bomb->explode();
+         }
+            gunCooldown = playerGunCooldown;
       }
    }
 }
@@ -104,6 +112,10 @@ void Player::tickUpdate() {
          hoppedLastTurn = false;
       }
       bunnyHopCoolDown--;
+   }
+
+   if (gunCooldown > 0) {
+      gunCooldown--;
    }
 
    int boostJumpCount =

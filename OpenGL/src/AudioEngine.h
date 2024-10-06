@@ -53,6 +53,7 @@ public:
    Sound Bomb_Place;
    Sound Bomb_Tick;
    Sound Enemy_Hurt;
+   Sound Zap;
 };
 
 AudioEngine& audio();

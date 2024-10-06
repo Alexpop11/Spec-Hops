@@ -10,7 +10,7 @@ public:
    bool         moved_last_tick = false;
    virtual void tickUpdate() override;
    bool         key_pressed_last_frame = false;
-   virtual void move(int new_x, int new_y) override;
+   virtual bool move(int new_x, int new_y) override;
    virtual void hurt() override;
    bool         second_step = false;
    virtual void render(Renderer& renderer) override;
@@ -21,5 +21,6 @@ public:
    virtual std::vector<GameObject*> children() override { return {healthText.get(), topText.get()}; }
 
    // Powerups
-   int playerBunnyHopCoolDown = 5;
+   int playerBunnyHopCoolDown = 6;
+   int playerGunCooldown = 3;
 };

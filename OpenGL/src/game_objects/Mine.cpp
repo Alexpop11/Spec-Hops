@@ -29,7 +29,7 @@ void Mine::tickUpdate() {
          audio().Bomb_Tick.play();
          red_last_frame = false;
       }
-      if (ExplodeTick > 24) {
+      if (ExplodeTick > 6) {
 
          auto nearbyWalls = World::where<Tile>(
             [&](const Tile& tile) { return (std::abs(tile_x - tile.tile_x) + std::abs(tile_y - tile.tile_y) < 3); });

@@ -10,7 +10,7 @@ Bomb::Bomb(const std::string& name, float x, float y)
 
 void Bomb::tickUpdate() {
    // Explode the bomb
-   if (ExplodeTick > 24) {
+   if (ExplodeTick > 6) {
       explode();
    } else {
       ExplodeTick++;
