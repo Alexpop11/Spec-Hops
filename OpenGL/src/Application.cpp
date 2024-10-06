@@ -243,22 +243,21 @@ void Application::InitializePipeline() {
    // Create the render pipeline
    wgpu::RenderPipelineDescriptor pipelineDesc;
 
-
    VertexBufferLayout<glm::vec2, glm::vec3> layout;
-   auto [vertexBufferLayout, vertexAttribs] = layout.CreateLayout();
+   auto                                     vertexBufferInfo = layout.CreateLayout();
 
    // print layout and attributes
    std::cout << "Vertex attributes: " << std::endl;
-   for (const auto& attr : *vertexAttribs) {
+   for (const auto& attr : vertexBufferInfo.attributes) {
       std::cout << " - Attribute | " << " offset: " << attr.offset << ", format: " << attr.format << std::endl;
    }
    std::cout << "Vertex buffer layout: " << std::endl;
-   std::cout << " - Stride: " << vertexBufferLayout.arrayStride << std::endl;
-   std::cout << " - Step mode: " << vertexBufferLayout.stepMode << std::endl;
-   std::cout << " - Attribute count: " << vertexBufferLayout.attributeCount << std::endl;
+   std::cout << " - Stride: " << vertexBufferInfo.layout.arrayStride << std::endl;
+   std::cout << " - Step mode: " << vertexBufferInfo.layout.stepMode << std::endl;
+   std::cout << " - Attribute count: " << vertexBufferInfo.layout.attributeCount << std::endl;
 
    pipelineDesc.vertex.bufferCount = 1;
-   pipelineDesc.vertex.buffers     = &vertexBufferLayout;
+   pipelineDesc.vertex.buffers     = &vertexBufferInfo.layout;
 
    // NB: We define the 'shaderModule' in the second part of this chapter.
    // Here we tell that the programmable vertex shader stage is described

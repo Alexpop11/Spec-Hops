@@ -4,6 +4,23 @@
 #include <string>
 #include "glm/glm.hpp"
 
+// Make a type like std::tuple<wgpu::VertexBufferLayout, std::vector<wgpu::VertexAttribute>>, but delete its copy and
+// copy assignment operators and make its move constructor and move assignment operator default
+struct VertexBufferInfo {
+   wgpu::VertexBufferLayout           layout;
+   std::vector<wgpu::VertexAttribute> attributes;
+
+   // add default constructor
+   VertexBufferInfo() = default;
+
+   VertexBufferInfo(const VertexBufferInfo&)            = delete;
+   VertexBufferInfo& operator=(const VertexBufferInfo&) = delete;
+
+   VertexBufferInfo(VertexBufferInfo&& other) noexcept;
+   VertexBufferInfo& operator=(VertexBufferInfo&& other) noexcept;
+};
+
+
 // template function that converts a type to a wgpu::VertexFormat
 template <typename T>
 wgpu::VertexFormat to_vertex_format() {
@@ -40,16 +57,15 @@ struct VertexBufferLayout {
       return vertexAttribs;
    }
 
-   std::tuple<wgpu::VertexBufferLayout, std::unique_ptr<std::vector<wgpu::VertexAttribute>>> CreateLayout() {
-      auto vertexAttribs = std::make_unique<std::vector<wgpu::VertexAttribute>>(Attributes());
+   VertexBufferInfo CreateLayout() {
+      VertexBufferInfo info;
+      info.attributes            = Attributes();
+      info.layout.arrayStride    = (type_size<Types>() + ...); // sum of the sizes of all types
+      info.layout.stepMode       = wgpu::VertexStepMode::Vertex;
+      info.layout.attributeCount = info.attributes.size();
+      info.layout.attributes     = info.attributes.data();
 
-      wgpu::VertexBufferLayout layout;
-      layout.arrayStride    = (type_size<Types>() + ...); // sum of the sizes of all types
-      layout.stepMode       = wgpu::VertexStepMode::Vertex;
-      layout.attributeCount = vertexAttribs->size();
-      layout.attributes     = vertexAttribs->data();
-
-      return std::make_tuple(layout, std::move(vertexAttribs));
+      return info;
    }
 
 private:
