@@ -82,7 +82,8 @@ fn vs_main(in: VertexInput) -> VertexOutput {
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4f {
-    return vec4f(in.color, 1.0); // use the interpolated color coming from the vertex shader
+    let linear_color = pow(in.color, vec3f(2.2));
+    return vec4f(linear_color, 1.0);
 }
 )";
 
@@ -117,7 +118,7 @@ void deviceLost(WGPUDeviceLostReason reason, char const* message, void* /* pUser
 class Application {
 public:
    // Initialize everything and return true if it went all right
-   bool Initialize() {
+   Application() {
       // Open window
       glfwInit();
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -195,7 +196,7 @@ public:
 
       InitializeBuffers();
 
-      return true;
+      initialized = true;
    }
 
    void InitializeBuffers() {
@@ -445,6 +446,13 @@ public:
    // Return true as long as the main loop should keep on running
    bool IsRunning() { return !glfwWindowShouldClose(window); }
 
+   static Application& get() {
+      static Application application = Application(); // Initialized first time this function is called
+      return application;
+   }
+
+   bool initialized;
+
 private:
    void PrintAdapterInfo(wgpu::Adapter& adapter) {
       // Get the adapter properties
@@ -537,10 +545,10 @@ private:
 
 int main(void) {
 
-   Application app;
+   Application& app = Application::get();
 
    // Not Emscripten-friendly
-   if (!app.Initialize()) {
+   if (!app.initialized) {
       return 1;
    }
 
