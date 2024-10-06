@@ -30,8 +30,6 @@
 #endif
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
-using namespace wgpu;
-
 // We embed the source of the shader module here
 const char* shaderSource = R"(
 /**
@@ -119,7 +117,7 @@ Application::Application() {
    wgpu::DeviceDescriptor deviceDesc   = {};
    deviceDesc.label                    = "My Device";
    deviceDesc.requiredFeatureCount     = 0;
-   RequiredLimits requiredLimits       = GetRequiredLimits(adapter);
+   wgpu::RequiredLimits requiredLimits = GetRequiredLimits(adapter);
    deviceDesc.requiredLimits           = &requiredLimits;
    deviceDesc.defaultQueue.nextInChain = nullptr;
    deviceDesc.defaultQueue.label       = "The default queue";
@@ -193,9 +191,9 @@ void Application::InitializeBuffers() {
    indexCount = static_cast<uint32_t>(indexData.size());
 
    // Create vertex buffer
-   BufferDescriptor bufferDesc;
+   wgpu::BufferDescriptor bufferDesc;
    bufferDesc.size             = pointData.size() * sizeof(float);
-   bufferDesc.usage            = BufferUsage::CopyDst | BufferUsage::Vertex; // Vertex usage here!
+   bufferDesc.usage            = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex; // Vertex usage here!
    bufferDesc.mappedAtCreation = false;
    pointBuffer                 = device.createBuffer(bufferDesc);
 
@@ -206,7 +204,7 @@ void Application::InitializeBuffers() {
    // (we reuse the bufferDesc initialized for the pointBuffer)
    bufferDesc.size  = indexData.size() * sizeof(uint16_t);
    bufferDesc.size  = (bufferDesc.size + 3) & ~3; // round up to the next multiple of 4
-   bufferDesc.usage = BufferUsage::CopyDst | BufferUsage::Index;
+   bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index;
    indexBuffer      = device.createBuffer(bufferDesc);
 
    queue.writeBuffer(indexBuffer, 0, indexData.data(), bufferDesc.size);
@@ -254,13 +252,13 @@ void Application::InitializePipeline() {
    // Create the render pipeline
    wgpu::RenderPipelineDescriptor pipelineDesc;
 
-   std::vector<VertexAttribute> vertexAttribs(2);
+   std::vector<wgpu::VertexAttribute> vertexAttribs(2);
    vertexAttribs[0].shaderLocation = 0; // @location(0)
-   vertexAttribs[0].format         = VertexFormat::Float32x2;
+   vertexAttribs[0].format         = wgpu::VertexFormat::Float32x2;
    vertexAttribs[0].offset         = 0;
-   vertexAttribs[1].shaderLocation = 1;                       // @location(1)
-   vertexAttribs[1].format         = VertexFormat::Float32x3; // different type!
-   vertexAttribs[1].offset         = 2 * sizeof(float);       // non null offset!
+   vertexAttribs[1].shaderLocation = 1;                             // @location(1)
+   vertexAttribs[1].format         = wgpu::VertexFormat::Float32x3; // different type!
+   vertexAttribs[1].offset         = 2 * sizeof(float);             // non null offset!
 
 
 
@@ -269,7 +267,7 @@ void Application::InitializePipeline() {
    vertexBufferLayout.attributeCount = static_cast<uint32_t>(vertexAttribs.size());
    vertexBufferLayout.attributes     = vertexAttribs.data();
    vertexBufferLayout.arrayStride    = 5 * sizeof(float);
-   vertexBufferLayout.stepMode       = VertexStepMode::Vertex;
+   vertexBufferLayout.stepMode       = wgpu::VertexStepMode::Vertex;
 
    pipelineDesc.vertex.bufferCount = 1;
    pipelineDesc.vertex.buffers     = &vertexBufferLayout;
@@ -402,7 +400,7 @@ void Application::MainLoop() {
 
    // The second argument must correspond to the choice of uint16_t or uint32_t
    // we've done when creating the index buffer.
-   renderPass.setIndexBuffer(indexBuffer, IndexFormat::Uint16, 0, indexBuffer.getSize());
+   renderPass.setIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16, 0, indexBuffer.getSize());
 
 
    // We use the `vertexCount` variable instead of hard-coding the vertex count
