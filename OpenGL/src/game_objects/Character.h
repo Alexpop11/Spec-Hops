@@ -1,10 +1,10 @@
 #pragma once
-#include "SquareObject.h"
+#include "Entity.h"
 #include "../World.h"
 #include "Tile.h"
 
 
-class Character : public SquareObject {
+class Character : public Entity {
 public:
    Character(const std::string& name, int tile_x, int tile_y, std::string texturepath);
    virtual bool move(int new_x, int new_y);
@@ -12,8 +12,8 @@ public:
    virtual void tickUpdate() override;
    void         die();
    int          health = 1;
-   virtual void        hurt();
-   int stunnedLength = 0;
+   virtual void hurt();
+   int          stunnedLength = 0;
 
    // Powerups
    bool hasBomb      = true;

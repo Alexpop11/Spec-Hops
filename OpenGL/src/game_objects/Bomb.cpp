@@ -4,7 +4,7 @@
 #include "Player.h"
 
 Bomb::Bomb(const std::string& name, float x, float y)
-   : SquareObject(name, DrawPriority::Bomb, x, y, "Textures/bomb.png") {
+   : Entity(name, DrawPriority::Bomb, x, y, "Textures/bomb.png") {
    ExplodeTick = 0;
 }
 

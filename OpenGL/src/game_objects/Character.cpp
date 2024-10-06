@@ -5,7 +5,7 @@
 
 
 Character::Character(const std::string& name, int tile_x, int tile_y, std::string texturepath)
-   : SquareObject(name, DrawPriority::Character, tile_x, tile_y, texturepath) {}
+   : Entity(name, DrawPriority::Character, tile_x, tile_y, texturepath) {}
 
 void Character::update() {
    SquareObject::update();
@@ -100,7 +100,7 @@ bool Character::move(int new_x, int new_y) {
 
                   // Optionally, apply effects to the enemy (e.g., stun)
                   other_character->stunnedLength = 3;
-                  other_character->tintColor = {1.0, 0.5, 0.0, 0.5};
+                  other_character->tintColor     = {1.0, 0.5, 0.0, 0.5};
 
                   return true; // Move succeeded with kick
                } else {

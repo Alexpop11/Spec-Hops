@@ -1,7 +1,7 @@
 #pragma once
-#include "SquareObject.h"
+#include "Entity.h"
 
-class Bomb : public SquareObject {
+class Bomb : public Entity {
 public:
    Bomb(const std::string& name, float x, float y);
    virtual void tickUpdate() override;
