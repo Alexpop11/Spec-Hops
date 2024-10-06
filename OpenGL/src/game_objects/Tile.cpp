@@ -1,14 +1,14 @@
 #include "Tile.h"
 
 Tile::Tile(const std::string& name, bool wall, bool unbreakable, float x, float y)
-   : SquareObject(name, DrawPriority::Floor, x, y, "Textures/alt-wall-bright.png")
+   : SquareObject(name, DrawPriority::Floor, x, y, "textures/alt-wall-bright.png")
    , wall(wall)
    , unbreakable(unbreakable) {
-   wallTextureUnbreakable = Texture::create(Renderer::ResPath() + "Textures/alt-wall-unbreakable.png");
-   wallTexture            = Texture::create(Renderer::ResPath() + "Textures/alt-wall-bright.png");
+   wallTextureUnbreakable = Texture::create(Renderer::ResPath() + "textures/alt-wall-unbreakable.png");
+   wallTexture            = Texture::create(Renderer::ResPath() + "textures/alt-wall-bright.png");
 
    // floor textures array
-   std::vector<std::string> floorTextures = {"Textures/2-alt-floor.png", "Textures/2-alt-floor-2.png"};
+   std::vector<std::string> floorTextures = {"textures/2-alt-floor.png", "textures/2-alt-floor-2.png"};
 
    // alternate floor textures i made. I'm going to leave them here for convenience, just comment out the above line and
    // uncomment this one std::vector<std::string> floorTextures = {"Textures/alt-floor.png", "Textures/alt-floor-2.png",

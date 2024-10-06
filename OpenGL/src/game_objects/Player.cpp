@@ -8,7 +8,7 @@
 #include "Bomb.h"
 
 Player::Player(const std::string& name, int tile_x, int tile_y)
-   : Character(name, tile_x, tile_y, "Textures/alternate-player.png") {
+   : Character(name, tile_x, tile_y, "textures/alternate-player.png") {
    drawPriority     = DrawPriority::Character;
    health           = 5;
    Camera::position = {tile_x, tile_y};

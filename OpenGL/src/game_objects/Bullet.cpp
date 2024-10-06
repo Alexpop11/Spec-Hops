@@ -4,7 +4,7 @@
 #include "Player.h"
 
 Bullet::Bullet(const std::string& name, float x, float y, int direction_x, int direction_y)
-   : SquareObject(name, DrawPriority::Bomb, x, y, "Textures/bullet.png")
+   : SquareObject(name, DrawPriority::Bomb, x, y, "textures/bullet.png")
    , direction_x(direction_x)
    , direction_y(direction_y) {}
 

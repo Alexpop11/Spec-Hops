@@ -11,7 +11,7 @@ using namespace GeometryUtils;
 
 Fog::Fog()
    : GameObject("Fog of War", DrawPriority::Fog, {0, 0}) {
-   shader       = Shader::create(Renderer::ResPath() + "Shaders/fog.shader");
+   shader       = Shader::create(Renderer::ResPath() + "shaders/fog.shader");
    mainFogColor = {0.1, 0.1, 0.1, 1};
    tintFogColor = {0.1, 0.1, 0.1, 0};
 }

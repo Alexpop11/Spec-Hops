@@ -58,7 +58,7 @@ AudioEngine::AudioEngine()
    , Scuff(getSound("scuff.wav")) {}
 
 Sound AudioEngine::getSound(const std::string& name) {
-   return Sound(Renderer::ResPath() + "Sounds/" + name, &engine.engine);
+   return Sound(Renderer::ResPath() + "sounds/" + name, &engine.engine);
 }
 
 void AudioEngine::play(Sound& sound) {
