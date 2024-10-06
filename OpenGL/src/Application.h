@@ -2,6 +2,7 @@
 #include <webgpu/webgpu.hpp>
 
 #include "rendering/RenderPipeline.h"
+#include "rendering/Buffer.h"
 
 #include <GLFW/glfw3.h>
 
@@ -43,10 +44,8 @@ private:
    std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
    wgpu::Queue                          queue;
    wgpu::TextureFormat                  surfaceFormat;
-   RenderPipeline                 pipeline;
+   RenderPipeline                       pipeline;
 
-   wgpu::Buffer pointBuffer;
-   uint32_t     pointCount;
-   wgpu::Buffer indexBuffer;
-   uint32_t     indexCount;
+   Buffer<float>    pointBuffer;
+   Buffer<uint16_t> indexBuffer;
 };

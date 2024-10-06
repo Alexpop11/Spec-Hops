@@ -25,6 +25,7 @@
 #include "rendering/Shader.h"
 #include "rendering/RenderPipeline.h"
 #include "rendering/VertexBufferLayout.h"
+#include "rendering/Buffer.h"
 
 #include "glm/glm.hpp"
 
@@ -215,6 +216,25 @@ wgpu::TextureFormat preferredFormat(wgpu::Surface& surface, wgpu::Adapter& adapt
    return capabilities.formats[0];
 }
 
+Buffer<float> getPointBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+   std::vector<float> pointData = {
+      // x,   y,     r,   g,   b
+      -0.5, -0.5, 1.0, 0.5, 0.5, // Point #0
+      +0.5, -0.5, 0.5, 1.0, 0.5, // Point #1
+      +0.5, +0.5, 0.5, 0.5, 1.0, // Point #2
+      -0.5, +0.5, 1.0, 1.0, 0.5  // Point #3
+   };
+   return Buffer<float>(device, queue, pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
+}
+
+Buffer<uint16_t> getIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+   std::vector<uint16_t> indexData = {
+      0, 1, 2, // Triangle #0 connects points #0, #1 and #2
+      0, 2, 3  // Triangle #1 connects points #0, #2 and #3
+   };
+   return Buffer<uint16_t>(device, queue, indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
+}
+
 // Initialize everything and return true if it went all right
 Application::Application()
    : window(createWindow())
@@ -225,7 +245,9 @@ Application::Application()
    , uncapturedErrorCallbackHandle(getUncapturedErrorCallbackHandle(device))
    , queue(device.getQueue())
    , surfaceFormat(preferredFormat(surface, adapter))
-   , pipeline(initializePipeline(device, surfaceFormat)) {
+   , pipeline(initializePipeline(device, surfaceFormat))
+   , pointBuffer(getPointBuffer(device, queue))
+   , indexBuffer(getIndexBuffer(device, queue)) {
 
    // Configure the surface
    wgpu::SurfaceConfiguration config = {};
@@ -245,7 +267,6 @@ Application::Application()
 
    surface.configure(config);
 
-   InitializeBuffers();
 
    InitializeResPath();
 
@@ -255,13 +276,9 @@ Application::Application()
 void Application::InitializeBuffers() {
    // Define point data
    // The de-duplicated list of point positions
-   std::vector<float> pointData = {
-      // x,   y,     r,   g,   b
-      -0.5, -0.5, 1.0, 0.5, 0.5, // Point #0
-      +0.5, -0.5, 0.5, 1.0, 0.5, // Point #1
-      +0.5, +0.5, 0.5, 0.5, 1.0, // Point #2
-      -0.5, +0.5, 1.0, 1.0, 0.5  // Point #3
-   };
+   /*pointBuffer = Buffer<float>(device, queue, pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
+   pointBuffer.upload();*/
+
 
    // Define index data
    // This is a list of indices referencing positions in the pointData
@@ -270,7 +287,7 @@ void Application::InitializeBuffers() {
       0, 2, 3  // Triangle #1 connects points #0, #2 and #3
    };
 
-   indexCount = static_cast<uint32_t>(indexData.size());
+   /*indexCount = static_cast<uint32_t>(indexData.size());
 
    // Create vertex buffer
    wgpu::BufferDescriptor bufferDesc;
@@ -289,7 +306,7 @@ void Application::InitializeBuffers() {
    bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index;
    indexBuffer      = device.createBuffer(bufferDesc);
 
-   queue.writeBuffer(indexBuffer, 0, indexData.data(), bufferDesc.size);
+   queue.writeBuffer(indexBuffer, 0, indexData.data(), bufferDesc.size);*/
 }
 
 void Application::InitializeResPath() {
@@ -315,9 +332,6 @@ void Application::InitializeResPath() {
 
 // Uninitialize everything that was initialized
 void Application::Terminate() {
-   pointBuffer.release();
-   indexBuffer.release();
-
    surface.unconfigure();
    queue.release();
    surface.release();
@@ -360,18 +374,10 @@ void Application::MainLoop() {
 
    wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
 
-   // Select which render pipeline to use
    renderPass.setPipeline(pipeline.GetPipeline());
-   // Set vertex buffer while encoding the render pass
-   renderPass.setVertexBuffer(0, pointBuffer, 0, pointBuffer.getSize());
-
-   // The second argument must correspond to the choice of uint16_t or uint32_t
-   // we've done when creating the index buffer.
-   renderPass.setIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16, 0, indexBuffer.getSize());
-
-
-   // We use the `vertexCount` variable instead of hard-coding the vertex count
-   renderPass.drawIndexed(indexCount, 1, 0, 0, 0);
+   renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.size());
+   renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.size());
+   renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
 
 
    renderPass.end();
