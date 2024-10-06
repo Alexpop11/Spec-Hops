@@ -13,6 +13,7 @@ public:
    void         die();
    int          health = 1;
    virtual void hurt();
+   virtual void kick(bool hitWall) override;
    int          stunnedLength = 0;
 
    // Powerups

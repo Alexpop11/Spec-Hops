@@ -31,8 +31,8 @@ bool Character::move(int new_x, int new_y) {
          int check_x = tile_x + (dx * i) / steps;
          int check_y = tile_y + (dy * i) / steps;
 
-         bool       spot_occupied   = false;
-         Character* other_character = nullptr;
+         bool    spot_occupied   = false;
+         Entity* other_character = nullptr;
 
          // Check for walls
          for (auto& tile : World::at<Tile>(check_x, check_y)) {
@@ -44,10 +44,10 @@ bool Character::move(int new_x, int new_y) {
 
          if (!spot_occupied) {
             // Check for other characters
-            for (auto& character : World::at<Character>(check_x, check_y)) {
-               if (character != this) {
+            for (auto& entity : World::at<Entity>(check_x, check_y)) {
+               if (entity != this) {
                   spot_occupied   = true;
-                  other_character = character;
+                  other_character = entity;
                   break;
                }
             }
@@ -59,8 +59,9 @@ bool Character::move(int new_x, int new_y) {
                int knockback_dx = (dx != 0) ? dx / std::abs(dx) : 0;
                int knockback_dy = (dy != 0) ? dy / std::abs(dy) : 0;
 
-               bool can_knockback      = true;
-               int  knockback_distance = 3;
+               bool      can_knockback          = true;
+               const int max_knockback_distance = 3;
+               int       knockback_distance     = max_knockback_distance;
 
                // Check if enemy can be knocked back 3 tiles
                for (int k = 1; k <= knockback_distance; ++k) {
@@ -98,9 +99,10 @@ bool Character::move(int new_x, int new_y) {
                   tile_x = check_x;
                   tile_y = check_y;
 
+                  bool hitWall = knockback_distance < max_knockback_distance;
+
                   // Optionally, apply effects to the enemy (e.g., stun)
-                  other_character->stunnedLength = 3;
-                  other_character->tintColor     = {1.0, 0.5, 0.0, 0.5};
+                  other_character->kick(hitWall);
 
                   return true; // Move succeeded with kick
                } else {
@@ -131,6 +133,10 @@ bool Character::move(int new_x, int new_y) {
    return false;
 }
 
+void Character::kick(bool hitWall) {
+   stunnedLength = 3;
+   tintColor     = {1.0, 0.5, 0.0, 0.5};
+}
 
 
 void Character::die() {

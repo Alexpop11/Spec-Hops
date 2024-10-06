@@ -36,3 +36,9 @@ void Bomb::explode() {
    audio().Bomb_Sound.play();
    ShouldDestroy = true;
 }
+
+void Bomb::kick(bool hitWall) {
+   if (hitWall) {
+      explode();
+   }
+}
