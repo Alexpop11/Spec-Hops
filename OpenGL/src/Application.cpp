@@ -91,38 +91,84 @@ void key_callback(GLFWwindow* window, int key, int /* scancode */, int action, i
    }
 }
 
-// Initialize everything and return true if it went all right
-Application::Application() {
-   // Open window
+GLFWwindow* createWindow() {
    glfwInit();
    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-   window = glfwCreateWindow(640, 480, "Spec Hops", nullptr, nullptr);
+   auto window = glfwCreateWindow(640, 480, "Spec Hops", nullptr, nullptr);
 
-   // std::string icon_path = Renderer::ResPath() + "Images/Logo2.png";
-   // setWindowIcon(window, icon_path.c_str());
+   return window;
+}
 
+void printAdapterInfo(wgpu::Adapter& adapter) {
+   // Get the adapter properties
+   wgpu::AdapterInfo info = {};
+   info.nextInChain       = nullptr;
+   adapter.getInfo(&info);
+   std::cout << "Adapter info:" << std::endl;
+   std::cout << " - vendorID: " << info.vendorID << std::endl;
+   if (info.vendor) {
+      std::cout << " - vendor: " << info.vendor << std::endl;
+   }
+   if (info.architecture) {
+      std::cout << " - architecture: " << info.architecture << std::endl;
+   }
+   std::cout << " - deviceID: " << info.deviceID << std::endl;
+   if (info.device) {
+      std::cout << " - name: " << info.device << std::endl;
+   }
+   if (info.description) {
+      std::cout << " - description: " << info.description << std::endl;
+   }
+   std::cout << std::hex;
+   std::cout << " - adapterType: 0x" << info.adapterType << std::endl;
+   std::cout << " - backendType: 0x" << info.backendType << std::endl;
+   std::cout << std::dec; // Restore decimal numbers
+}
 
-   wgpu::Instance instance = wgpuCreateInstance(nullptr);
-
-   surface = glfwGetWGPUSurface(instance, window);
-
+wgpu::Adapter getAdapter(wgpu::Instance& instance, wgpu::Surface& surface) {
    std::cout << "Requesting adapter..." << std::endl;
-   surface                                 = glfwGetWGPUSurface(instance, window);
    wgpu::RequestAdapterOptions adapterOpts = {};
    adapterOpts.compatibleSurface           = surface;
    wgpu::Adapter adapter                   = instance.requestAdapter(adapterOpts);
    std::cout << "Got adapter: " << adapter << std::endl;
+   printAdapterInfo(adapter);
+   return adapter;
+}
 
-   PrintAdapterInfo(adapter);
+wgpu::RequiredLimits getRequiredLimits(wgpu::Adapter& adapter) {
+   wgpu::SupportedLimits supportedLimits;
+   adapter.getLimits(&supportedLimits);
 
-   instance.release();
+   // Don't forget to = Default
+   wgpu::RequiredLimits requiredLimits = wgpu::Default;
 
+   // We use at most 2 vertex attribute for now
+   requiredLimits.limits.maxVertexAttributes = 2;
+   // We also never transfer more than 3 components between stages
+   requiredLimits.limits.maxInterStageShaderComponents = 3;
+   // We should also tell that we use 1 vertex buffers
+   requiredLimits.limits.maxVertexBuffers = 1;
+   // Maximum size of a buffer is 6 vertices of 2 float each
+   requiredLimits.limits.maxBufferSize = 6 * 5 * sizeof(float);
+   // Maximum stride between 2 consecutive vertices in the vertex buffer
+   requiredLimits.limits.maxVertexBufferArrayStride = 5 * sizeof(float);
+
+   // These two limits are different because they are "minimum" limits,
+   // they are the only ones we are may forward from the adapter's supported
+   // limits.
+   requiredLimits.limits.minUniformBufferOffsetAlignment = supportedLimits.limits.minUniformBufferOffsetAlignment;
+   requiredLimits.limits.minStorageBufferOffsetAlignment = supportedLimits.limits.minStorageBufferOffsetAlignment;
+
+   return requiredLimits;
+}
+
+wgpu::Device getDevice(wgpu::Adapter& adapter) {
    std::cout << "Requesting device..." << std::endl;
    wgpu::DeviceDescriptor deviceDesc   = {};
    deviceDesc.label                    = "My Device";
    deviceDesc.requiredFeatureCount     = 0;
-   wgpu::RequiredLimits requiredLimits = GetRequiredLimits(adapter);
+   wgpu::RequiredLimits requiredLimits = getRequiredLimits(adapter);
    deviceDesc.requiredLimits           = &requiredLimits;
    deviceDesc.defaultQueue.nextInChain = nullptr;
    deviceDesc.defaultQueue.label       = "The default queue";
@@ -132,17 +178,49 @@ Application::Application() {
          std::cout << " (" << message << ")";
       std::cout << std::endl;
    };
-   device = adapter.requestDevice(deviceDesc);
+   auto device = adapter.requestDevice(deviceDesc);
    std::cout << "Got device: " << device << std::endl;
+   return device;
+}
 
-   uncapturedErrorCallbackHandle = device.setUncapturedErrorCallback([](wgpu::ErrorType type, char const* message) {
+auto getUncapturedErrorCallbackHandle(wgpu::Device& device) {
+   return device.setUncapturedErrorCallback([](wgpu::ErrorType type, char const* message) {
       std::cout << "Uncaptured device error: type " << type;
       if (message)
          std::cout << " (" << message << ")";
       std::cout << std::endl;
    });
+}
 
-   queue = device.getQueue();
+RenderPipeline initializePipeline(wgpu::Device& device, wgpu::TextureFormat& surfaceFormat) {
+   // Load the shader module
+   Shader             shader(device, shaderSource);
+   wgpu::ShaderModule shaderModule = shader.GetShaderModule();
+
+   // Create the render pipeline
+   wgpu::RenderPipelineDescriptor pipelineDesc;
+
+   VertexBufferLayout<glm::vec2, glm::vec3> layout;
+   auto                                     vertexBufferInfo = layout.CreateLayout();
+
+   std::vector<VertexBufferInfo> layouts;
+   layouts.push_back(std::move(vertexBufferInfo));
+
+   return RenderPipeline(device, shader, layouts, wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
+}
+
+
+// Initialize everything and return true if it went all right
+Application::Application()
+   : window(createWindow())
+   , instance(wgpuCreateInstance(nullptr))
+   , surface(glfwGetWGPUSurface(instance, window))
+   , adapter(getAdapter(instance, surface))
+   , device(getDevice(adapter))
+   , uncapturedErrorCallbackHandle(getUncapturedErrorCallbackHandle(device))
+   , queue(device.getQueue())
+   , surfaceFormat(surface.getPreferredFormat(adapter))
+   , pipeline(initializePipeline(device, surfaceFormat)) {
 
    // Configure the surface
    wgpu::SurfaceConfiguration config = {};
@@ -151,7 +229,6 @@ Application::Application() {
    config.width  = 640;
    config.height = 480;
    config.usage  = wgpu::TextureUsage::RenderAttachment;
-   surfaceFormat = surface.getPreferredFormat(adapter);
    config.format = surfaceFormat;
 
    // And we do not need any particular view format:
@@ -162,11 +239,6 @@ Application::Application() {
    config.alphaMode       = wgpu::CompositeAlphaMode::Auto;
 
    surface.configure(config);
-
-   // Release the adapter only after it has been fully utilized
-   adapter.release();
-
-   InitializePipeline();
 
    InitializeBuffers();
 
@@ -235,104 +307,12 @@ void Application::InitializeResPath() {
    }
 }
 
-void Application::InitializePipeline() {
-   // Load the shader module
-   Shader             shader(device, shaderSource);
-   wgpu::ShaderModule shaderModule = shader.GetShaderModule();
-
-   // Create the render pipeline
-   wgpu::RenderPipelineDescriptor pipelineDesc;
-
-   VertexBufferLayout<glm::vec2, glm::vec3> layout;
-   auto                                     vertexBufferInfo = layout.CreateLayout();
-
-   // print layout and attributes
-   std::cout << "Vertex attributes: " << std::endl;
-   for (const auto& attr : vertexBufferInfo.attributes) {
-      std::cout << " - Attribute | " << " offset: " << attr.offset << ", format: " << attr.format << std::endl;
-   }
-   std::cout << "Vertex buffer layout: " << std::endl;
-   std::cout << " - Stride: " << vertexBufferInfo.layout.arrayStride << std::endl;
-   std::cout << " - Step mode: " << vertexBufferInfo.layout.stepMode << std::endl;
-   std::cout << " - Attribute count: " << vertexBufferInfo.layout.attributeCount << std::endl;
-
-   pipelineDesc.vertex.bufferCount = 1;
-   pipelineDesc.vertex.buffers     = &vertexBufferInfo.layout;
-
-   // NB: We define the 'shaderModule' in the second part of this chapter.
-   // Here we tell that the programmable vertex shader stage is described
-   // by the function called 'vs_main' in that module.
-   pipelineDesc.vertex.module        = shaderModule;
-   pipelineDesc.vertex.entryPoint    = "vs_main";
-   pipelineDesc.vertex.constantCount = 0;
-   pipelineDesc.vertex.constants     = nullptr;
-
-   // Each sequence of 3 vertices is considered as a triangle
-   pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
-
-   // We'll see later how to specify the order in which vertices should be
-   // connected. When not specified, vertices are considered sequentially.
-   pipelineDesc.primitive.stripIndexFormat = wgpu::IndexFormat::Undefined;
-
-   // The face orientation is defined by assuming that when looking
-   // from the front of the face, its corner vertices are enumerated
-   // in the counter-clockwise (CCW) order.
-   pipelineDesc.primitive.frontFace = wgpu::FrontFace::CCW;
-
-   // But the face orientation does not matter much because we do not
-   // cull (i.e. "hide") the faces pointing away from us (which is often
-   // used for optimization).
-   pipelineDesc.primitive.cullMode = wgpu::CullMode::None;
-
-   // We tell that the programmable fragment shader stage is described
-   // by the function called 'fs_main' in the shader module.
-   wgpu::FragmentState fragmentState;
-   fragmentState.module        = shaderModule;
-   fragmentState.entryPoint    = "fs_main";
-   fragmentState.constantCount = 0;
-   fragmentState.constants     = nullptr;
-
-   wgpu::BlendState blendState;
-   blendState.color.srcFactor = wgpu::BlendFactor::SrcAlpha;
-   blendState.color.dstFactor = wgpu::BlendFactor::OneMinusSrcAlpha;
-   blendState.color.operation = wgpu::BlendOperation::Add;
-   blendState.alpha.srcFactor = wgpu::BlendFactor::Zero;
-   blendState.alpha.dstFactor = wgpu::BlendFactor::One;
-   blendState.alpha.operation = wgpu::BlendOperation::Add;
-
-   wgpu::ColorTargetState colorTarget;
-   colorTarget.format    = surfaceFormat;
-   colorTarget.blend     = &blendState;
-   colorTarget.writeMask = wgpu::ColorWriteMask::All; // We could write to only some of the color channels.
-
-   // We have only one target because our render pass has only one output color
-   // attachment.
-   fragmentState.targetCount = 1;
-   fragmentState.targets     = &colorTarget;
-   pipelineDesc.fragment     = &fragmentState;
-
-   // We do not use stencil/depth testing for now
-   pipelineDesc.depthStencil = nullptr;
-
-   // Samples per pixel
-   pipelineDesc.multisample.count = 1;
-
-   // Default value for the mask, meaning "all bits on"
-   pipelineDesc.multisample.mask = ~0u;
-
-   // Default value as well (irrelevant for count = 1 anyways)
-   pipelineDesc.multisample.alphaToCoverageEnabled = false;
-   pipelineDesc.layout                             = nullptr;
-
-   pipeline = device.createRenderPipeline(pipelineDesc);
-}
 
 // Uninitialize everything that was initialized
 void Application::Terminate() {
    pointBuffer.release();
    indexBuffer.release();
 
-   pipeline.release();
    surface.unconfigure();
    queue.release();
    surface.release();
@@ -344,7 +324,6 @@ void Application::Terminate() {
 // Draw a frame and handle events
 void Application::MainLoop() {
    glfwPollEvents();
-
    // Get the next target texture view
    wgpu::TextureView targetView = GetNextSurfaceTextureView();
    if (!targetView)
@@ -377,7 +356,7 @@ void Application::MainLoop() {
    wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
 
    // Select which render pipeline to use
-   renderPass.setPipeline(pipeline);
+   renderPass.setPipeline(pipeline.GetPipeline());
    // Set vertex buffer while encoding the render pass
    renderPass.setVertexBuffer(0, pointBuffer, 0, pointBuffer.getSize());
 
@@ -427,31 +406,6 @@ Application& Application::get() {
    return application;
 }
 
-void Application::PrintAdapterInfo(wgpu::Adapter& adapter) {
-   // Get the adapter properties
-   wgpu::AdapterInfo info = {};
-   info.nextInChain       = nullptr;
-   adapter.getInfo(&info);
-   std::cout << "Adapter info:" << std::endl;
-   std::cout << " - vendorID: " << info.vendorID << std::endl;
-   if (info.vendor) {
-      std::cout << " - vendor: " << info.vendor << std::endl;
-   }
-   if (info.architecture) {
-      std::cout << " - architecture: " << info.architecture << std::endl;
-   }
-   std::cout << " - deviceID: " << info.deviceID << std::endl;
-   if (info.device) {
-      std::cout << " - name: " << info.device << std::endl;
-   }
-   if (info.description) {
-      std::cout << " - description: " << info.description << std::endl;
-   }
-   std::cout << std::hex;
-   std::cout << " - adapterType: 0x" << info.adapterType << std::endl;
-   std::cout << " - backendType: 0x" << info.backendType << std::endl;
-   std::cout << std::dec; // Restore decimal numbers
-}
 
 wgpu::TextureView Application::GetNextSurfaceTextureView() {
    wgpu::SurfaceTexture surfaceTexture;
@@ -473,33 +427,6 @@ wgpu::TextureView Application::GetNextSurfaceTextureView() {
    wgpu::TextureView targetView   = texture.createView(viewDescriptor);
 
    return targetView;
-}
-
-wgpu::RequiredLimits Application::GetRequiredLimits(wgpu::Adapter& adapter) const {
-   wgpu::SupportedLimits supportedLimits;
-   adapter.getLimits(&supportedLimits);
-
-   // Don't forget to = Default
-   wgpu::RequiredLimits requiredLimits = wgpu::Default;
-
-   // We use at most 2 vertex attribute for now
-   requiredLimits.limits.maxVertexAttributes = 2;
-   // We also never transfer more than 3 components between stages
-   requiredLimits.limits.maxInterStageShaderComponents = 3;
-   // We should also tell that we use 1 vertex buffers
-   requiredLimits.limits.maxVertexBuffers = 1;
-   // Maximum size of a buffer is 6 vertices of 2 float each
-   requiredLimits.limits.maxBufferSize = 6 * 5 * sizeof(float);
-   // Maximum stride between 2 consecutive vertices in the vertex buffer
-   requiredLimits.limits.maxVertexBufferArrayStride = 5 * sizeof(float);
-
-   // These two limits are different because they are "minimum" limits,
-   // they are the only ones we are may forward from the adapter's supported
-   // limits.
-   requiredLimits.limits.minUniformBufferOffsetAlignment = supportedLimits.limits.minUniformBufferOffsetAlignment;
-   requiredLimits.limits.minStorageBufferOffsetAlignment = supportedLimits.limits.minStorageBufferOffsetAlignment;
-
-   return requiredLimits;
 }
 
 int main(void) {

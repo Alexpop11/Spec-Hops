@@ -1,36 +1,19 @@
 // RenderPipeline.cpp
 #include "RenderPipeline.h"
 
-/*
-RenderPipelineWrapper::RenderPipelineWrapper(wgpu::Device device, Shader& shader,
-                                             const std::vector<VertexBufferLayout>& vertexLayouts,
-                                             wgpu::PrimitiveTopology topology, wgpu::TextureFormat colorFormat)
+RenderPipeline::RenderPipeline(wgpu::Device& device, Shader& shader, const std::vector<VertexBufferInfo>& vertexInfos,
+                               wgpu::PrimitiveTopology topology, wgpu::TextureFormat colorFormat)
    : device(device) {
    // Create vertex buffer layouts
    std::vector<wgpu::VertexBufferLayout> wgpuVertexLayouts;
-   for (const auto& layout : vertexLayouts) {
-      wgpu::VertexBufferLayout wgpuLayout = {};
-      wgpuLayout.arrayStride              = layout.arrayStride;
-      wgpuLayout.stepMode                 = layout.stepMode;
-
-      std::vector<wgpu::VertexAttribute> wgpuAttributes;
-      for (const auto& attr : layout.attributes) {
-         wgpu::VertexAttribute wgpuAttr = {};
-         wgpuAttr.shaderLocation        = attr.shaderLocation;
-         wgpuAttr.format                = attr.format;
-         wgpuAttr.offset                = attr.offset;
-         wgpuAttributes.push_back(wgpuAttr);
-      }
-
-      wgpuLayout.attributeCount = static_cast<uint32_t>(wgpuAttributes.size());
-      wgpuLayout.attributes     = wgpuAttributes.data();
-      wgpuVertexLayouts.push_back(wgpuLayout);
+   for (const auto& info : vertexInfos) {
+      wgpuVertexLayouts.push_back(info.layout);
    }
 
    // Define pipeline layout
    wgpu::PipelineLayoutDescriptor pipelineLayoutDesc = {};
    pipelineLayoutDesc.label                          = "Pipeline Layout";
-   wgpu::PipelineLayout pipelineLayout               = device.createPipelineLayout(&pipelineLayoutDesc);
+   wgpu::PipelineLayout pipelineLayout               = device.createPipelineLayout(pipelineLayoutDesc);
 
    // Define color target state
    wgpu::ColorTargetState colorTarget = {};
@@ -72,25 +55,25 @@ RenderPipelineWrapper::RenderPipelineWrapper(wgpu::Device device, Shader& shader
    pipelineDesc.multisample.alphaToCoverageEnabled = false;
 
    // Create render pipeline
-   pipeline = device.createRenderPipeline(&pipelineDesc);
+   pipeline = device.createRenderPipeline(pipelineDesc);
 
    // Release the pipeline layout as it's no longer needed after pipeline creation
    pipelineLayout.release();
 }
 
-RenderPipelineWrapper::~RenderPipelineWrapper() {
+RenderPipeline::~RenderPipeline() {
    if (pipeline) {
       pipeline.release();
    }
 }
 
-RenderPipelineWrapper::RenderPipelineWrapper(RenderPipelineWrapper&& other) noexcept
+RenderPipeline::RenderPipeline(RenderPipeline&& other) noexcept
    : device(other.device)
    , pipeline(other.pipeline) {
    other.pipeline = nullptr;
 }
 
-RenderPipelineWrapper& RenderPipelineWrapper::operator=(RenderPipelineWrapper&& other) noexcept {
+RenderPipeline& RenderPipeline::operator=(RenderPipeline&& other) noexcept {
    if (this != &other) {
       if (pipeline) {
          pipeline.release();
@@ -101,4 +84,3 @@ RenderPipelineWrapper& RenderPipelineWrapper::operator=(RenderPipelineWrapper&& 
    }
    return *this;
 }
-*/

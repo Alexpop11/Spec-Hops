@@ -1,6 +1,8 @@
 
 #include <webgpu/webgpu.hpp>
 
+#include "rendering/RenderPipeline.h"
+
 #include <GLFW/glfw3.h>
 
 
@@ -12,7 +14,7 @@ public:
 
    void InitializeBuffers();
 
-   void InitializePipeline();
+   RenderPipeline InitializePipeline();
 
    // Uninitialize everything that was initialized
    void Terminate();
@@ -31,17 +33,17 @@ public:
 private:
    void InitializeResPath();
 
-   void                 PrintAdapterInfo(wgpu::Adapter& adapter);
-   wgpu::TextureView    GetNextSurfaceTextureView();
-   wgpu::RequiredLimits GetRequiredLimits(wgpu::Adapter& adapter) const;
+   wgpu::TextureView GetNextSurfaceTextureView();
 
    GLFWwindow*                          window;
-   wgpu::Device                         device;
-   wgpu::Queue                          queue;
+   wgpu::Instance                       instance;
    wgpu::Surface                        surface;
+   wgpu::Adapter                        adapter;
+   wgpu::Device                         device;
    std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
-   wgpu::TextureFormat                  surfaceFormat = wgpu::TextureFormat::Undefined;
-   wgpu::RenderPipeline                 pipeline;
+   wgpu::Queue                          queue;
+   wgpu::TextureFormat                  surfaceFormat;
+   RenderPipeline                 pipeline;
 
    wgpu::Buffer pointBuffer;
    uint32_t     pointCount;

@@ -1,3 +1,4 @@
+#pragma once
 
 #include <webgpu/webgpu.hpp>
 #include <vector>
@@ -7,8 +8,8 @@
 // Make a type like std::tuple<wgpu::VertexBufferLayout, std::vector<wgpu::VertexAttribute>>, but delete its copy and
 // copy assignment operators and make its move constructor and move assignment operator default
 struct VertexBufferInfo {
-   wgpu::VertexBufferLayout           layout;
-   std::vector<wgpu::VertexAttribute> attributes;
+   wgpu::VertexBufferLayout                            layout;
+   std::unique_ptr<std::vector<wgpu::VertexAttribute>> attributes;
 
    // add default constructor
    VertexBufferInfo() = default;
@@ -16,8 +17,8 @@ struct VertexBufferInfo {
    VertexBufferInfo(const VertexBufferInfo&)            = delete;
    VertexBufferInfo& operator=(const VertexBufferInfo&) = delete;
 
-   VertexBufferInfo(VertexBufferInfo&& other) noexcept;
-   VertexBufferInfo& operator=(VertexBufferInfo&& other) noexcept;
+   VertexBufferInfo(VertexBufferInfo&& other) noexcept            = default;
+   VertexBufferInfo& operator=(VertexBufferInfo&& other) noexcept = default;
 };
 
 
@@ -59,11 +60,11 @@ struct VertexBufferLayout {
 
    VertexBufferInfo CreateLayout() {
       VertexBufferInfo info;
-      info.attributes            = Attributes();
+      info.attributes            = std::make_unique<std::vector<wgpu::VertexAttribute>>(Attributes());
       info.layout.arrayStride    = (type_size<Types>() + ...); // sum of the sizes of all types
       info.layout.stepMode       = wgpu::VertexStepMode::Vertex;
-      info.layout.attributeCount = info.attributes.size();
-      info.layout.attributes     = info.attributes.data();
+      info.layout.attributeCount = info.attributes->size();
+      info.layout.attributes     = info.attributes->data();
 
       return info;
    }

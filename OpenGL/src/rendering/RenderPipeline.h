@@ -5,26 +5,26 @@
 #include <string>
 #include "Shader.h"
 #include "glm/glm.hpp"
+#include "VertexBufferLayout.h"
 
-/*
-class RenderPipelineWrapper {
+
+class RenderPipeline {
 public:
-   RenderPipelineWrapper(wgpu::Device device, Shader& shader, wgpu::PrimitiveTopology topology,
-                         wgpu::TextureFormat colorFormat);
-   ~RenderPipelineWrapper();
+   RenderPipeline(wgpu::Device& device, Shader& shader, const std::vector<VertexBufferInfo>& vertexInfos,
+                  wgpu::PrimitiveTopology topology, wgpu::TextureFormat colorFormat);
+   ~RenderPipeline();
 
    // Deleted copy constructor and assignment operator
-   RenderPipelineWrapper(const RenderPipelineWrapper&)            = delete;
-   RenderPipelineWrapper& operator=(const RenderPipelineWrapper&) = delete;
+   RenderPipeline(const RenderPipeline&)            = delete;
+   RenderPipeline& operator=(const RenderPipeline&) = delete;
 
    // Move constructor and assignment operator
-   RenderPipelineWrapper(RenderPipelineWrapper&& other) noexcept;
-   RenderPipelineWrapper& operator=(RenderPipelineWrapper&& other) noexcept;
+   RenderPipeline(RenderPipeline&& other) noexcept;
+   RenderPipeline& operator=(RenderPipeline&& other) noexcept;
 
    wgpu::RenderPipeline GetPipeline() const { return pipeline; }
 
 private:
-   wgpu::Device         device;
+   wgpu::Device&         device;
    wgpu::RenderPipeline pipeline;
 };
-*/
