@@ -38,7 +38,9 @@ void Bomb::explode() {
    ShouldDestroy = true;
 }
 
-void Bomb::kick(bool hitWall) {
+void Bomb::kick(bool hitWall, int dx, int dy) {
+   Entity::kick(hitWall, dx, dy);
+
    if (hitWall) {
       explode();
    }

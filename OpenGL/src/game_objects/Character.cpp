@@ -92,9 +92,7 @@ bool Character::move(int new_x, int new_y) {
 
                // Move enemy back as far as possible
                if (knockback_distance > 0) {
-                  kicking = true;
-                  other_character->tile_x += knockback_dx * knockback_distance;
-                  other_character->tile_y += knockback_dy * knockback_distance;
+                  kicking = other_character;
 
                   // Stop the player at the collision spot
                   tile_x = check_x;
@@ -103,7 +101,7 @@ bool Character::move(int new_x, int new_y) {
                   bool hitWall = knockback_distance < max_knockback_distance;
 
                   // apply effect to enemy if they hit a wall
-                  other_character->kick(hitWall);
+                  other_character->kick(hitWall, knockback_dx * knockback_distance, knockback_dy * knockback_distance);
                   audio().Impact.play();
 
                   return true; // Move succeeded with kick
@@ -135,7 +133,9 @@ bool Character::move(int new_x, int new_y) {
    return false;
 }
 
-void Character::kick(bool hitWall) {
+void Character::kick(bool hitWall, int dx, int dy) {
+   Entity::kick(hitWall, dx, dy);
+
    stunnedLength = 9;
    tintColor     = {1.0, 0.5, 0.0, 0.5};
 }

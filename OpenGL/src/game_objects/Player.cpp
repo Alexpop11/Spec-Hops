@@ -14,7 +14,7 @@ Player::Player(const std::string& name, int tile_x, int tile_y)
    Camera::position = {tile_x, tile_y};
 
    healthText = std::make_unique<Text>("Health", Renderer::jacquard12_big, glm::vec2{20, 20});
-   //topText = std::make_unique<Text>("Hello!", Renderer::Pixelify, glm::vec2{1280,650});
+   // topText = std::make_unique<Text>("Hello!", Renderer::Pixelify, glm::vec2{1280,650});
 }
 
 bool Player::move(int new_x, int new_y) {
@@ -33,6 +33,16 @@ bool Player::move(int new_x, int new_y) {
 
 void Player::update() {
    Character::update();
+
+   if (auto kickedGuy = this->kicking.lock()) {
+      if (glm::length(kickedGuy->position - position) < 1.5) {
+         kicking.reset();
+         World::timeSpeed = 0.2f;
+      } else {
+         std::cout << "kickedGuy->position - position " << glm::length(kickedGuy->position - position) << std::endl;
+      }
+   }
+
    // smooth camera movement
    Camera::position = zeno(Camera::position, position, 0.1);
    tintColor.a      = zeno(tintColor.a, 0.0, 0.1);
@@ -65,8 +75,7 @@ void Player::update() {
 
    healthText->name = "Health: " + std::to_string(health);
 
-   // When user clicks the mouse, 
-
+   // When user clicks the mouse,
 }
 
 void Player::render(Renderer& renderer) {
@@ -83,7 +92,7 @@ void Player::render(Renderer& renderer) {
          for (auto& bomb : World::at<Bomb>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
             bomb->explode();
          }
-            gunCooldown = playerGunCooldown;
+         gunCooldown = playerGunCooldown;
       }
    }
    if (Input::right_mouse_pressed) {
@@ -91,13 +100,13 @@ void Player::render(Renderer& renderer) {
          Renderer::DebugLine(position, renderer.MousePos(), {1, 0, 0, 1});
          // get what is at mouse position
          for (auto& character : World::at<Character>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
-            character->tintColor     = {1.0, 0.5, 0.0, 0.5};
+            character->tintColor = {1.0, 0.5, 0.0, 0.5};
          }
          for (auto& bomb : World::at<Bomb>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
             bomb->tintColor = {1.0, 0.5, 0.0, 0.5};
          }
-      // need to figure out some way to slow tick rate and also make all things zeno at a fraction of normal speed
-         World::timeSpeed = zeno(World::timeSpeed, 0.333, 0.08);
+         // need to figure out some way to slow tick rate and also make all things zeno at a fraction of normal speed
+         World::timeSpeed        = zeno(World::timeSpeed, 0.333, 0.08);
          World::settingTimeSpeed = true;
       }
    }
@@ -116,10 +125,6 @@ void Player::hurt() {
 }
 
 void Player::tickUpdate() {
-   if (kicking) {
-      kicking = false;
-      World::timeSpeed = 0.2f;
-   }
    // This logic is already in character, but it's not applying to the player for some reason - so for now I'm just
    // going to copy it here. pls help Powerup cooldowns
    if (bombCoolDown > 0) {
