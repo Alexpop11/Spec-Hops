@@ -22,6 +22,7 @@
 
 #include <glfw3webgpu.h>
 #include "rendering/webgpu-utils.h"
+#include "rendering/Shader.h"
 
 #define GL_SILENCE_DEPRECATION
 
@@ -232,22 +233,8 @@ void Application::InitializeResPath() {
 
 void Application::InitializePipeline() {
    // Load the shader module
-   wgpu::ShaderModuleDescriptor shaderDesc;
-#ifdef WEBGPU_BACKEND_WGPU
-   shaderDesc.hintCount = 0;
-   shaderDesc.hints     = nullptr;
-#endif
-
-   // We use the extension mechanism to specify the WGSL part of the shader module descriptor
-   wgpu::ShaderModuleWGSLDescriptor shaderCodeDesc;
-   // Set the chained struct's header
-   shaderCodeDesc.chain.next = nullptr;
-   // I changed this from ShaderModuleWGSLDescriptor to ShaderSourceWGSL
-   shaderCodeDesc.chain.sType = wgpu::SType::ShaderSourceWGSL;
-   // Connect the chain
-   shaderDesc.nextInChain          = &shaderCodeDesc.chain;
-   shaderCodeDesc.code             = shaderSource;
-   wgpu::ShaderModule shaderModule = device.createShaderModule(shaderDesc);
+   Shader             shader(device, shaderSource);
+   wgpu::ShaderModule shaderModule = shader.GetShaderModule();
 
    // Create the render pipeline
    wgpu::RenderPipelineDescriptor pipelineDesc;
@@ -338,10 +325,6 @@ void Application::InitializePipeline() {
    pipelineDesc.layout                             = nullptr;
 
    pipeline = device.createRenderPipeline(pipelineDesc);
-
-
-   // We no longer need to access the shader module
-   shaderModule.release();
 }
 
 // Uninitialize everything that was initialized
