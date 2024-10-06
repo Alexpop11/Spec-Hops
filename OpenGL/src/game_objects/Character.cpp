@@ -92,6 +92,7 @@ bool Character::move(int new_x, int new_y) {
 
                // Move enemy back as far as possible
                if (knockback_distance > 0) {
+                  kicking = true;
                   other_character->tile_x += knockback_dx * knockback_distance;
                   other_character->tile_y += knockback_dy * knockback_distance;
 

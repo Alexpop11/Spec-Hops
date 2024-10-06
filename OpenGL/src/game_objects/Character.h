@@ -15,6 +15,7 @@ public:
    virtual void hurt();
    virtual void kick(bool hitWall) override;
    int          stunnedLength = 0;
+   bool         kicking       = false;
 
    // Powerups
    bool hasBomb      = true;

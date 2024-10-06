@@ -116,9 +116,9 @@ void Player::hurt() {
 }
 
 void Player::tickUpdate() {
-   if (moved_last_tick) {
-      moved_last_tick = false;
-      //return;
+   if (kicking) {
+      kicking = false;
+      World::timeSpeed = 0.2f;
    }
    // This logic is already in character, but it's not applying to the player for some reason - so for now I'm just
    // going to copy it here. pls help Powerup cooldowns
