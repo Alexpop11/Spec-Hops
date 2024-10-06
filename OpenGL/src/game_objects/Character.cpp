@@ -31,8 +31,8 @@ bool Character::move(int new_x, int new_y) {
          int check_x = tile_x + (dx * i) / steps;
          int check_y = tile_y + (dy * i) / steps;
 
-         bool    spot_occupied   = false;
-         Entity* other_character = nullptr;
+         bool                    spot_occupied   = false;
+         std::shared_ptr<Entity> other_character = nullptr;
 
          // Check for walls
          for (auto& tile : World::at<Tile>(check_x, check_y)) {
@@ -45,7 +45,7 @@ bool Character::move(int new_x, int new_y) {
          if (!spot_occupied) {
             // Check for other characters
             for (auto& entity : World::at<Entity>(check_x, check_y)) {
-               if (entity != this) {
+               if (entity.get() != this) {
                   spot_occupied   = true;
                   other_character = entity;
                   break;
@@ -78,7 +78,7 @@ bool Character::move(int new_x, int new_y) {
                   }
                   if (!obstacle) {
                      for (auto& character : World::at<Character>(new_enemy_x, new_enemy_y)) {
-                        if (character != other_character && character != this) {
+                        if (character != other_character && character.get() != this) {
                            obstacle = true;
                            break;
                         }
@@ -102,7 +102,7 @@ bool Character::move(int new_x, int new_y) {
 
                   bool hitWall = knockback_distance < max_knockback_distance;
 
-                  //apply effect to enemy if they hit a wall
+                  // apply effect to enemy if they hit a wall
                   other_character->kick(hitWall);
                   audio().Impact.play();
 

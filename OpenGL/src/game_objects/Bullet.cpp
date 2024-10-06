@@ -22,7 +22,7 @@ void Bullet::tickUpdate() {
    // Assuming you have a way to check for characters at the new position
    auto nearbyCharacters = World::at<Character>(tile_x, tile_y);
    if (!nearbyCharacters.empty()) {
-      auto* character = nearbyCharacters.front(); // Assuming we target the first found character
+      auto character = nearbyCharacters.front(); // Assuming we target the first found character
       character->hurt();
       std::cout << "Bullet damaged character. Their health is now " << character->health << std::endl;
       ShouldDestroy = true;

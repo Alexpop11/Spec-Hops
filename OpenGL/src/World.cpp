@@ -12,11 +12,11 @@
 #include "game_objects/enemies/Turret.h"
 #include "game_objects/Mine.h"
 
-std::vector<std::unique_ptr<GameObject>> World::gameobjects      = {};
+std::vector<std::shared_ptr<GameObject>> World::gameobjects      = {};
 std::vector<std::unique_ptr<GameObject>> World::gameobjectstoadd = {};
-float World::timeSpeed = 1.0f;
-bool World::settingTimeSpeed = false;
-bool World::shouldTick = false;
+float                                    World::timeSpeed        = 1.0f;
+bool                                     World::settingTimeSpeed = false;
+bool                                     World::shouldTick       = false;
 
 void World::LoadMap(const std::string& map_path) {
    gameobjects.clear();
@@ -43,32 +43,32 @@ void World::LoadMap(const std::string& map_path) {
          size_t y = total_rows - row;
          if (c != '\n') {
             if (c == 'b') { // Background
-               gameobjects.push_back(std::make_unique<Background>(Background("Background")));
+               gameobjects.push_back(std::make_shared<Background>(Background("Background")));
             }
             if (c == 'p') { // player
-               gameobjects.push_back(std::make_unique<Player>(Player("Coolbox", (float)x, (float)y)));
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Player>(Player("Coolbox", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>(Tile("Floor", (float)x, (float)y)));
             }
             if (c == 'f') { // floor
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>(Tile("Floor", (float)x, (float)y)));
             }
             if (c == 'w') { // wall
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Wall", true, false, (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>(Tile("Wall", true, false, (float)x, (float)y)));
             }
             if (c == 'W') { // wall
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Wall", true, true, (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>(Tile("Wall", true, true, (float)x, (float)y)));
             }
             if (c == 'e') { // enemy Bomber
-               gameobjects.push_back(std::make_unique<Bomber>(Bomber("bomber", (float)x, (float)y)));
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Bomber>(Bomber("bomber", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>(Tile("Floor", (float)x, (float)y)));
             }
             if (c == 't') { // Turret
-               gameobjects.push_back(std::make_unique<Turret>(Turret("turret", (float)x, (float)y)));
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Turret>(Turret("turret", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>(Tile("Floor", (float)x, (float)y)));
             }
             if (c == 'm') { // Mine
-               gameobjects.push_back(std::make_unique<Mine>(Mine("mine", (float)x, (float)y)));
-               gameobjects.push_back(std::make_unique<Tile>(Tile("Floor", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Mine>(Mine("mine", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>(Tile("Floor", (float)x, (float)y)));
             }
          }
       }

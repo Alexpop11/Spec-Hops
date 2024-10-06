@@ -9,7 +9,7 @@ class World {
 public:
    static float                                    timeSpeed;
    static bool                                     settingTimeSpeed;
-   static std::vector<std::unique_ptr<GameObject>> gameobjects;
+   static std::vector<std::shared_ptr<GameObject>> gameobjects;
    static std::vector<std::unique_ptr<GameObject>> gameobjectstoadd;
    static std::vector<GameObject*>                 get_gameobjects() {
       // return a vector of all gameobjects and their gameobjects.children
@@ -23,10 +23,10 @@ public:
    }
 
    template <typename T>
-   static std::vector<T*> where(std::function<bool(const T&)> condition) {
-      std::vector<T*> filteredObjects;
+   static std::vector<std::shared_ptr<T>> where(std::function<bool(const T&)> condition) {
+      std::vector<std::shared_ptr<T>> filteredObjects;
       for (auto& gameobject : gameobjects) {
-         T* castedObject = dynamic_cast<T*>(gameobject.get());
+         std::shared_ptr<T> castedObject = std::dynamic_pointer_cast<T>(gameobject);
          if (castedObject && condition(*castedObject)) {
             filteredObjects.push_back(castedObject);
          }
@@ -34,7 +34,6 @@ public:
       return filteredObjects;
    }
 
-   // Implemented getAll<T>()
    template <typename T>
    static std::vector<T*> getAll() {
       std::vector<T*> allObjects;
@@ -47,7 +46,6 @@ public:
       return allObjects;
    }
 
-   // Implemented getFirst<T>()
    template <typename T>
    static T* getFirst() {
       for (auto& gameobject : gameobjects) {
@@ -60,7 +58,7 @@ public:
    }
 
    template <typename T>
-   static std::vector<T*> at(int x, int y) {
+   static std::vector<std::shared_ptr<T>> at(int x, int y) {
       return where<T>([&](const T& obj) { return obj.tile_x == x && obj.tile_y == y; });
    }
 
