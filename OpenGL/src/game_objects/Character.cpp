@@ -92,17 +92,15 @@ bool Character::move(int new_x, int new_y) {
 
                // Move enemy back as far as possible
                if (knockback_distance > 0) {
-                  kicking = other_character;
+                  KickState kicking;
+                  kicking.victim    = other_character;
+                  kicking.direction = glm::ivec2(knockback_dx * knockback_distance, knockback_dy * knockback_distance);
+                  kicking.intoWall  = knockback_distance < max_knockback_distance;
+                  this->kicking     = kicking;
 
                   // Stop the player at the collision spot
                   tile_x = check_x;
                   tile_y = check_y;
-
-                  bool hitWall = knockback_distance < max_knockback_distance;
-
-                  // apply effect to enemy if they hit a wall
-                  other_character->kick(hitWall, knockback_dx * knockback_distance, knockback_dy * knockback_distance);
-                  audio().Impact.play();
 
                   return true; // Move succeeded with kick
                } else {

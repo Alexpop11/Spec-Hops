@@ -34,12 +34,15 @@ bool Player::move(int new_x, int new_y) {
 void Player::update() {
    Character::update();
 
-   if (auto kickedGuy = this->kicking.lock()) {
-      if (glm::length(kickedGuy->position - position) < 1.5) {
-         kicking.reset();
-         World::timeSpeed = 0.2f;
-      } else {
-         std::cout << "kickedGuy->position - position " << glm::length(kickedGuy->position - position) << std::endl;
+   if (kicking) {
+      if (auto kickedGuy = kicking->victim.lock()) {
+         if (glm::length(kickedGuy->position - position) < 1.5) {
+            kickedGuy->kick(kicking->intoWall, kicking->direction.x, kicking->direction.y);
+            World::timeSpeed = 0.1f;
+            kicking.reset();
+         } else {
+            std::cout << "kickedGuy->position - position " << glm::length(kickedGuy->position - position) << std::endl;
+         }
       }
    }
 
