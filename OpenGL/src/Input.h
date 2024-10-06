@@ -13,6 +13,7 @@ public:
    static bool  right_mouse_pressed_down;
    static float startTime;
    static float deltaTime;
+   static float currentTime;
 
 private:
    static bool keys_pressed_last_frame[GLFW_KEY_LAST];

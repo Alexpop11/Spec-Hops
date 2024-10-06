@@ -7,6 +7,8 @@
 
 class World {
 public:
+   static float                                    timeSpeed;
+   static bool                                     settingTimeSpeed;
    static std::vector<std::unique_ptr<GameObject>> gameobjects;
    static std::vector<std::unique_ptr<GameObject>> gameobjectstoadd;
    static std::vector<GameObject*>                 get_gameobjects() {

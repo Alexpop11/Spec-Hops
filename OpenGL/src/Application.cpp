@@ -120,16 +120,23 @@ int main(void) {
    World::LoadMap("maps/SpaceShip.txt");
    World::gameobjects.push_back(std::make_unique<Fog>());
 
-   double currentTime = glfwGetTime();
+   Input::currentTime = glfwGetTime();
+   double realTimeLastFrame = Input::currentTime;
    double lastTick    = Input::startTime;
 
    // -------------------
    // Main rendering loop
    // -------------------
    while (!glfwWindowShouldClose(window)) {
-      double lastFrameTime = currentTime;
-      currentTime          = glfwGetTime();
-      Input::deltaTime     = currentTime - lastFrameTime;
+      double lastFrameTime = Input::currentTime;
+      Input::deltaTime     = World::timeSpeed*(glfwGetTime() - realTimeLastFrame);
+      Input::currentTime   = Input::currentTime + Input::deltaTime;
+      realTimeLastFrame    = glfwGetTime();
+      if (!World::settingTimeSpeed) {
+         World::timeSpeed = zeno(World::timeSpeed, 1.0, 0.2);
+      } else {
+         World::settingTimeSpeed = false;
+      }
 
       // Set the viewport size
       auto [width, height] = renderer.WindowSize();
@@ -142,9 +149,9 @@ int main(void) {
 
       World::UpdateObjects();
 
-      if (World::shouldTick || lastTick + (1.0 / TICKS_PER_SECOND) <= currentTime) {
+      if (World::shouldTick || lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime) {
          World::TickObjects();
-         lastTick          = currentTime;
+         lastTick          = Input::currentTime;
          World::shouldTick = false;
       }
 

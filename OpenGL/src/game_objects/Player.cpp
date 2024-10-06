@@ -97,6 +97,8 @@ void Player::render(Renderer& renderer) {
             bomb->tintColor = {1.0, 0.5, 0.0, 0.5};
          }
       // need to figure out some way to slow tick rate and also make all things zeno at a fraction of normal speed
+         World::timeSpeed = zeno(World::timeSpeed, 0.333, 0.08);
+         World::settingTimeSpeed = true;
       }
    }
 }

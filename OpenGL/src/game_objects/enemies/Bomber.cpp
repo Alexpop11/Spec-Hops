@@ -27,7 +27,7 @@ bool Bomber::move(int new_x, int new_y) {
                World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
                audio().Bomb_Place.play();
                Character::move(tile_x - sign(player->tile_x - tile_x), tile_y);
-               return Character::move(tile_x, tile_y - sign(player->tile_y - tile_y));
+               return Character::move(tile_x, tile_y - sign(player->tile_y - tile_y)); 
             }
             break;
          }

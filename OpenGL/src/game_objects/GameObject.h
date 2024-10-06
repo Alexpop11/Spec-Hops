@@ -32,7 +32,6 @@ public:
 
 
    virtual ~GameObject() = default;
-   float CreationTime    = (float)glfwGetTime();
    bool  ShouldDestroy   = false;
 
    virtual std::vector<GameObject*> children() { return {}; }

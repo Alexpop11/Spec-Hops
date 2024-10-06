@@ -3,6 +3,7 @@
 
 float Input::startTime                              = 0;
 float Input::deltaTime                              = 0.01;
+float Input::currentTime                            = 0;
 
 bool  Input::keys_pressed[GLFW_KEY_LAST]            = {false};
 bool  Input::keys_pressed_last_frame[GLFW_KEY_LAST] = {false};
