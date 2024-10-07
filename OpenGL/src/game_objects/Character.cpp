@@ -60,7 +60,7 @@ bool Character::move(int new_x, int new_y) {
                int knockback_dy = (dy != 0) ? dy / std::abs(dy) : 0;
 
                bool      can_knockback          = true;
-               const int max_knockback_distance = 3;
+               const int max_knockback_distance = 5;
                int       knockback_distance     = max_knockback_distance;
 
                // Check if enemy can be knocked back 3 tiles
@@ -131,10 +131,19 @@ bool Character::move(int new_x, int new_y) {
    return false;
 }
 
-void Character::kick(bool hitWall, int dx, int dy) {
-   Entity::kick(hitWall, dx, dy);
+void Character::kick(bool hitWall, int dx, int dy, bool superKick) {
+   Entity::kick(hitWall, dx, dy, superKick);
 
-   stunnedLength = 9;
+   if (hitWall && superKick) {
+      stunnedLength = 9;
+      auto tile = World::at<Tile>(tile_x + dx + sign(dx), tile_y + dy + sign(dy)).front();
+      if (!tile->unbreakable) {
+         tile->wall = false;
+      }
+      hurt();
+    }
+
+
    tintColor     = {1.0, 0.5, 0.0, 0.5};
 }
 
