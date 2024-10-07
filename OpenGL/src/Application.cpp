@@ -205,6 +205,12 @@ auto getUncapturedErrorCallbackHandle(wgpu::Device& device) {
       if (message)
          std::cout << " (" << message << ")";
       std::cout << std::endl;
+
+#ifdef _MSC_VER
+      __debugbreak();
+#else
+      assert(false);
+#endif
    });
 }
 
@@ -239,6 +245,8 @@ RenderPipeline initializePipeline(wgpu::Device& device, wgpu::TextureFormat& sur
    bindGroupLayoutDesc.entries           = &bindingLayout;
    wgpu::BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutDesc);
    // ========================================================
+
+
 
    return RenderPipeline("Rainbow Square", device, shader, layouts, bindGroupLayout,
                          wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
