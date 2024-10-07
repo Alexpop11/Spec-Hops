@@ -5,8 +5,13 @@
 #include "rendering/Buffer.h"
 
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
-
+struct MyUniforms {
+   float     time; // at byte offset 0
+   float     _pad0[3];
+   glm::vec4 color; // at byte offset 16
+};
 
 class Application {
 public:
@@ -42,7 +47,7 @@ private:
    wgpu::TextureFormat                  surfaceFormat;
    RenderPipeline                       pipeline;
 
-   Buffer<float>    pointBuffer;
-   Buffer<uint16_t> indexBuffer;
-   Buffer<float>    uniformBuffer;
+   Buffer<float>      pointBuffer;
+   Buffer<uint16_t>   indexBuffer;
+   Buffer<MyUniforms> uniformBuffer;
 };

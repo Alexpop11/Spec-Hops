@@ -93,6 +93,11 @@ public:
    size_t size() const { return size_; }
    size_t count() const { return count_; }
 
+   void Update(const std::vector<T>& data) {
+      assert(data.size() * sizeof(T) <= size_ && "Data size exceeds buffer size.");
+      queue_.writeBuffer(buffer_, 0, data.data(), data.size() * sizeof(T));
+   }
+
 private:
    wgpu::Device&     device_;
    wgpu::Queue&      queue_;

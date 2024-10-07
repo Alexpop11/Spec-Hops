@@ -38,34 +38,33 @@
 
 // We embed the source of the shader module here
 const char* shaderSource = R"(
-/**
- * A structure with fields labeled with vertex attribute locations can be used
- * as input to the entry point of a shader.
- */
 struct VertexInput {
     @location(0) position: vec2f,
     @location(1) color: vec3f,
 };
 
-@group(0) @binding(0) var<uniform> uTime: f32;
-
-/**
- * A structure with fields labeled with builtins and locations can also be used
- * as *output* of the vertex shader, which is also the input of the fragment
- * shader.
- */
 struct VertexOutput {
     @builtin(position) position: vec4f,
     @location(0) color: vec3f,
 };
 
+/**
+ * A structure holding the value of our uniforms
+ */
+struct MyUniforms {
+	time: f32,
+	color: vec4f,
+};
+
+// Instead of the simple uTime variable, our uniform variable is a struct
+@group(0) @binding(0) var<uniform> uMyUniforms: MyUniforms;
+
 @vertex
 fn vs_main(in: VertexInput) -> VertexOutput {
 	var out: VertexOutput;
 	let ratio = 640.0 / 480.0;
-	// We move the scene depending on the time
 	var offset = vec2f(-0.6875, -0.463);
-	offset += 0.3 * vec2f(cos(uTime), sin(uTime));
+	offset += 0.3 * vec2f(cos(uMyUniforms.time), sin(uMyUniforms.time));
 	out.position = vec4f(in.position.x + offset.x, (in.position.y + offset.y) * ratio, 0.0, 1.0);
 	out.color = in.color;
 	return out;
@@ -73,9 +72,12 @@ fn vs_main(in: VertexInput) -> VertexOutput {
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4f {
-    let linear_color = pow(in.color, vec3f(2.2));
-    return vec4f(linear_color, 1.0);
+	let color = in.color * uMyUniforms.color.rgb;
+	// Gamma-correction
+	let corrected_color = pow(color, vec3f(2.2));
+	return vec4f(corrected_color, uMyUniforms.color.a);
 }
+
 )";
 
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
@@ -157,9 +159,16 @@ wgpu::RequiredLimits getRequiredLimits(wgpu::Adapter& adapter) {
    // We should also tell that we use 1 vertex buffers
    requiredLimits.limits.maxVertexBuffers = 1;
    // Maximum size of a buffer is 6 vertices of 2 float each
-   requiredLimits.limits.maxBufferSize = 6 * 5 * sizeof(float);
+   requiredLimits.limits.maxBufferSize = 15 * 5 * sizeof(float);
    // Maximum stride between 2 consecutive vertices in the vertex buffer
    requiredLimits.limits.maxVertexBufferArrayStride = 5 * sizeof(float);
+   // We use at most 1 uniform buffer per stage
+   requiredLimits.limits.maxUniformBuffersPerShaderStage = 1;
+   // Uniform structs have a size of maximum 16 float
+   requiredLimits.limits.maxUniformBufferBindingSize = 16 * 4;
+   // We use at most 1 bind group for now
+   requiredLimits.limits.maxBindGroups = 1;
+
 
    // These two limits are different because they are "minimum" limits,
    // they are the only ones we are may forward from the adapter's supported
@@ -221,9 +230,9 @@ RenderPipeline initializePipeline(wgpu::Device& device, wgpu::TextureFormat& sur
    // The binding index as used in the @binding attribute in the shader
    bindingLayout.binding = 0;
    // The stage that needs to access this resource
-   bindingLayout.visibility            = wgpu::ShaderStage::Vertex;
+   bindingLayout.visibility            = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment;
    bindingLayout.buffer.type           = wgpu::BufferBindingType::Uniform;
-   bindingLayout.buffer.minBindingSize = sizeof(float);
+   bindingLayout.buffer.minBindingSize = sizeof(MyUniforms);
 
    wgpu::BindGroupLayoutDescriptor bindGroupLayoutDesc{};
    bindGroupLayoutDesc.entryCount        = 1; // TODO; replace with number of bindings
@@ -260,9 +269,13 @@ Buffer<uint16_t> getIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    return Buffer<uint16_t>(device, queue, indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 }
 
-Buffer<float> getUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
-   std::vector<float> uniformData = {0};
-   return Buffer<float>(device, queue, uniformData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+Buffer<MyUniforms> getUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+   MyUniforms uniform;
+   uniform.time  = 1.0f;
+   uniform.color = {0.0f, 1.0f, 0.4f, 1.0f};
+
+   std::vector<MyUniforms> uniformData = {uniform};
+   return Buffer<MyUniforms>(device, queue, uniformData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
 }
 
 // Initialize everything and return true if it went all right
@@ -304,36 +317,6 @@ Application::Application()
    initialized = true;
 }
 
-void Application::InitializeResPath() {
-   namespace fs = std::filesystem;
-
-   if (res_path.empty()) {
-      // Get the path of the executable
-      fs::path exe_path = fs::weakly_canonical(fs::path("/proc/self/exe"));
-      fs::path exe_dir  = exe_path.parent_path();
-
-      // Check for "res/shaders" relative to the executable's directory
-      if (fs::exists(exe_dir / "res" / "shaders")) {
-         res_path = (exe_dir / "res").string() + "/";
-      } else if (fs::exists(RES_PATH "/res/shaders")) {
-         res_path = RES_PATH "/res/";
-      } else {
-         std::cout << "Resource directory not found relative to " << exe_dir << " or " << RES_PATH << std::endl;
-         res_path = "./res/";
-      }
-   }
-}
-
-
-// Uninitialize everything that was initialized
-void Application::Terminate() {
-   surface.unconfigure();
-   queue.release();
-   surface.release();
-   device.release();
-   glfwDestroyWindow(window);
-   glfwTerminate();
-}
 
 // Draw a frame and handle events
 void Application::MainLoop() {
@@ -344,8 +327,13 @@ void Application::MainLoop() {
       return;
 
    // Update the uniform buffer
-   float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
-   queue.writeBuffer(uniformBuffer.get(), 0, &t, sizeof(float));
+   MyUniforms uniform;
+   uniform.time  = glfwGetTime();
+   uniform.color = {0.0f, 1.0f, 0.4f, 1.0f};
+   // queue.writeBuffer(uniformBuffer.get(), 0, &uniform, sizeof(MyUniforms));
+
+   std::vector<MyUniforms> uniformData = {uniform};
+   uniformBuffer.Update(uniformData);
 
    // Create a command encoder for the draw call
    wgpu::CommandEncoderDescriptor encoderDesc = {};
@@ -384,7 +372,7 @@ void Application::MainLoop() {
    // multiple uniform blocks.
    binding.offset = 0;
    // And we specify again the size of the buffer.
-   binding.size = sizeof(float);
+   binding.size = sizeof(MyUniforms);
 
    // A bind group contains one or multiple bindings
    wgpu::BindGroupDescriptor bindGroupDesc{};
@@ -426,6 +414,38 @@ void Application::MainLoop() {
 #elif defined(WEBGPU_BACKEND_WGPU)
    device.poll(false);
 #endif
+}
+
+
+void Application::InitializeResPath() {
+   namespace fs = std::filesystem;
+
+   if (res_path.empty()) {
+      // Get the path of the executable
+      fs::path exe_path = fs::weakly_canonical(fs::path("/proc/self/exe"));
+      fs::path exe_dir  = exe_path.parent_path();
+
+      // Check for "res/shaders" relative to the executable's directory
+      if (fs::exists(exe_dir / "res" / "shaders")) {
+         res_path = (exe_dir / "res").string() + "/";
+      } else if (fs::exists(RES_PATH "/res/shaders")) {
+         res_path = RES_PATH "/res/";
+      } else {
+         std::cout << "Resource directory not found relative to " << exe_dir << " or " << RES_PATH << std::endl;
+         res_path = "./res/";
+      }
+   }
+}
+
+
+// Uninitialize everything that was initialized
+void Application::Terminate() {
+   surface.unconfigure();
+   queue.release();
+   surface.release();
+   device.release();
+   glfwDestroyWindow(window);
+   glfwTerminate();
 }
 
 // Return true as long as the main loop should keep on running
