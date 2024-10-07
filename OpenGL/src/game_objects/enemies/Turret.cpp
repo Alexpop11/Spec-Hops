@@ -4,7 +4,7 @@
 Turret::Turret(const std::string& name, float x, float y)
    : Character(name, x, y, "enemy.png") {
    drawPriority = DrawPriority::Character;
-   health       = 1;
+   health       = 3;
 }
 
 void Turret::update() {
