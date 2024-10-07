@@ -39,6 +39,7 @@ void Player::update() {
          if (glm::length(kickedGuy->position - position) < 1.5) {
             kickedGuy->kick(kicking->intoWall, kicking->direction.x, kicking->direction.y);
             World::timeSpeed = 0.1f;
+            audio().Update(World::timeSpeed);
             kicking.reset();
          } else {
             std::cout << "kickedGuy->position - position " << glm::length(kickedGuy->position - position) << std::endl;
@@ -108,8 +109,8 @@ void Player::render(Renderer& renderer) {
          for (auto& bomb : World::at<Bomb>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
             bomb->tintColor = {1.0, 0.5, 0.0, 0.5};
          }
-         // need to figure out some way to slow tick rate and also make all things zeno at a fraction of normal speed
          World::timeSpeed        = zeno(World::timeSpeed, 0.333, 0.08);
+         audio().Update(World::timeSpeed);
          World::settingTimeSpeed = true;
       }
    }

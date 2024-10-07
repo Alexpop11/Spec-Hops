@@ -1,6 +1,7 @@
 #include "AudioEngine.h"
 #include "Renderer.h"
 #include <cstring>
+#include "World.h"
 
 Sound::Sound(const std::string& filename, ma_engine* engine)
    : engine(engine) {
@@ -30,8 +31,15 @@ Sound& Sound::operator=(Sound&& other) noexcept {
    return *this;
 }
 
+void Sound::setPitch(float pitch) {
+   if (engine != nullptr) {
+      ma_sound_set_pitch(&sound, pitch);
+   }
+}
+
 void Sound::play() {
    if (engine != nullptr) {
+      ma_sound_set_pitch(&sound, World::timeSpeed);
       ma_sound_start(&sound);
    }
 }
@@ -55,10 +63,28 @@ AudioEngine::AudioEngine()
    , Enemy_Hurt(getSound("enemy_ouch.wav")) 
    , Zap(getSound("zap.wav"))
    , Impact(getSound("impact.wav")) 
-   , Scuff(getSound("scuff.wav")) {}
+   , Scuff(getSound("scuff.wav")) {
+
+    Update(World::timeSpeed);
+}
 
 Sound AudioEngine::getSound(const std::string& name) {
    return Sound(Renderer::ResPath() + "sounds/" + name, &engine.engine);
+}
+
+void AudioEngine::Update(float newTimeSpeed) {
+   Walk.setPitch(newTimeSpeed);
+   Walk1.setPitch(newTimeSpeed);
+   Bomb_Sound.setPitch(newTimeSpeed);
+   Death_Sound.setPitch(newTimeSpeed);
+   Bullet_Sound.setPitch(newTimeSpeed);
+   Hurt_Sound.setPitch(newTimeSpeed);
+   Bomb_Place.setPitch(newTimeSpeed);
+   Bomb_Tick.setPitch(newTimeSpeed);
+   Enemy_Hurt.setPitch(newTimeSpeed);
+   Zap.setPitch(newTimeSpeed);
+   Impact.setPitch(newTimeSpeed);
+   Scuff.setPitch(newTimeSpeed);
 }
 
 void AudioEngine::play(Sound& sound) {

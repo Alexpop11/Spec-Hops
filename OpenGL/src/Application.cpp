@@ -134,6 +134,7 @@ int main(void) {
       realTimeLastFrame    = glfwGetTime();
       if (!World::settingTimeSpeed) {
          World::timeSpeed = zeno(World::timeSpeed, 1.0, 0.2);
+         audio().Update(World::timeSpeed);
       } else {
          World::settingTimeSpeed = false;
       }

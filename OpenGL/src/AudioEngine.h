@@ -17,6 +17,7 @@ public:
    Sound(Sound&& other) noexcept;
    Sound& operator=(Sound&& other) noexcept;
    void   play();
+   void   setPitch(float pitch); // New method to set pitch
    ~Sound();
 };
 
@@ -43,6 +44,7 @@ private:
 public:
    AudioEngine();
    void play(Sound& sound);
+   void Update(float newTimeSpeed);
 
    Sound Walk;
    Sound Walk1;
