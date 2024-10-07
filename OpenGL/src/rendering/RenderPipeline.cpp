@@ -1,19 +1,27 @@
 // RenderPipeline.cpp
 #include "RenderPipeline.h"
 
-RenderPipeline::RenderPipeline(wgpu::Device& device, Shader& shader, const std::vector<VertexBufferInfo>& vertexInfos,
-                               wgpu::PrimitiveTopology topology, wgpu::TextureFormat colorFormat)
-   : device(device) {
+RenderPipeline::RenderPipeline(const std::string& label, wgpu::Device& device, Shader& shader,
+                               const std::vector<VertexBufferInfo>& vertexInfos,
+                               const wgpu::BindGroupLayout bindGroupLayout, wgpu::PrimitiveTopology topology,
+                               wgpu::TextureFormat colorFormat)
+   : bindGroupLayout(bindGroupLayout) {
    // Create vertex buffer layouts
    std::vector<wgpu::VertexBufferLayout> wgpuVertexLayouts;
    for (const auto& info : vertexInfos) {
       wgpuVertexLayouts.push_back(info.layout);
    }
 
-   // Define pipeline layout
-   wgpu::PipelineLayoutDescriptor pipelineLayoutDesc = {};
-   pipelineLayoutDesc.label                          = "Pipeline Layout";
-   wgpu::PipelineLayout pipelineLayout               = device.createPipelineLayout(pipelineLayoutDesc);
+   // Create a bind group layout
+   // TODO: this will need to be parameterized
+   // ========================================================================================
+   // Create the pipeline layout
+   wgpu::PipelineLayoutDescriptor layoutDesc{};
+   layoutDesc.bindGroupLayoutCount = 1;
+   layoutDesc.bindGroupLayouts     = (WGPUBindGroupLayout*)&bindGroupLayout;
+   layoutDesc.label                = label.c_str();
+   wgpu::PipelineLayout layout     = device.createPipelineLayout(layoutDesc);
+   // =========================================================================================
 
    // Define color target state
    wgpu::ColorTargetState colorTarget = {};
@@ -45,7 +53,7 @@ RenderPipeline::RenderPipeline(wgpu::Device& device, Shader& shader, const std::
    // Define pipeline descriptor
    wgpu::RenderPipelineDescriptor pipelineDesc     = {};
    pipelineDesc.label                              = "Render Pipeline";
-   pipelineDesc.layout                             = pipelineLayout;
+   pipelineDesc.layout                             = layout;
    pipelineDesc.vertex                             = vertexState;
    pipelineDesc.fragment                           = &fragmentState;
    pipelineDesc.primitive                          = primitiveState;
@@ -54,11 +62,12 @@ RenderPipeline::RenderPipeline(wgpu::Device& device, Shader& shader, const std::
    pipelineDesc.multisample.mask                   = ~0u;
    pipelineDesc.multisample.alphaToCoverageEnabled = false;
 
+
    // Create render pipeline
    pipeline = device.createRenderPipeline(pipelineDesc);
 
    // Release the pipeline layout as it's no longer needed after pipeline creation
-   pipelineLayout.release();
+   layout.release();
 }
 
 RenderPipeline::~RenderPipeline() {
@@ -68,9 +77,10 @@ RenderPipeline::~RenderPipeline() {
 }
 
 RenderPipeline::RenderPipeline(RenderPipeline&& other) noexcept
-   : device(other.device)
-   , pipeline(other.pipeline) {
-   other.pipeline = nullptr;
+   : pipeline(other.pipeline)
+   , bindGroupLayout(other.bindGroupLayout) {
+   other.pipeline        = nullptr;
+   other.bindGroupLayout = nullptr;
 }
 
 RenderPipeline& RenderPipeline::operator=(RenderPipeline&& other) noexcept {
@@ -78,9 +88,9 @@ RenderPipeline& RenderPipeline::operator=(RenderPipeline&& other) noexcept {
       if (pipeline) {
          pipeline.release();
       }
-      device         = other.device;
-      pipeline       = other.pipeline;
-      other.pipeline = nullptr;
+      pipeline        = other.pipeline;
+      bindGroupLayout = other.bindGroupLayout;
+      other.pipeline  = nullptr;
    }
    return *this;
 }

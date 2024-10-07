@@ -1,8 +1,7 @@
 // Shader.cpp
 #include "Shader.h"
 
-Shader::Shader(wgpu::Device device, const std::string& src)
-   : device(device) {
+Shader::Shader(wgpu::Device device, const std::string& src) {
    wgpu::ShaderModuleWGSLDescriptor wgslDesc;
    wgslDesc.code       = src.c_str();
    wgslDesc.chain.next = nullptr;
@@ -34,8 +33,7 @@ Shader::~Shader() {
 }
 
 Shader::Shader(Shader&& other) noexcept
-   : device(other.device)
-   , shaderModule(other.shaderModule) {
+   : shaderModule(other.shaderModule) {
    other.shaderModule = nullptr;
 }
 
@@ -44,7 +42,6 @@ Shader& Shader::operator=(Shader&& other) noexcept {
       if (shaderModule) {
          shaderModule.release();
       }
-      device             = other.device;
       shaderModule       = other.shaderModule;
       other.shaderModule = nullptr;
    }

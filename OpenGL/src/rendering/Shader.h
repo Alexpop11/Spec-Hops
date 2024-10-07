@@ -21,6 +21,5 @@ public:
    wgpu::ShaderModule GetShaderModule() const { return shaderModule; }
 
 private:
-   wgpu::Device       device;
    wgpu::ShaderModule shaderModule;
 };

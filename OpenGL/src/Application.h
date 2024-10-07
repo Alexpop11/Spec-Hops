@@ -44,4 +44,5 @@ private:
 
    Buffer<float>    pointBuffer;
    Buffer<uint16_t> indexBuffer;
+   Buffer<float>    uniformBuffer;
 };

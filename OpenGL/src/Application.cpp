@@ -47,6 +47,8 @@ struct VertexInput {
     @location(1) color: vec3f,
 };
 
+@group(0) @binding(0) var<uniform> uTime: f32;
+
 /**
  * A structure with fields labeled with builtins and locations can also be used
  * as *output* of the vertex shader, which is also the input of the fragment
@@ -59,10 +61,14 @@ struct VertexOutput {
 
 @vertex
 fn vs_main(in: VertexInput) -> VertexOutput {
-    var out: VertexOutput; // create the output struct
-    out.position = vec4f(in.position, 0.0, 1.0); // same as what we used to directly return
-    out.color = in.color; // forward the color attribute to the fragment shader
-    return out;
+	var out: VertexOutput;
+	let ratio = 640.0 / 480.0;
+	// We move the scene depending on the time
+	var offset = vec2f(-0.6875, -0.463);
+	offset += 0.3 * vec2f(cos(uTime), sin(uTime));
+	out.position = vec4f(in.position.x + offset.x, (in.position.y + offset.y) * ratio, 0.0, 1.0);
+	out.color = in.color;
+	return out;
 }
 
 @fragment
@@ -207,7 +213,26 @@ RenderPipeline initializePipeline(wgpu::Device& device, wgpu::TextureFormat& sur
    std::vector<VertexBufferInfo> layouts;
    layouts.push_back(std::move(vertexBufferInfo));
 
-   return RenderPipeline(device, shader, layouts, wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
+
+   // Create a bind group for the uniforms for this render pass
+   // ========================================================
+   // Create binding layout (don't forget to = Default)
+   wgpu::BindGroupLayoutEntry bindingLayout = wgpu::Default;
+   // The binding index as used in the @binding attribute in the shader
+   bindingLayout.binding = 0;
+   // The stage that needs to access this resource
+   bindingLayout.visibility            = wgpu::ShaderStage::Vertex;
+   bindingLayout.buffer.type           = wgpu::BufferBindingType::Uniform;
+   bindingLayout.buffer.minBindingSize = sizeof(float);
+
+   wgpu::BindGroupLayoutDescriptor bindGroupLayoutDesc{};
+   bindGroupLayoutDesc.entryCount        = 1; // TODO; replace with number of bindings
+   bindGroupLayoutDesc.entries           = &bindingLayout;
+   wgpu::BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutDesc);
+   // ========================================================
+
+   return RenderPipeline("Rainbow Square", device, shader, layouts, bindGroupLayout,
+                         wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
 }
 
 wgpu::TextureFormat preferredFormat(wgpu::Surface& surface, wgpu::Adapter& adapter) {
@@ -235,6 +260,11 @@ Buffer<uint16_t> getIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    return Buffer<uint16_t>(device, queue, indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 }
 
+Buffer<float> getUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+   std::vector<float> uniformData = {0};
+   return Buffer<float>(device, queue, uniformData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+}
+
 // Initialize everything and return true if it went all right
 Application::Application()
    : window(createWindow())
@@ -247,7 +277,8 @@ Application::Application()
    , surfaceFormat(preferredFormat(surface, adapter))
    , pipeline(initializePipeline(device, surfaceFormat))
    , pointBuffer(getPointBuffer(device, queue))
-   , indexBuffer(getIndexBuffer(device, queue)) {
+   , indexBuffer(getIndexBuffer(device, queue))
+   , uniformBuffer(getUniformBuffer(device, queue)) {
 
    // Configure the surface
    wgpu::SurfaceConfiguration config = {};
@@ -312,6 +343,10 @@ void Application::MainLoop() {
    if (!targetView)
       return;
 
+   // Update the uniform buffer
+   float t = static_cast<float>(glfwGetTime()); // glfwGetTime returns a double
+   queue.writeBuffer(uniformBuffer.get(), 0, &t, sizeof(float));
+
    // Create a command encoder for the draw call
    wgpu::CommandEncoderDescriptor encoderDesc = {};
    encoderDesc.label                          = "My command encoder";
@@ -338,7 +373,29 @@ void Application::MainLoop() {
 
    wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
 
+
+   // Create a binding
+   wgpu::BindGroupEntry binding{};
+   // The index of the binding (the entries in bindGroupDesc can be in any order)
+   binding.binding = 0;
+   // The buffer it is actually bound to
+   binding.buffer = uniformBuffer.get();
+   // We can specify an offset within the buffer, so that a single buffer can hold
+   // multiple uniform blocks.
+   binding.offset = 0;
+   // And we specify again the size of the buffer.
+   binding.size = sizeof(float);
+
+   // A bind group contains one or multiple bindings
+   wgpu::BindGroupDescriptor bindGroupDesc{};
+   bindGroupDesc.layout = pipeline.GetBindGroupLayout();
+   // There must be as many bindings as declared in the layout!
+   bindGroupDesc.entryCount  = 1; // TODO; replace with number of bindings
+   bindGroupDesc.entries     = &binding;
+   wgpu::BindGroup bindGroup = device.createBindGroup(bindGroupDesc);
+
    renderPass.setPipeline(pipeline.GetPipeline());
+   renderPass.setBindGroup(0, bindGroup, 0, nullptr);
    renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.size());
    renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.size());
    renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);

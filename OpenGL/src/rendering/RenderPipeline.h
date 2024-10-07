@@ -10,7 +10,8 @@
 
 class RenderPipeline {
 public:
-   RenderPipeline(wgpu::Device& device, Shader& shader, const std::vector<VertexBufferInfo>& vertexInfos,
+   RenderPipeline(const std::string& label, wgpu::Device& device, Shader& shader,
+                  const std::vector<VertexBufferInfo>& vertexInfos, const wgpu::BindGroupLayout bindGroupLayout,
                   wgpu::PrimitiveTopology topology, wgpu::TextureFormat colorFormat);
    ~RenderPipeline();
 
@@ -22,9 +23,10 @@ public:
    RenderPipeline(RenderPipeline&& other) noexcept;
    RenderPipeline& operator=(RenderPipeline&& other) noexcept;
 
-   wgpu::RenderPipeline GetPipeline() const { return pipeline; }
+   wgpu::RenderPipeline  GetPipeline() const { return pipeline; }
+   wgpu::BindGroupLayout GetBindGroupLayout() const { return bindGroupLayout; }
 
 private:
-   wgpu::Device&         device;
-   wgpu::RenderPipeline pipeline;
+   wgpu::RenderPipeline  pipeline;
+   wgpu::BindGroupLayout bindGroupLayout;
 };
