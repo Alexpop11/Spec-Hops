@@ -13,10 +13,6 @@ public:
    // Initialize everything and return true if it went all right
    Application();
 
-   void InitializeBuffers();
-
-   RenderPipeline InitializePipeline();
-
    // Uninitialize everything that was initialized
    void Terminate();
 

@@ -273,42 +273,6 @@ Application::Application()
    initialized = true;
 }
 
-void Application::InitializeBuffers() {
-   // Define point data
-   // The de-duplicated list of point positions
-   /*pointBuffer = Buffer<float>(device, queue, pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
-   pointBuffer.upload();*/
-
-
-   // Define index data
-   // This is a list of indices referencing positions in the pointData
-   std::vector<uint16_t> indexData = {
-      0, 1, 2, // Triangle #0 connects points #0, #1 and #2
-      0, 2, 3  // Triangle #1 connects points #0, #2 and #3
-   };
-
-   /*indexCount = static_cast<uint32_t>(indexData.size());
-
-   // Create vertex buffer
-   wgpu::BufferDescriptor bufferDesc;
-   bufferDesc.size             = pointData.size() * sizeof(float);
-   bufferDesc.usage            = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex; // Vertex usage here!
-   bufferDesc.mappedAtCreation = false;
-   pointBuffer                 = device.createBuffer(bufferDesc);
-
-   // Upload geometry data to the buffer
-   queue.writeBuffer(pointBuffer, 0, pointData.data(), bufferDesc.size);
-
-   // Create index buffer
-   // (we reuse the bufferDesc initialized for the pointBuffer)
-   bufferDesc.size  = indexData.size() * sizeof(uint16_t);
-   bufferDesc.size  = (bufferDesc.size + 3) & ~3; // round up to the next multiple of 4
-   bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index;
-   indexBuffer      = device.createBuffer(bufferDesc);
-
-   queue.writeBuffer(indexBuffer, 0, indexData.data(), bufferDesc.size);*/
-}
-
 void Application::InitializeResPath() {
    namespace fs = std::filesystem;
 
