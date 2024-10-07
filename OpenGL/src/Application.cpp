@@ -123,6 +123,7 @@ int main(void) {
    Input::currentTime = glfwGetTime();
    double realTimeLastFrame = Input::currentTime;
    double lastTick    = Input::startTime;
+   audio().Song.play();
 
    // -------------------
    // Main rendering loop

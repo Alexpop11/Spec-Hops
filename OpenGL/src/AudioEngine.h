@@ -58,6 +58,7 @@ public:
    Sound Zap;
    Sound Impact;
    Sound Scuff;
+   Sound Song;
 };
 
 AudioEngine& audio();

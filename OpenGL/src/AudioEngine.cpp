@@ -63,7 +63,8 @@ AudioEngine::AudioEngine()
    , Enemy_Hurt(getSound("enemy_ouch.wav")) 
    , Zap(getSound("zap.wav"))
    , Impact(getSound("impact.wav")) 
-   , Scuff(getSound("scuff.wav")) {
+   , Scuff(getSound("scuff.wav"))
+   , Song(getSound("acid_splash.wav")){
 
     Update(World::timeSpeed);
 }
@@ -85,6 +86,7 @@ void AudioEngine::Update(float newTimeSpeed) {
    Zap.setPitch(newTimeSpeed);
    Impact.setPitch(newTimeSpeed);
    Scuff.setPitch(newTimeSpeed);
+   Song.setPitch(newTimeSpeed);
 }
 
 void AudioEngine::play(Sound& sound) {
