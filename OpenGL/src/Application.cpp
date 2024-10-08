@@ -120,9 +120,9 @@ int main(void) {
    World::LoadMap("maps/SpaceShip.txt");
    World::gameobjects.push_back(std::make_unique<Fog>());
 
-   Input::currentTime = glfwGetTime();
+   Input::currentTime       = glfwGetTime();
    double realTimeLastFrame = Input::currentTime;
-   double lastTick    = Input::startTime;
+   double lastTick          = Input::startTime;
    audio().Song.play();
 
    // -------------------
@@ -130,7 +130,7 @@ int main(void) {
    // -------------------
    while (!glfwWindowShouldClose(window)) {
       double lastFrameTime = Input::currentTime;
-      Input::deltaTime     = World::timeSpeed*(glfwGetTime() - realTimeLastFrame);
+      Input::deltaTime     = World::timeSpeed * (glfwGetTime() - realTimeLastFrame);
       Input::currentTime   = Input::currentTime + Input::deltaTime;
       realTimeLastFrame    = glfwGetTime();
       if (!World::settingTimeSpeed) {
@@ -152,10 +152,15 @@ int main(void) {
 
       World::UpdateObjects();
 
-      if (!World::ticksPaused() && (World::shouldTick || lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime)) {
-         World::TickObjects();
-         lastTick          = Input::currentTime;
-         World::shouldTick = false;
+      if (!World::ticksPaused()) {
+         if (World::shouldTick) {
+            World::TickObjects();
+            lastTick          = Input::currentTime;
+            World::shouldTick = false;
+         } else if (lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime) {
+            World::TickObjects();
+            lastTick = lastTick + (1.0 / TICKS_PER_SECOND);
+         }
       }
 
       // Start the Dear ImGui frame
