@@ -26,6 +26,7 @@
 #include "rendering/RenderPipeline.h"
 #include "rendering/VertexBufferLayout.h"
 #include "rendering/Buffer.h"
+#include "rendering/BindGroupLayout.h"
 
 #include "glm/glm.hpp"
 
@@ -214,7 +215,7 @@ auto getUncapturedErrorCallbackHandle(wgpu::Device& device) {
    });
 }
 
-RenderPipeline initializePipeline(wgpu::Device& device, wgpu::TextureFormat& surfaceFormat) {
+RenderPipeline<MyUniformBinding> initializePipeline(wgpu::Device& device, wgpu::TextureFormat& surfaceFormat) {
    // Load the shader module
    Shader             shader(device, shaderSource);
    wgpu::ShaderModule shaderModule = shader.GetShaderModule();
@@ -248,8 +249,8 @@ RenderPipeline initializePipeline(wgpu::Device& device, wgpu::TextureFormat& sur
 
 
 
-   return RenderPipeline("Rainbow Square", device, shader, layouts, bindGroupLayout,
-                         wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
+   return RenderPipeline<MyUniformBinding>("Rainbow Square", device, shader, layouts,
+                                           wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
 }
 
 wgpu::TextureFormat preferredFormat(wgpu::Surface& surface, wgpu::Adapter& adapter) {

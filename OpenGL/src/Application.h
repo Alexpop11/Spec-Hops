@@ -3,6 +3,7 @@
 
 #include "rendering/RenderPipeline.h"
 #include "rendering/Buffer.h"
+#include "rendering/BindGroupLayout.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -12,6 +13,13 @@ struct MyUniforms {
    float     _pad0[3];
    glm::vec4 color; // at byte offset 16
 };
+
+using MyUniformBinding =
+   BufferBinding<MyUniforms,                                                         // Type of the buffer
+                 0,                                                                  // Binding index
+                 wgpu::both(wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment), // Shader visibility
+                 wgpu::BufferBindingType::Uniform                                    // Buffer binding type
+                 >;
 
 class Application {
 public:
@@ -45,7 +53,7 @@ private:
    std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
    wgpu::Queue                          queue;
    wgpu::TextureFormat                  surfaceFormat;
-   RenderPipeline                       pipeline;
+   RenderPipeline<MyUniformBinding>     pipeline;
 
    Buffer<float>      pointBuffer;
    Buffer<uint16_t>   indexBuffer;
