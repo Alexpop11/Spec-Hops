@@ -8,22 +8,21 @@
 #include "VertexBufferLayout.h"
 #include "BindGroupLayout.h"
 
-template <typename BindGroupType>
+template <typename BindGroupType, typename VertexBufferLayoutType>
 class RenderPipeline;
 
-template <BindingC... Bindings>
-class RenderPipeline<BindGroupLayout<Bindings...>> {
+template <BindingC... Bindings, typename... VertexBufferItems>
+class RenderPipeline<BindGroupLayout<Bindings...>, VertexBufferLayout<VertexBufferItems...>> {
 public:
-   RenderPipeline(const std::string& label, wgpu::Device& device, Shader& shader,
-                  const std::vector<VertexBufferInfo>& vertexInfos, wgpu::PrimitiveTopology topology,
+   RenderPipeline(const std::string& label, wgpu::Device& device, Shader& shader, wgpu::PrimitiveTopology topology,
                   wgpu::TextureFormat colorFormat)
       : device(device)
       , bindGroupLayout(BindGroupLayout<Bindings...>::CreateLayout(device)) {
       // Create vertex buffer layouts
+      auto vertexInfo = VertexBufferLayout<VertexBufferItems...>::CreateLayout();
+
       std::vector<wgpu::VertexBufferLayout> wgpuVertexLayouts;
-      for (const auto& info : vertexInfos) {
-         wgpuVertexLayouts.push_back(info.layout);
-      }
+      wgpuVertexLayouts.push_back(vertexInfo.layout);
 
       wgpu::PipelineLayoutDescriptor layoutDesc{};
       layoutDesc.bindGroupLayoutCount = 1;

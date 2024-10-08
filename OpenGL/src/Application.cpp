@@ -418,7 +418,7 @@ auto getUncapturedErrorCallbackHandle(wgpu::Device& device) {
    });
 }
 
-RenderPipeline<BindGroupLayout<StarUniformBinding>> initializePipeline(wgpu::Device&        device,
+RenderPipeline<BindGroupLayout<StarUniformBinding>, VertexBufferLayout<glm::vec2>> initializePipeline(wgpu::Device&        device,
                                                                        wgpu::TextureFormat& surfaceFormat) {
    // Load the shader module
    Shader             shader(device, shaderSource);
@@ -433,8 +433,9 @@ RenderPipeline<BindGroupLayout<StarUniformBinding>> initializePipeline(wgpu::Dev
    std::vector<VertexBufferInfo> layouts;
    layouts.push_back(std::move(vertexBufferInfo));
 
-   return RenderPipeline<BindGroupLayout<StarUniformBinding>>("Stars", device, shader, layouts,
-                                                              wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
+   return RenderPipeline<BindGroupLayout<StarUniformBinding>, VertexBufferLayout<glm::vec2>>("Stars", device, shader,
+                                                                                            wgpu::PrimitiveTopology::TriangleList,
+                                                                                            surfaceFormat);
 }
 
 wgpu::TextureFormat preferredFormat(wgpu::Surface& surface, wgpu::Adapter& adapter) {

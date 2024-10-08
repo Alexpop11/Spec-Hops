@@ -48,7 +48,7 @@ constexpr std::size_t type_size() {
 
 template <typename... Types>
 struct VertexBufferLayout {
-   std::vector<wgpu::VertexAttribute> Attributes() {
+   static std::vector<wgpu::VertexAttribute> Attributes() {
       std::vector<wgpu::VertexAttribute> vertexAttribs;
       std::size_t                        offset = 0;
       std::size_t                        index  = 0;
@@ -58,7 +58,7 @@ struct VertexBufferLayout {
       return vertexAttribs;
    }
 
-   VertexBufferInfo CreateLayout() {
+   static VertexBufferInfo CreateLayout() {
       VertexBufferInfo info;
       info.attributes            = std::make_unique<std::vector<wgpu::VertexAttribute>>(Attributes());
       info.layout.arrayStride    = (type_size<Types>() + ...); // sum of the sizes of all types
@@ -71,7 +71,7 @@ struct VertexBufferLayout {
 
 private:
    template <typename T>
-   wgpu::VertexAttribute CreateAttribute(std::size_t shaderLocation, std::size_t& offset) {
+   static wgpu::VertexAttribute CreateAttribute(std::size_t shaderLocation, std::size_t& offset) {
       wgpu::VertexAttribute attribute;
       attribute.shaderLocation = shaderLocation;
       attribute.format         = to_vertex_format<T>();
