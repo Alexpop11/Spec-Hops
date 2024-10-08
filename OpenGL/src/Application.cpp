@@ -39,46 +39,249 @@
 
 // We embed the source of the shader module here
 const char* shaderSource = R"(
-struct VertexInput {
-    @location(0) position: vec2f,
-    @location(1) color: vec3f,
-};
-
 struct VertexOutput {
-    @builtin(position) position: vec4f,
-    @location(0) color: vec3f,
-};
+    @builtin(position) gl_Position: vec4<f32>,
+}
 
-/**
- * A structure holding the value of our uniforms
- */
-struct MyUniforms {
+@vertex 
+fn vs_main(@location(0) position: vec4<f32>) -> VertexOutput {
+    return VertexOutput(position);
+}
+
+struct FragmentOutput {
+    @location(0) color: vec4<f32>,
+}
+
+struct StarUniforms {
 	time: f32,
-	color: vec4f,
+	resolution: vec2f,
 };
 
-// Instead of the simple uTime variable, our uniform variable is a struct
-@group(0) @binding(0) var<uniform> uMyUniforms: MyUniforms;
+@group(0) @binding(0) var<uniform> uSTarUniforms: StarUniforms;
+var<private> color: vec4<f32>;
+var<private> gl_FragCoord_1: vec4<f32>;
 
-@vertex
-fn vs_main(in: VertexInput) -> VertexOutput {
-	var out: VertexOutput;
-	let ratio = 640.0 / 480.0;
-	var offset = vec2f(-0.6875, -0.463);
-	offset += 0.3 * vec2f(cos(uMyUniforms.time), sin(uMyUniforms.time));
-	out.position = vec4f(in.position.x + offset.x, (in.position.y + offset.y) * ratio, 0.0, 1.0);
-	out.color = in.color;
-	return out;
+fn random(coord: vec2<f32>) -> f32 {
+    var coord_1: vec2<f32>;
+
+    coord_1 = coord;
+    let _e9 = coord_1;
+    let _e18 = coord_1;
+    let _e30 = coord_1;
+    let _e39 = coord_1;
+    return fract((sin(dot(_e39, vec2<f32>(12.9898f, 78.233f))) * 43758.547f));
 }
 
-@fragment
-fn fs_main(in: VertexOutput) -> @location(0) vec4f {
-	let color = in.color * uMyUniforms.color.rgb;
-	// Gamma-correction
-	let corrected_color = pow(color, vec3f(2.2));
-	return vec4f(corrected_color, uMyUniforms.color.a);
+fn star(uv: vec2<f32>, center: vec2<f32>, size: f32) -> f32 {
+    var uv_1: vec2<f32>;
+    var center_1: vec2<f32>;
+    var size_1: f32;
+    var d: vec2<f32>;
+    var manhattanDist: f32;
+    var euclideanDist: f32;
+    var pointiness: f32 = 3f;
+    var star_1: f32;
+    var flareR: f32;
+    var invertedflareR: f32;
+    var flare: f32;
+
+    uv_1 = uv;
+    center_1 = center;
+    size_1 = size;
+    let _e9 = uv_1;
+    let _e10 = center_1;
+    let _e12 = uv_1;
+    let _e13 = center_1;
+    d = abs((_e12 - _e13));
+    let _e17 = d;
+    let _e19 = d;
+    manhattanDist = (_e17.x + _e19.y);
+    let _e24 = d;
+    euclideanDist = length(_e24);
+    let _e32 = size_1;
+    let _e37 = size_1;
+    let _e40 = euclideanDist;
+    star_1 = (1f - smoothstep(0f, (_e37 / 1.5f), _e40));
+    let _e46 = pointiness;
+    let _e48 = manhattanDist;
+    let _e49 = euclideanDist;
+    let _e50 = pointiness;
+    flareR = mix(_e48, _e49, -(_e50));
+    let _e54 = size_1;
+    let _e55 = flareR;
+    invertedflareR = (_e54 - _e55);
+    let _e58 = size_1;
+    let _e63 = size_1;
+    let _e68 = flareR;
+    flare = smoothstep((_e63 + 0.01f), 0f, _e68);
+    let _e73 = flare;
+    let _e74 = star_1;
+    return max(_e73, _e74);
 }
 
+fn starColor(seed: f32) -> vec3<f32> {
+    var seed_1: f32;
+    var colorType: f32;
+
+    seed_1 = seed;
+    let _e5 = seed_1;
+    let _e8 = seed_1;
+    let _e11 = random(vec2<f32>(_e8, 0.4f));
+    colorType = _e11;
+    let _e13 = colorType;
+    if (_e13 < 0.79f) {
+        {
+            return vec3<f32>(1f, 1f, 1f);
+        }
+    } else {
+        let _e20 = colorType;
+        if (_e20 < 0.82f) {
+            {
+                return vec3<f32>(0.65f, 0.73f, 1f);
+            }
+        } else {
+            let _e27 = colorType;
+            if (_e27 < 0.9f) {
+                {
+                    return vec3<f32>(1f, 0.75f, 0.75f);
+                }
+            } else {
+                {
+                    return vec3<f32>(1f, 0.9f, 0.7f);
+                }
+            }
+        }
+    }
+}
+
+fn main_1() {
+    var uv_2: vec2<f32>;
+    var aspectRatio: f32;
+    var numStars: i32 = 200i;
+    var finalColor: vec3<f32> = vec3(0f);
+    var i: i32 = 0i;
+    var seed_2: f32;
+    var speedF: f32;
+    var local: f32;
+    var local_1: f32;
+    var starSpeed: f32;
+    var starSize: f32;
+    var starY: f32;
+    var starX: f32;
+    var starPos: vec2<f32>;
+    var starTint: vec3<f32>;
+    var smallStarBrightness: f32;
+
+    let _e4 = gl_FragCoord_1;
+    let _e6 = uSTarUniforms.resolution;
+    uv_2 = (_e4.xy / _e6.xy);
+    let _e10 = uSTarUniforms.resolution;
+    let _e12 = uSTarUniforms.resolution;
+    aspectRatio = (_e10.x / _e12.y);
+    let _e17 = uv_2;
+    let _e19 = aspectRatio;
+    uv_2.x = (_e17.x * _e19);
+    let _e22 = uv_2;
+    let _e27 = uv_2;
+    uv_2.x = (floor((_e27.x * 450f)) / 450f);
+    let _e37 = uv_2;
+    let _e42 = uv_2;
+    uv_2.y = (floor((_e42.y * 450f)) / 450f);
+    loop {
+        let _e58 = i;
+        let _e59 = numStars;
+        if !((_e58 < _e59)) {
+            break;
+        }
+        {
+            let _e65 = i;
+            let _e67 = numStars;
+            seed_2 = (f32(_e65) / f32(_e67));
+            let _e71 = seed_2;
+            let _e74 = seed_2;
+            let _e77 = random(vec2<f32>(_e74, 0.1f));
+            speedF = _e77;
+            let _e79 = speedF;
+            if (_e79 < 0.995f) {
+                let _e82 = speedF;
+                if (_e82 < 0.975f) {
+                    let _e90 = speedF;
+                    local = mix(0.01f, 0.08f, _e90);
+                } else {
+                    local = 0.23f;
+                }
+                let _e94 = local;
+                local_1 = _e94;
+            } else {
+                local_1 = 0.8f;
+            }
+            let _e97 = local_1;
+            starSpeed = -(_e97);
+            let _e102 = seed_2;
+            let _e105 = seed_2;
+            let _e108 = random(vec2<f32>(_e105, 0.2f));
+            let _e111 = seed_2;
+            let _e114 = seed_2;
+            let _e117 = random(vec2<f32>(_e114, 0.2f));
+            starSize = mix(0.001f, 0.005f, _e117);
+            let _e120 = seed_2;
+            let _e123 = seed_2;
+            let _e126 = random(vec2<f32>(_e123, 0.3f));
+            starY = _e126;
+            let _e128 = seed_2;
+            let _e129 = uSTarUniforms.time;
+            let _e130 = starSpeed;
+            let _e133 = seed_2;
+            let _e134 = uSTarUniforms.time;
+            let _e135 = starSpeed;
+            starX = fract((_e133 + (_e134 * _e135)));
+            let _e140 = starX;
+            let _e141 = aspectRatio;
+            let _e143 = starY;
+            starPos = vec2<f32>((_e140 * _e141), _e143);
+            let _e147 = seed_2;
+            let _e148 = starColor(_e147);
+            starTint = _e148;
+            let _e150 = finalColor;
+            let _e151 = starTint;
+            let _e155 = uv_2;
+            let _e156 = starPos;
+            let _e157 = starSize;
+            let _e158 = star(_e155, _e156, _e157);
+            finalColor = (_e150 + (_e151 * _e158));
+        }
+        continuing {
+            let _e62 = i;
+            i = (_e62 + 1i);
+        }
+    }
+    let _e162 = uv_2;
+    let _e164 = aspectRatio;
+    let _e167 = uv_2;
+    let _e171 = uv_2;
+    let _e173 = aspectRatio;
+    let _e176 = uv_2;
+    let _e179 = random(vec2<f32>((0.05f + (_e171.x / _e173)), _e176.y));
+    smallStarBrightness = _e179;
+    let _e181 = smallStarBrightness;
+    if (_e181 > 0.985f) {
+        {
+            let _e184 = finalColor;
+            finalColor = (_e184 + vec3(0.3f));
+        }
+    }
+    let _e188 = finalColor;
+    color = vec4<f32>(_e188.x, _e188.y, _e188.z, 1f);
+    return;
+}
+
+@fragment 
+fn fs_main(@builtin(position) gl_FragCoord: vec4<f32>) -> FragmentOutput {
+    gl_FragCoord_1 = gl_FragCoord;
+    main_1();
+    let _e9 = color;
+    return FragmentOutput(_e9);
+}
 )";
 
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
@@ -215,7 +418,7 @@ auto getUncapturedErrorCallbackHandle(wgpu::Device& device) {
    });
 }
 
-RenderPipeline<MyUniformBinding> initializePipeline(wgpu::Device& device, wgpu::TextureFormat& surfaceFormat) {
+RenderPipeline<StarUniformBinding> initializePipeline(wgpu::Device& device, wgpu::TextureFormat& surfaceFormat) {
    // Load the shader module
    Shader             shader(device, shaderSource);
    wgpu::ShaderModule shaderModule = shader.GetShaderModule();
@@ -223,14 +426,14 @@ RenderPipeline<MyUniformBinding> initializePipeline(wgpu::Device& device, wgpu::
    // Create the render pipeline
    wgpu::RenderPipelineDescriptor pipelineDesc;
 
-   VertexBufferLayout<glm::vec2, glm::vec3> layout;
-   auto                                     vertexBufferInfo = layout.CreateLayout();
+   VertexBufferLayout<glm::vec2> layout;
+   auto                          vertexBufferInfo = layout.CreateLayout();
 
    std::vector<VertexBufferInfo> layouts;
    layouts.push_back(std::move(vertexBufferInfo));
 
-   return RenderPipeline<MyUniformBinding>("Rainbow Square", device, shader, layouts,
-                                           wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
+   return RenderPipeline<StarUniformBinding>("Stars", device, shader, layouts, wgpu::PrimitiveTopology::TriangleList,
+                                             surfaceFormat);
 }
 
 wgpu::TextureFormat preferredFormat(wgpu::Surface& surface, wgpu::Adapter& adapter) {
@@ -241,11 +444,8 @@ wgpu::TextureFormat preferredFormat(wgpu::Surface& surface, wgpu::Adapter& adapt
 
 Buffer<float> getPointBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    std::vector<float> pointData = {
-      // x,   y,     r,   g,   b
-      -0.5, -0.5, 1.0, 0.5, 0.5, // Point #0
-      +0.5, -0.5, 0.5, 1.0, 0.5, // Point #1
-      +0.5, +0.5, 0.5, 0.5, 1.0, // Point #2
-      -0.5, +0.5, 1.0, 1.0, 0.5  // Point #3
+      // x,   y,
+      -1, -1, +1, -1, +1, +1, -1, +1,
    };
    return Buffer<float>(device, queue, pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
 }
@@ -258,17 +458,18 @@ Buffer<uint16_t> getIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    return Buffer<uint16_t>(device, queue, indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 }
 
-Buffer<MyUniforms, true> getUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
-   MyUniforms uniform;
-   uniform.time  = 1.0f;
-   uniform.color = {0.0f, 1.0f, 0.4f, 1.0f};
-   MyUniforms uniform2;
-   uniform2.time  = 2.0f;
-   uniform2.color = {0.0f, 1.0f, 0.4f, 1.0f};
+UniformBuffer<StarUniforms> getUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+   StarUniforms uniform;
+   uniform.time       = 1.0f;
+   uniform.resolution = {640, 480};
+   StarUniforms uniform2;
+   uniform2.time       = 2.0f;
+   uniform2.resolution = {640, 480};
 
 
-   std::vector<MyUniforms> uniformData = {uniform, uniform2};
-   return Buffer<MyUniforms, true>(device, queue, uniformData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+   std::vector<StarUniforms> uniformData = {uniform, uniform2};
+   return Buffer<StarUniforms, true>(device, queue, uniformData,
+                                     wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
 }
 
 // Initialize everything and return true if it went all right
@@ -320,14 +521,14 @@ void Application::MainLoop() {
       return;
 
    // Update the uniform buffer
-   MyUniforms uniform;
-   uniform.time  = glfwGetTime();
-   uniform.color = {0.0f, 1.0f, 0.4f, 1.0f};
-   MyUniforms uniform2;
-   uniform2.time  = -glfwGetTime();
-   uniform2.color = {1.0f, 0.0f, 0.4f, 1.0f};
+   StarUniforms uniform;
+   uniform.time       = glfwGetTime();
+   uniform.resolution = {640, 480};
+   StarUniforms uniform2;
+   uniform2.time       = -glfwGetTime();
+   uniform2.resolution = {640, 480};
 
-   std::vector<MyUniforms> uniformData = {uniform, uniform2};
+   std::vector<StarUniforms> uniformData = {uniform, uniform2};
    uniformBuffer.upload(uniformData);
 
    // Create a command encoder for the draw call

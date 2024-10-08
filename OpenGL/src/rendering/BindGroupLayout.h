@@ -65,7 +65,7 @@ struct GetWGPUType<TextureBinding<Visibility, SampleType, ViewDimension, Multisa
 template <typename Binding>
 using WGPUType = typename GetWGPUType<Binding>::type;
 template <typename T>
-concept ValidWGPUBinding = requires { typename WGPUType<T>; };
+concept BindingC = requires { typename WGPUType<T>; };
 
 
 

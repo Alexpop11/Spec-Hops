@@ -130,3 +130,6 @@ private:
    wgpu::BufferUsage usage_;
    size_t            elementStride_ = 0; // Size of each element, including padding if Uniform is true
 };
+
+template <typename T>
+using UniformBuffer = Buffer<T, true>;

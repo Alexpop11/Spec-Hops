@@ -8,14 +8,16 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-struct MyUniforms {
+// Laid out with
+// https://eliemichel.github.io/WebGPU-AutoLayout/
+struct StarUniforms {
    float     time; // at byte offset 0
-   float     _pad0[3];
-   glm::vec4 color; // at byte offset 16
+   float     _pad0;
+   glm::vec2 resolution; // at byte offset 8
 };
 
-using MyUniformBinding =
-   BufferBinding<MyUniforms,                                                         // Type of the buffer
+using StarUniformBinding =
+   BufferBinding<StarUniforms,                                                       // Type of the buffer
                  wgpu::both(wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment), // Shader visibility
                  wgpu::BufferBindingType::Uniform,                                   // Buffer binding type
                  true>;
@@ -52,9 +54,9 @@ private:
    std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
    wgpu::Queue                          queue;
    wgpu::TextureFormat                  surfaceFormat;
-   RenderPipeline<MyUniformBinding>     pipeline;
+   RenderPipeline<StarUniformBinding>   pipeline;
 
-   Buffer<float>            pointBuffer;
-   Buffer<uint16_t>         indexBuffer;
-   Buffer<MyUniforms, true> uniformBuffer;
+   Buffer<float>               pointBuffer;
+   Buffer<uint16_t>            indexBuffer;
+   UniformBuffer<StarUniforms> uniformBuffer;
 };

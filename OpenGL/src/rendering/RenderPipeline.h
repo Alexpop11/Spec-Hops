@@ -8,7 +8,7 @@
 #include "VertexBufferLayout.h"
 #include "BindGroupLayout.h"
 
-template <ValidWGPUBinding... T>
+template <BindingC... T>
 class RenderPipeline {
 public:
    RenderPipeline(const std::string& label, wgpu::Device& device, Shader& shader,
