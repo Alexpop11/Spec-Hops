@@ -16,7 +16,6 @@ struct MyUniforms {
 
 using MyUniformBinding =
    BufferBinding<MyUniforms,                                                         // Type of the buffer
-                 0,                                                                  // Binding index
                  wgpu::both(wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment), // Shader visibility
                  wgpu::BufferBindingType::Uniform                                    // Buffer binding type
                  >;

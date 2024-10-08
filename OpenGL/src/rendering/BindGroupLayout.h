@@ -11,29 +11,26 @@ enum class BindingType {
 };
 
 // Helper struct for buffer bindings (e.g., Uniform or Storage buffers)
-template <typename T, uint32_t BindingIndex, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
+template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
 struct BufferBinding {
    using Type                                           = T;
-   static constexpr uint32_t                binding     = BindingIndex;
    static constexpr wgpu::ShaderStage       visibility  = Visibility;
    static constexpr wgpu::BufferBindingType bufferType  = BufferType;
    static constexpr BindingType             bindingType = BindingType::Buffer;
 };
 
 // Helper struct for sampler bindings
-template <uint32_t BindingIndex, wgpu::ShaderStage Visibility, wgpu::SamplerBindingType SamplerType>
+template <wgpu::ShaderStage Visibility, wgpu::SamplerBindingType SamplerType>
 struct SamplerBinding {
-   static constexpr uint32_t                 binding     = BindingIndex;
    static constexpr wgpu::ShaderStage        visibility  = Visibility;
    static constexpr wgpu::SamplerBindingType samplerType = SamplerType;
    static constexpr BindingType              bindingType = BindingType::Sampler;
 };
 
 // Helper struct for texture bindings
-template <uint32_t BindingIndex, wgpu::ShaderStage Visibility, wgpu::TextureSampleType SampleType,
-          wgpu::TextureViewDimension ViewDimension, bool Multisampled = false>
+template <wgpu::ShaderStage Visibility, wgpu::TextureSampleType SampleType, wgpu::TextureViewDimension ViewDimension,
+          bool Multisampled = false>
 struct TextureBinding {
-   static constexpr uint32_t                   binding       = BindingIndex;
    static constexpr wgpu::ShaderStage          visibility    = Visibility;
    static constexpr wgpu::TextureSampleType    sampleType    = SampleType;
    static constexpr wgpu::TextureViewDimension viewDimension = ViewDimension;
@@ -51,7 +48,8 @@ template <typename... Bindings>
 struct BindGroupLayoutGenerator {
    static std::vector<wgpu::BindGroupLayoutEntry> GetEntries() {
       std::vector<wgpu::BindGroupLayoutEntry> entries;
-      (entries.push_back(CreateEntry<Bindings>()), ...);
+      size_t                                  index = 0;
+      (entries.push_back(CreateEntry<Bindings>(index)), ...);
       return entries;
    }
 
@@ -66,9 +64,10 @@ struct BindGroupLayoutGenerator {
 
 private:
    template <typename Binding>
-   static wgpu::BindGroupLayoutEntry CreateEntry() {
+   static wgpu::BindGroupLayoutEntry CreateEntry(size_t& index) {
       wgpu::BindGroupLayoutEntry entry{};
-      entry.binding    = Binding::binding;
+      entry.binding = index;
+      index += 1;
       entry.visibility = Binding::visibility;
 
       if constexpr (Binding::bindingType == BindingType::Buffer) {
