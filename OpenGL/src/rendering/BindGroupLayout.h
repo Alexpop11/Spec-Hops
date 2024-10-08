@@ -15,17 +15,24 @@ template <typename Binding>
 struct GetWGPUType;
 
 // Helper struct for buffer bindings (e.g., Uniform or Storage buffers)
-template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
+template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType, bool DynamicOffset = false>
 struct BufferBinding {
-   using Type                                           = T;
-   static constexpr wgpu::ShaderStage       visibility  = Visibility;
-   static constexpr wgpu::BufferBindingType bufferType  = BufferType;
-   static constexpr BindingType             bindingType = BindingType::Buffer;
+   using Type                                             = T;
+   static constexpr wgpu::ShaderStage       visibility    = Visibility;
+   static constexpr wgpu::BufferBindingType bufferType    = BufferType;
+   static constexpr BindingType             bindingType   = BindingType::Buffer;
+   static constexpr bool                    dynamicOffset = DynamicOffset;
 };
 template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
-struct GetWGPUType<BufferBinding<T, Visibility, BufferType>> {
-   using type = std::tuple<Buffer<T>&, size_t>;
+struct GetWGPUType<BufferBinding<T, Visibility, BufferType, false>> {
+    using type = std::tuple<Buffer<T>&, size_t>;
 };
+template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
+struct GetWGPUType<BufferBinding<T, Visibility, BufferType, true>> {
+    using type = Buffer<T>&;
+};
+
+
 
 // Helper struct for sampler bindings
 template <wgpu::ShaderStage Visibility, wgpu::SamplerBindingType SamplerType>

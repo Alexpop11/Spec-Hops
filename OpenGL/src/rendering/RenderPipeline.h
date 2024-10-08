@@ -101,11 +101,16 @@ public:
    wgpu::BindGroupEntry createBindGroupEntry(Resource& resource) const {
       wgpu::BindGroupEntry entry{};
       entry.binding = static_cast<uint32_t>(I);
-      if constexpr (Binding::bindingType == BindingType::Buffer) {
+      if constexpr (Binding::bindingType == BindingType::Buffer && !Binding::dynamicOffset) {
          // Assuming WGPUType<T> is Buffer
          entry.buffer = std::get<0>(resource).get();
          entry.offset = std::get<1>(resource);
          entry.size   = sizeof(typename Binding::Type);
+      } else if constexpr (Binding::bindingType == BindingType::Buffer && Binding::dynamicOffset) {
+         entry.buffer = resource.get();
+         entry.offset = 0;
+         entry.size   = sizeof(typename Binding::Type);
+
       } else if constexpr (Binding::bindingType == BindingType::Sampler) {
          // Assuming WGPUType<T> is wgpu::Sampler
          entry.sampler = resource.Get(); // Replace Get() with actual method to retrieve the sampler handle

@@ -350,9 +350,7 @@ void Application::MainLoop() {
 
    wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
 
-   size_t                                  uniformIndex    = 0;
-   std::tuple<Buffer<MyUniforms>&, size_t> uniformToRender = std::tie(uniformBuffer, uniformIndex);
-   wgpu::BindGroup                         bindGroup       = pipeline.BindGroup(uniformToRender);
+   wgpu::BindGroup                         bindGroup       = pipeline.BindGroup(uniformBuffer);
    renderPass.setBindGroup(0, bindGroup, 0, nullptr);
 
    renderPass.setPipeline(pipeline.GetPipeline());
