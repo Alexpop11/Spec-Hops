@@ -109,8 +109,6 @@ private:
          entry.texture.sampleType    = Binding::sampleType;
          entry.texture.viewDimension = Binding::viewDimension;
          entry.texture.multisampled  = Binding::multisampled;
-      } else {
-         static_assert(false, "Unsupported binding type");
       }
 
 
