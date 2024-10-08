@@ -71,7 +71,7 @@ concept BindingC = requires { typename WGPUType<T>; };
 
 // Generator for BindGroupLayout
 template <typename... Bindings>
-struct BindGroupLayoutGenerator {
+struct BindGroupLayout {
    static std::vector<wgpu::BindGroupLayoutEntry> GetEntries() {
       std::vector<wgpu::BindGroupLayoutEntry> entries;
       size_t                                  index = 0;

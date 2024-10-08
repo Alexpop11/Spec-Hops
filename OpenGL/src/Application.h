@@ -46,15 +46,15 @@ private:
 
    wgpu::TextureView GetNextSurfaceTextureView();
 
-   GLFWwindow*                          window;
-   wgpu::Instance                       instance;
-   wgpu::Surface                        surface;
-   wgpu::Adapter                        adapter;
-   wgpu::Device                         device;
-   std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
-   wgpu::Queue                          queue;
-   wgpu::TextureFormat                  surfaceFormat;
-   RenderPipeline<StarUniformBinding>   pipeline;
+   GLFWwindow*                                         window;
+   wgpu::Instance                                      instance;
+   wgpu::Surface                                       surface;
+   wgpu::Adapter                                       adapter;
+   wgpu::Device                                        device;
+   std::unique_ptr<wgpu::ErrorCallback>                uncapturedErrorCallbackHandle;
+   wgpu::Queue                                         queue;
+   wgpu::TextureFormat                                 surfaceFormat;
+   RenderPipeline<BindGroupLayout<StarUniformBinding>> pipeline;
 
    Buffer<float>               pointBuffer;
    Buffer<uint16_t>            indexBuffer;

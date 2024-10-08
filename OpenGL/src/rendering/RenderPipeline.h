@@ -8,14 +8,17 @@
 #include "VertexBufferLayout.h"
 #include "BindGroupLayout.h"
 
-template <BindingC... T>
-class RenderPipeline {
+template <typename BindGroupType>
+class RenderPipeline;
+
+template <BindingC... Bindings>
+class RenderPipeline<BindGroupLayout<Bindings...>> {
 public:
    RenderPipeline(const std::string& label, wgpu::Device& device, Shader& shader,
                   const std::vector<VertexBufferInfo>& vertexInfos, wgpu::PrimitiveTopology topology,
                   wgpu::TextureFormat colorFormat)
       : device(device)
-      , bindGroupLayout(BindGroupLayoutGenerator<T...>::CreateLayout(device)) {
+      , bindGroupLayout(BindGroupLayout<Bindings...>::CreateLayout(device)) {
       // Create vertex buffer layouts
       std::vector<wgpu::VertexBufferLayout> wgpuVertexLayouts;
       for (const auto& info : vertexInfos) {
@@ -72,12 +75,12 @@ public:
       pipeline = device.createRenderPipeline(pipelineDesc);
    };
 
-   wgpu::BindGroup BindGroup(WGPUType<T>&... resources) {
+   wgpu::BindGroup BindGroup(WGPUType<Bindings>&... resources) {
       // Create a tuple of references to the resources
       auto resourcesTuple = std::forward_as_tuple(resources...);
 
       // Create the bind group using the resources
-      wgpu::BindGroup bindGroup = createBindGroup(resourcesTuple, std::index_sequence_for<T...>{});
+      wgpu::BindGroup bindGroup = createBindGroup(resourcesTuple, std::index_sequence_for<Bindings...>{});
 
       return bindGroup;
    }
@@ -85,7 +88,8 @@ public:
    template <typename Tuple, size_t... I>
    wgpu::BindGroup createBindGroup(Tuple& resources, std::index_sequence<I...>) {
       // Create an array of BindGroupEntry
-      std::array<wgpu::BindGroupEntry, sizeof...(T)> entries = {createBindGroupEntry<I, T>(std::get<I>(resources))...};
+      std::array<wgpu::BindGroupEntry, sizeof...(Bindings)> entries = {
+         createBindGroupEntry<I, Bindings>(std::get<I>(resources))...};
 
       // Create the BindGroupDescriptor
       wgpu::BindGroupDescriptor bindGroupDesc{};
