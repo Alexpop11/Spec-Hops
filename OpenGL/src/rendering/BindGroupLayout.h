@@ -25,11 +25,11 @@ struct BufferBinding {
 };
 template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
 struct GetWGPUType<BufferBinding<T, Visibility, BufferType, false>> {
-    using type = std::tuple<Buffer<T>&, size_t>;
+   using type = std::tuple<Buffer<T, BufferType == wgpu::BufferBindingType::Uniform>&, size_t>;
 };
 template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
 struct GetWGPUType<BufferBinding<T, Visibility, BufferType, true>> {
-    using type = Buffer<T>&;
+   using type = Buffer<T, BufferType == wgpu::BufferBindingType::Uniform>&;
 };
 
 
@@ -99,7 +99,7 @@ private:
       if constexpr (Binding::bindingType == BindingType::Buffer) {
          // Buffer binding
          entry.buffer.type             = Binding::bufferType;
-         entry.buffer.hasDynamicOffset = false;
+         entry.buffer.hasDynamicOffset = Binding::dynamicOffset;
          entry.buffer.minBindingSize   = sizeof(typename Binding::Type);
       } else if constexpr (Binding::bindingType == BindingType::Sampler) {
          // Sampler binding

@@ -258,13 +258,17 @@ Buffer<uint16_t> getIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    return Buffer<uint16_t>(device, queue, indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 }
 
-Buffer<MyUniforms> getUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+Buffer<MyUniforms, true> getUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    MyUniforms uniform;
    uniform.time  = 1.0f;
    uniform.color = {0.0f, 1.0f, 0.4f, 1.0f};
+   MyUniforms uniform2;
+   uniform2.time  = 2.0f;
+   uniform2.color = {0.0f, 1.0f, 0.4f, 1.0f};
 
-   std::vector<MyUniforms> uniformData = {uniform};
-   return Buffer<MyUniforms>(device, queue, uniformData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+
+   std::vector<MyUniforms> uniformData = {uniform, uniform2};
+   return Buffer<MyUniforms, true>(device, queue, uniformData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
 }
 
 // Initialize everything and return true if it went all right
@@ -319,10 +323,12 @@ void Application::MainLoop() {
    MyUniforms uniform;
    uniform.time  = glfwGetTime();
    uniform.color = {0.0f, 1.0f, 0.4f, 1.0f};
-   // queue.writeBuffer(uniformBuffer.get(), 0, &uniform, sizeof(MyUniforms));
+   MyUniforms uniform2;
+   uniform2.time  = -glfwGetTime();
+   uniform2.color = {1.0f, 0.0f, 0.4f, 1.0f};
 
-   std::vector<MyUniforms> uniformData = {uniform};
-   uniformBuffer.Update(uniformData);
+   std::vector<MyUniforms> uniformData = {uniform, uniform2};
+   uniformBuffer.upload(uniformData);
 
    // Create a command encoder for the draw call
    wgpu::CommandEncoderDescriptor encoderDesc = {};
@@ -350,12 +356,19 @@ void Application::MainLoop() {
 
    wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
 
-   wgpu::BindGroup                         bindGroup       = pipeline.BindGroup(uniformBuffer);
-   renderPass.setBindGroup(0, bindGroup, 0, nullptr);
+   wgpu::BindGroup bindGroup = pipeline.BindGroup(uniformBuffer);
 
    renderPass.setPipeline(pipeline.GetPipeline());
    renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.size());
    renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.size());
+
+   uint32_t dynamicOffset = 0;
+   dynamicOffset          = uniformBuffer.index(0);
+   renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
+   renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
+
+   dynamicOffset = uniformBuffer.index(1);
+   renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
    renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
 
 

@@ -54,7 +54,7 @@ private:
    wgpu::TextureFormat                  surfaceFormat;
    RenderPipeline<MyUniformBinding>     pipeline;
 
-   Buffer<float>      pointBuffer;
-   Buffer<uint16_t>   indexBuffer;
-   Buffer<MyUniforms> uniformBuffer;
+   Buffer<float>            pointBuffer;
+   Buffer<uint16_t>         indexBuffer;
+   Buffer<MyUniforms, true> uniformBuffer;
 };
