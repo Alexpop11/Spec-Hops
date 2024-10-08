@@ -25,7 +25,7 @@ CPMAddPackage(
 FetchContent_Declare(
   webgpu
   GIT_REPOSITORY https://github.com/anchpop/WebGPU-distribution.git
-  GIT_TAG        4c52dadb75767b5847ef62fe27bf904f43e354c2
+  GIT_TAG        7d29923aff711ae179ffdf933cc9ca31d6e400f0
 )
 FetchContent_MakeAvailable(webgpu)
 
