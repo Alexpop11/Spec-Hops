@@ -229,26 +229,6 @@ RenderPipeline<MyUniformBinding> initializePipeline(wgpu::Device& device, wgpu::
    std::vector<VertexBufferInfo> layouts;
    layouts.push_back(std::move(vertexBufferInfo));
 
-
-   // Create a bind group for the uniforms for this render pass
-   // ========================================================
-   // Create binding layout (don't forget to = Default)
-   wgpu::BindGroupLayoutEntry bindingLayout = wgpu::Default;
-   // The binding index as used in the @binding attribute in the shader
-   bindingLayout.binding = 0;
-   // The stage that needs to access this resource
-   bindingLayout.visibility            = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment;
-   bindingLayout.buffer.type           = wgpu::BufferBindingType::Uniform;
-   bindingLayout.buffer.minBindingSize = sizeof(MyUniforms);
-
-   wgpu::BindGroupLayoutDescriptor bindGroupLayoutDesc{};
-   bindGroupLayoutDesc.entryCount        = 1; // TODO; replace with number of bindings
-   bindGroupLayoutDesc.entries           = &bindingLayout;
-   wgpu::BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutDesc);
-   // ========================================================
-
-
-
    return RenderPipeline<MyUniformBinding>("Rainbow Square", device, shader, layouts,
                                            wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
 }
@@ -370,29 +350,12 @@ void Application::MainLoop() {
 
    wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
 
-
-   // Create a binding
-   wgpu::BindGroupEntry binding{};
-   // The index of the binding (the entries in bindGroupDesc can be in any order)
-   binding.binding = 0;
-   // The buffer it is actually bound to
-   binding.buffer = uniformBuffer.get();
-   // We can specify an offset within the buffer, so that a single buffer can hold
-   // multiple uniform blocks.
-   binding.offset = 0;
-   // And we specify again the size of the buffer.
-   binding.size = sizeof(MyUniforms);
-
-   // A bind group contains one or multiple bindings
-   wgpu::BindGroupDescriptor bindGroupDesc{};
-   bindGroupDesc.layout = pipeline.GetBindGroupLayout();
-   // There must be as many bindings as declared in the layout!
-   bindGroupDesc.entryCount  = 1; // TODO; replace with number of bindings
-   bindGroupDesc.entries     = &binding;
-   wgpu::BindGroup bindGroup = device.createBindGroup(bindGroupDesc);
+   size_t                                  uniformIndex    = 0;
+   std::tuple<Buffer<MyUniforms>&, size_t> uniformToRender = std::tie(uniformBuffer, uniformIndex);
+   wgpu::BindGroup                         bindGroup       = pipeline.BindGroup(uniformToRender);
+   renderPass.setBindGroup(0, bindGroup, 0, nullptr);
 
    renderPass.setPipeline(pipeline.GetPipeline());
-   renderPass.setBindGroup(0, bindGroup, 0, nullptr);
    renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.size());
    renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.size());
    renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
