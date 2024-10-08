@@ -75,7 +75,7 @@ public:
       pipeline = device.createRenderPipeline(pipelineDesc);
    };
 
-   wgpu::BindGroup BindGroup(WGPUType<Bindings>&... resources) {
+   wgpu::BindGroup BindGroup(ToBind<Bindings>&... resources) {
       // Create a tuple of references to the resources
       auto resourcesTuple = std::forward_as_tuple(resources...);
 
@@ -106,7 +106,7 @@ public:
       wgpu::BindGroupEntry entry{};
       entry.binding = static_cast<uint32_t>(I);
       if constexpr (Binding::bindingType == BindingType::Buffer && !Binding::dynamicOffset) {
-         // Assuming WGPUType<T> is Buffer
+         // Assuming ToBind<T> is Buffer
          entry.buffer = std::get<0>(resource).get();
          entry.offset = std::get<1>(resource);
          entry.size   = sizeof(typename Binding::Type);
@@ -116,10 +116,10 @@ public:
          entry.size   = sizeof(typename Binding::Type);
 
       } else if constexpr (Binding::bindingType == BindingType::Sampler) {
-         // Assuming WGPUType<T> is wgpu::Sampler
+         // Assuming ToBind<T> is wgpu::Sampler
          entry.sampler = resource.Get(); // Replace Get() with actual method to retrieve the sampler handle
       } else if constexpr (Binding::bindingType == BindingType::Texture) {
-         // Assuming WGPUType<T> is wgpu::TextureView
+         // Assuming ToBind<T> is wgpu::TextureView
          entry.textureView = resource.Get(); // Replace Get() with actual method to retrieve the texture view handle
       }
       return entry;

@@ -12,7 +12,7 @@ enum class BindingType {
 };
 
 template <typename Binding>
-struct GetWGPUType;
+struct GetToBind;
 
 // Helper struct for buffer bindings (e.g., Uniform or Storage buffers)
 template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType, bool DynamicOffset = false>
@@ -24,11 +24,11 @@ struct BufferBinding {
    static constexpr bool                    dynamicOffset = DynamicOffset;
 };
 template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
-struct GetWGPUType<BufferBinding<T, Visibility, BufferType, false>> {
+struct GetToBind<BufferBinding<T, Visibility, BufferType, false>> {
    using type = std::tuple<Buffer<T, BufferType == wgpu::BufferBindingType::Uniform>&, size_t>;
 };
 template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
-struct GetWGPUType<BufferBinding<T, Visibility, BufferType, true>> {
+struct GetToBind<BufferBinding<T, Visibility, BufferType, true>> {
    using type = Buffer<T, BufferType == wgpu::BufferBindingType::Uniform>&;
 };
 
@@ -42,7 +42,7 @@ struct SamplerBinding {
    static constexpr BindingType              bindingType = BindingType::Sampler;
 };
 template <wgpu::ShaderStage Visibility, wgpu::SamplerBindingType SamplerType>
-struct GetWGPUType<SamplerBinding<Visibility, SamplerType>> {
+struct GetToBind<SamplerBinding<Visibility, SamplerType>> {
    using type = wgpu::Sampler;
 };
 
@@ -58,14 +58,14 @@ struct TextureBinding {
 };
 template <wgpu::ShaderStage Visibility, wgpu::TextureSampleType SampleType, wgpu::TextureViewDimension ViewDimension,
           bool Multisampled>
-struct GetWGPUType<TextureBinding<Visibility, SampleType, ViewDimension, Multisampled>> {
+struct GetToBind<TextureBinding<Visibility, SampleType, ViewDimension, Multisampled>> {
    using type = wgpu::Texture;
 };
 
 template <typename Binding>
-using WGPUType = typename GetWGPUType<Binding>::type;
+using ToBind = typename GetToBind<Binding>::type;
 template <typename T>
-concept BindingC = requires { typename WGPUType<T>; };
+concept BindingC = requires { typename ToBind<T>; };
 
 
 
