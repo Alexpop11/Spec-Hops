@@ -1,11 +1,10 @@
-
+#pragma once
 #include <webgpu/webgpu.hpp>
 
 #include "rendering/RenderPipeline.h"
 #include "rendering/Buffer.h"
 #include "rendering/BindGroupLayout.h"
 #include "rendering/DataFormats.h"
-#include "rendering/Texture.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -23,8 +22,8 @@ public:
 
    static Application& get();
 
-   bool        initialized;
-   std::string res_path;
+   bool                  initialized;
+   std::filesystem::path res_path;
 
    wgpu::TextureFormat                             getSurfaceFormat() { return surfaceFormat; }
    wgpu::Device                                    getDevice() { return device; }
@@ -38,7 +37,6 @@ public:
    const UniformBuffer<SquareObjectFragmentUniform>& getSquareObjectFragmentUniform() {
       return squareObjectFragmentUniform;
    }
-   Texture& floorTexture() { return floor; }
 
    wgpu::TextureView GetNextSurfaceTextureView();
 
@@ -62,5 +60,4 @@ private:
    Buffer<SquareObjectVertex>                 squareObjectPointBuffer;
    UniformBuffer<SquareObjectVertexUniform>   squareObjectVertexUniform;
    UniformBuffer<SquareObjectFragmentUniform> squareObjectFragmentUniform;
-   Texture                                    floor;
 };

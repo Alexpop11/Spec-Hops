@@ -3,6 +3,7 @@
 #include <webgpu/webgpu.hpp>
 
 #include "RenderPipeline.h"
+#include "Texture.h"
 
 class SquareObjectData {
    Buffer<uint16_t>           indexBuffer;
@@ -15,6 +16,7 @@ public:
 
    RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>> stars;
    RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>       squareObject;
+   Texture                                                                                              player;
 
    // SquareObjectData squareObjectData;
 

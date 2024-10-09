@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstring>     // For std::memcpy
 #include <stb_image.h> // Ensure stb_image is included in your project
+#include "../Application.h"
 
 // Texture abstraction class
 class Texture {
@@ -15,7 +16,7 @@ public:
    Texture(wgpu::Device& device, wgpu::Queue& queue, const std::string& path)
       : device_(device)
       , queue_(queue)
-      , path_(path) {
+      , path_(Application::get().res_path / "textures" / path) {
       std::cout << "Initializing texture: " << path_ << std::endl;
 
       // Load image data using stb_image

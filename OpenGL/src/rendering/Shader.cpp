@@ -1,9 +1,10 @@
 #include "Shader.h"
+#include "../Application.h"
 
 Shader::Shader(wgpu::Device device, const std::filesystem::path& filePath)
    : filePath(filePath) {
    // Read the shader source code from the file
-   std::string src = ReadFile(filePath);
+   std::string src = ReadFile(Application::get().res_path / "shaders" / filePath);
    if (src.empty()) {
       std::cerr << "Shader source is empty. Failed to load shader from: " << filePath << std::endl;
       return;
@@ -21,8 +22,9 @@ Shader::Shader(wgpu::Device device, const std::filesystem::path& filePath)
    shaderDesc.hints     = nullptr;
 #endif
 
+   std::string label      = filePath.stem().string();
    moduleDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&wgslDesc);
-   moduleDesc.label       = filePath.c_str();
+   moduleDesc.label       = label.c_str();
 
    shaderModule = device.createShaderModule(moduleDesc);
 

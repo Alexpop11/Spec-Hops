@@ -183,7 +183,7 @@ auto getUncapturedErrorCallbackHandle(wgpu::Device& device) {
 RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>>
 initializePipeline(wgpu::Device& device, wgpu::TextureFormat& surfaceFormat) {
    // Load the shader module
-   Shader             shader(device, "/Users/andrepopovitch/coding/SpaceBoom/OpenGL/res/shaders/stars.wgsl");
+   Shader             shader(device, "stars.wgsl");
    wgpu::ShaderModule shaderModule = shader.GetShaderModule();
 
    return RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>>(
@@ -284,11 +284,6 @@ UniformBuffer<SquareObjectFragmentUniform> createSquareObjectFragmentUniformBuff
    return Buffer<SquareObjectFragmentUniform, true>(device, queue, uniformData,
                                                     wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
 }
-
-Texture createTexture(wgpu::Device& device, wgpu::Queue& queue) {
-   return Texture(device, queue, "/Users/andrepopovitch/coding/SpaceBoom/OpenGL/res/textures/alternate-player.png");
-}
-
 // Initialize everything and return true if it went all right
 Application::Application()
    : window(createWindow())
@@ -304,8 +299,7 @@ Application::Application()
    , uniformBuffer(createStarUniformBuffer(device, queue))
    , squareObjectPointBuffer(createSquareObjectPointBuffer(device, queue))
    , squareObjectVertexUniform(createSquareObjectVertexUniformBuffer(device, queue))
-   , squareObjectFragmentUniform(createSquareObjectFragmentUniformBuffer(device, queue))
-   , floor(createTexture(device, queue)) {
+   , squareObjectFragmentUniform(createSquareObjectFragmentUniformBuffer(device, queue)) {
 
    // Configure the surface
    wgpu::SurfaceConfiguration config = {};
@@ -466,10 +460,10 @@ void mainLoop(Application& application, Renderer& renderer) {
    */
 
    {
-      auto            u1        = std::forward_as_tuple(application.getSquareObjectVertexUniform(), 0);
-      auto            u2        = std::forward_as_tuple(application.getSquareObjectFragmentUniform(), 0);
-      wgpu::BindGroup bindGroup = SquareObjectLayout::BindGroup(
-         device, u1, u2, application.floorTexture().getTextureView(), application.floorTexture().getSampler());
+      auto            u1 = std::forward_as_tuple(application.getSquareObjectVertexUniform(), 0);
+      auto            u2 = std::forward_as_tuple(application.getSquareObjectFragmentUniform(), 0);
+      wgpu::BindGroup bindGroup =
+         SquareObjectLayout::BindGroup(device, u1, u2, renderer.player.getTextureView(), renderer.player.getSampler());
       renderPass.setPipeline(renderer.squareObject.GetPipeline());
       renderPass.setBindGroup(0, bindGroup, 0, nullptr);
       renderPass.setIndexBuffer(application.getIndexBuffer().get(), wgpu::IndexFormat::Uint16, 0,
