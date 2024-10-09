@@ -43,7 +43,8 @@ private:
    wgpu::Instance                       instance;
    wgpu::Surface                        surface;
    wgpu::Adapter                        adapter;
-   wgpu::Device                         device;   std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
+   wgpu::Device                         device;
+   std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
    wgpu::Queue                          queue;
    wgpu::TextureFormat                  surfaceFormat;
    Buffer<float>                        pointBuffer;

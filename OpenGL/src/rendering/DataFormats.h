@@ -17,3 +17,8 @@ using StarUniformBinding =
                  wgpu::both(wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment), // Shader visibility
                  wgpu::BufferBindingType::Uniform,                                   // Buffer binding type
                  true>;
+
+class SquareObjectVertex {
+   glm::vec2 position;
+   glm::vec2 uv;
+};
