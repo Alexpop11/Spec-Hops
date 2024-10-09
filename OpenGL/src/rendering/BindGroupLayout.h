@@ -168,6 +168,32 @@ private:
    }
 };
 
+template <typename... Layouts>
+struct BindGroupLayouts {
+   static std::vector<wgpu::BindGroupLayout> CreateLayouts(wgpu::Device& device) {
+      return {Layouts::CreateLayout(device)...};
+   }
+
+   // Ensure that the number of tuples matches the number of layouts
+   template <typename... Tuples>
+   static std::vector<wgpu::BindGroup> BindGroups(wgpu::Device& device, Tuples&&... tuples) {
+      static_assert(sizeof...(Layouts) == sizeof...(Tuples), "Number of layouts and tuples must match");
+
+      // Create a vector and initialize it with the results of each BindGroup call
+      return {call_bind_group<Layouts>(device, std::forward<Tuples>(tuples))...};
+   }
+
+private:
+   // Helper function to call BindGroup for a single layout and tuple
+   template <typename Layout, typename Tuple>
+   static wgpu::BindGroup call_bind_group(wgpu::Device& device, Tuple&& tuple) {
+      // Unpack the tuple and pass the resources to Layout::BindGroup
+      return std::apply([&device](auto&&... args) -> wgpu::BindGroup { return Layout::BindGroup(device, args...); },
+                        std::forward<Tuple>(tuple));
+   }
+};
+
+
 namespace wgpu {
 constexpr wgpu::ShaderStage both(wgpu::ShaderStage lhs, wgpu::ShaderStage rhs) {
    return wgpu::ShaderStage(lhs.m_raw | rhs.m_raw);

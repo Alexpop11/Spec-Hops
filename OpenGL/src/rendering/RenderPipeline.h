@@ -9,25 +9,22 @@
 #include "BindGroupLayout.h"
 #include "DataFormats.h"
 
-template <typename BindGroupType, typename VertexBufferLayoutType>
-class RenderPipeline;
-
-template <BindingC... Bindings, typename... VertexBufferItems>
-class RenderPipeline<BindGroupLayout<Bindings...>, VertexBufferLayout<VertexBufferItems...>> {
+template <typename BGLs, typename VBL>
+class RenderPipeline {
 public:
    RenderPipeline(const std::string& label, wgpu::Device& device, Shader& shader, wgpu::PrimitiveTopology topology,
                   wgpu::TextureFormat colorFormat)
       : device(device)
-      , bindGroupLayout(BindGroupLayout<Bindings...>::CreateLayout(device)) {
+      , bindGroupLayouts(BGLs::CreateLayouts(device)) {
       // Create vertex buffer layouts
-      auto vertexInfo = VertexBufferLayout<VertexBufferItems...>::CreateLayout();
+      auto vertexInfo = VBL::CreateLayout();
 
       std::vector<wgpu::VertexBufferLayout> wgpuVertexLayouts;
       wgpuVertexLayouts.push_back(vertexInfo.layout);
 
       wgpu::PipelineLayoutDescriptor layoutDesc{};
-      layoutDesc.bindGroupLayoutCount = 1;
-      layoutDesc.bindGroupLayouts     = (WGPUBindGroupLayout*)&bindGroupLayout;
+      layoutDesc.bindGroupLayoutCount = bindGroupLayouts.size();
+      layoutDesc.bindGroupLayouts     = (WGPUBindGroupLayout*)bindGroupLayouts.data();
       layoutDesc.label                = label.c_str();
       wgpu::PipelineLayout layout     = device.createPipelineLayout(layoutDesc);
 
@@ -88,27 +85,27 @@ public:
    // Move constructor and assignment operator
    RenderPipeline(RenderPipeline&& other) noexcept
       : pipeline(other.pipeline)
-      , bindGroupLayout(other.bindGroupLayout) {
-      other.pipeline        = nullptr;
-      other.bindGroupLayout = nullptr;
+      , bindGroupLayouts(other.bindGroupLayouts) {
+      other.pipeline         = nullptr;
+      other.bindGroupLayouts = nullptr;
    };
    RenderPipeline& operator=(RenderPipeline&& other) noexcept {
       if (this != &other) {
          if (pipeline) {
             pipeline.release();
          }
-         pipeline        = other.pipeline;
-         bindGroupLayout = other.bindGroupLayout;
-         other.pipeline  = nullptr;
+         pipeline         = other.pipeline;
+         bindGroupLayouts = other.bindGroupLayouts;
+         other.pipeline   = nullptr;
       }
       return *this;
    };
 
-   wgpu::RenderPipeline  GetPipeline() const { return pipeline; }
-   wgpu::BindGroupLayout GetBindGroupLayout() const { return bindGroupLayout; }
+   wgpu::RenderPipeline               GetPipeline() const { return pipeline; }
+   std::vector<wgpu::BindGroupLayout> GetBindGroupLayouts() const { return bindGroupLayouts; }
 
 private:
-   wgpu::Device          device;
-   wgpu::RenderPipeline  pipeline;
-   wgpu::BindGroupLayout bindGroupLayout;
+   wgpu::Device                       device;
+   wgpu::RenderPipeline               pipeline;
+   std::vector<wgpu::BindGroupLayout> bindGroupLayouts;
 };
