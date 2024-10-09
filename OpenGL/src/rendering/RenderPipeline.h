@@ -28,11 +28,23 @@ public:
       layoutDesc.label                = label.c_str();
       wgpu::PipelineLayout layout     = device.createPipelineLayout(layoutDesc);
 
-      // Define color target state
+      // Define color target state (to enable blending)
+      wgpu::BlendComponent blendColor    = {};
+      blendColor.srcFactor               = wgpu::BlendFactor::SrcAlpha;
+      blendColor.dstFactor               = wgpu::BlendFactor::OneMinusSrcAlpha;
+      blendColor.operation               = wgpu::BlendOperation::Add;
+      wgpu::BlendComponent blendAlpha    = {};
+      blendAlpha.srcFactor               = wgpu::BlendFactor::One;
+      blendAlpha.dstFactor               = wgpu::BlendFactor::OneMinusSrcAlpha;
+      blendAlpha.operation               = wgpu::BlendOperation::Add;
+      wgpu::BlendState blendState        = {};
+      blendState.color                   = blendColor;
+      blendState.alpha                   = blendAlpha;
       wgpu::ColorTargetState colorTarget = {};
       colorTarget.format                 = colorFormat;
-      colorTarget.blend                  = nullptr; // You can set up blending here if needed
+      colorTarget.blend                  = &blendState; // Enable blending
       colorTarget.writeMask              = wgpu::ColorWriteMask::All;
+
 
       // Define fragment state
       wgpu::FragmentState fragmentState = {};

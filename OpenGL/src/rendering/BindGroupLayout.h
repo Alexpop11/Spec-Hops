@@ -25,11 +25,11 @@ struct BufferBinding {
 };
 template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
 struct GetToBind<BufferBinding<T, Visibility, BufferType, false>> {
-   using type = std::tuple<Buffer<T, BufferType == wgpu::BufferBindingType::Uniform>&, size_t>;
+   using type = const std::tuple<const Buffer<T, BufferType == wgpu::BufferBindingType::Uniform>&, size_t>;
 };
 template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
 struct GetToBind<BufferBinding<T, Visibility, BufferType, true>> {
-   using type = Buffer<T, BufferType == wgpu::BufferBindingType::Uniform>&;
+   using type = const Buffer<T, BufferType == wgpu::BufferBindingType::Uniform>&;
 };
 
 
@@ -43,7 +43,7 @@ struct SamplerBinding {
 };
 template <wgpu::ShaderStage Visibility, wgpu::SamplerBindingType SamplerType>
 struct GetToBind<SamplerBinding<Visibility, SamplerType>> {
-   using type = wgpu::Sampler;
+   using type = const wgpu::Sampler;
 };
 
 // Helper struct for texture bindings
@@ -59,7 +59,7 @@ struct TextureBinding {
 template <wgpu::ShaderStage Visibility, wgpu::TextureSampleType SampleType, wgpu::TextureViewDimension ViewDimension,
           bool Multisampled>
 struct GetToBind<TextureBinding<Visibility, SampleType, ViewDimension, Multisampled>> {
-   using type = wgpu::Texture;
+   using type = const wgpu::TextureView;
 };
 
 template <typename Binding>
@@ -119,22 +119,23 @@ struct BindGroupLayout {
    static wgpu::BindGroupEntry createBindGroupEntry(wgpu::Device& device, Resource& resource) {
       wgpu::BindGroupEntry entry{};
       entry.binding = static_cast<uint32_t>(I);
-      if constexpr (Binding::bindingType == BindingType::Buffer && !Binding::dynamicOffset) {
-         // Assuming ToBind<T> is Buffer
-         entry.buffer = std::get<0>(resource).get();
-         entry.offset = std::get<1>(resource);
-         entry.size   = sizeof(typename Binding::Type);
-      } else if constexpr (Binding::bindingType == BindingType::Buffer && Binding::dynamicOffset) {
-         entry.buffer = resource.get();
-         entry.offset = 0;
-         entry.size   = sizeof(typename Binding::Type);
-
+      if constexpr (Binding::bindingType == BindingType::Buffer) {
+         if constexpr (!Binding::dynamicOffset) {
+            // Assuming ToBind<T> is Buffer
+            entry.buffer = std::get<0>(resource).get();
+            entry.offset = std::get<1>(resource);
+            entry.size   = sizeof(typename Binding::Type);
+         } else if constexpr (Binding::dynamicOffset) {
+            entry.buffer = resource.get();
+            entry.offset = 0;
+            entry.size   = sizeof(typename Binding::Type);
+         }
       } else if constexpr (Binding::bindingType == BindingType::Sampler) {
          // Assuming ToBind<T> is wgpu::Sampler
-         entry.sampler = resource.Get(); // Replace Get() with actual method to retrieve the sampler handle
+         entry.sampler = resource; // Replace Get() with actual method to retrieve the sampler handle
       } else if constexpr (Binding::bindingType == BindingType::Texture) {
          // Assuming ToBind<T> is wgpu::TextureView
-         entry.textureView = resource.Get(); // Replace Get() with actual method to retrieve the texture view handle
+         entry.textureView = resource; // Replace Get() with actual method to retrieve the texture view handle
       }
       return entry;
    }

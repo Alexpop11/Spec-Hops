@@ -1,8 +1,14 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
+#undef MINIAUDIO_IMPLEMENTATION
 
 #define WEBGPU_CPP_IMPLEMENTATION
 #include <webgpu/webgpu.hpp>
+#undef WEBGPU_CPP_IMPLEMENTATION
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#undef STB_IMAGE_IMPLEMENTATION
 
 #include "Application.h"
 
@@ -17,8 +23,6 @@
 
 #include "res_path.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION // for icon
-#include "stb_image.h"
 
 #include <glfw3webgpu.h>
 #include "rendering/webgpu-utils.h"
@@ -28,8 +32,12 @@
 #include "rendering/Buffer.h"
 #include "rendering/BindGroupLayout.h"
 #include "rendering/Renderer.h"
+#include "rendering/Texture.h"
 
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
+
 
 #define GL_SILENCE_DEPRECATION
 
@@ -196,6 +204,16 @@ Buffer<float> createPointBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    return Buffer<float>(device, queue, pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
 }
 
+Buffer<SquareObjectVertex> createSquareObjectPointBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+   std::vector<SquareObjectVertex> pointData = {
+      SquareObjectVertex{glm::vec2(-0.5f, -0.5f), glm::vec2(0.0f, 0.0f)}, // 0
+      SquareObjectVertex{glm::vec2(0.5f,  -0.5f), glm::vec2(1.0f, 0.0f)}, // 1
+      SquareObjectVertex{glm::vec2(0.5f,  0.5f),  glm::vec2(1.0f, 1.0f)}, // 2
+      SquareObjectVertex{glm::vec2(-0.5f, 0.5f),  glm::vec2(0.0f, 1.0f)}, // 3
+   };
+   return Buffer<SquareObjectVertex>(device, queue, pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
+}
+
 Buffer<uint16_t> createIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    std::vector<uint16_t> indexData = {
       0, 1, 2, // Triangle #0 connects points #0, #1 and #2
@@ -204,7 +222,7 @@ Buffer<uint16_t> createIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    return Buffer<uint16_t>(device, queue, indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 }
 
-UniformBuffer<StarUniforms> createUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+UniformBuffer<StarUniforms> createStarUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    StarUniforms uniform;
    uniform.time       = 1.0f;
    uniform.resolution = {640, 480};
@@ -216,6 +234,59 @@ UniformBuffer<StarUniforms> createUniformBuffer(wgpu::Device& device, wgpu::Queu
    std::vector<StarUniforms> uniformData = {uniform, uniform2};
    return Buffer<StarUniforms, true>(device, queue, uniformData,
                                      wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+}
+
+glm::mat4 CalculateMVP(std::tuple<int, int> windowSize, const glm::vec2& objectPosition, float objectRotationDegrees,
+                       float objectScale) {
+   // Retrieve window size from the renderer
+   auto [width, height] = windowSize;
+
+   // Calculate aspect ratio
+   float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+
+   // Create orthographic projection matrix
+   float     orthoWidth = 18 * aspectRatio;
+   glm::mat4 projection = glm::ortho(-orthoWidth / 2.0f, orthoWidth / 2.0f, -18 / 2.0f, 18 / 2.0f, -1.0f, 1.0f);
+
+   // Create view matrix
+   glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-glm::vec2(1, 1), 0.0f));
+
+   // Create model matrix
+   glm::mat4 model           = glm::translate(glm::mat4(1.0f), glm::vec3(objectPosition, 0.0f));
+   float     rotationRadians = glm::radians(objectRotationDegrees);
+   model                     = glm::rotate(model, rotationRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+   model                     = glm::scale(model, glm::vec3(objectScale, objectScale, 1.0f));
+
+   // Combine matrices to form MVP
+   glm::mat4 mvp = projection * view * model;
+
+   return mvp;
+}
+
+UniformBuffer<SquareObjectVertexUniform> createSquareObjectVertexUniformBuffer(wgpu::Device& device,
+                                                                               wgpu::Queue&  queue) {
+   SquareObjectVertexUniform uniform{};
+   uniform.u_MVP = CalculateMVP({640, 480}, {0, 0}, 0, 1);
+
+
+   std::vector<SquareObjectVertexUniform> uniformData = {uniform};
+   return Buffer<SquareObjectVertexUniform, true>(device, queue, uniformData,
+                                                  wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+}
+
+UniformBuffer<SquareObjectFragmentUniform> createSquareObjectFragmentUniformBuffer(wgpu::Device& device,
+                                                                                   wgpu::Queue&  queue) {
+   SquareObjectFragmentUniform uniform;
+   uniform.u_Color = {1.0f, 0.0f, 0.0f, 0.1f};
+
+
+   std::vector<SquareObjectFragmentUniform> uniformData = {uniform};
+   return Buffer<SquareObjectFragmentUniform, true>(device, queue, uniformData,
+                                                    wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+}
+
+Texture createTexture(wgpu::Device& device, wgpu::Queue& queue) {
+   return Texture(device, queue, "/Users/andrepopovitch/coding/SpaceBoom/OpenGL/res/textures/alternate-player.png");
 }
 
 // Initialize everything and return true if it went all right
@@ -230,7 +301,11 @@ Application::Application()
    , surfaceFormat(preferredFormat(surface, adapter))
    , pointBuffer(createPointBuffer(device, queue))
    , indexBuffer(createIndexBuffer(device, queue))
-   , uniformBuffer(createUniformBuffer(device, queue)) {
+   , uniformBuffer(createStarUniformBuffer(device, queue))
+   , squareObjectPointBuffer(createSquareObjectPointBuffer(device, queue))
+   , squareObjectVertexUniform(createSquareObjectVertexUniformBuffer(device, queue))
+   , squareObjectFragmentUniform(createSquareObjectFragmentUniformBuffer(device, queue))
+   , floor(createTexture(device, queue)) {
 
    // Configure the surface
    wgpu::SurfaceConfiguration config = {};
@@ -369,21 +444,40 @@ void mainLoop(Application& application, Renderer& renderer) {
 
    wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
 
-   wgpu::BindGroup bindGroup = BindGroupLayout<StarUniformBinding>::BindGroup(device, application.getUniformBuffer());
+   {
+      wgpu::BindGroup bindGroup =
+         BindGroupLayout<StarUniformBinding>::BindGroup(device, application.getUniformBuffer());
 
-   renderPass.setPipeline(renderer.stars.GetPipeline());
-   renderPass.setVertexBuffer(0, application.getPointBuffer().get(), 0, application.getPointBuffer().size());
-   renderPass.setIndexBuffer(application.getIndexBuffer().get(), wgpu::IndexFormat::Uint16, 0,
-                             application.getIndexBuffer().size());
+      renderPass.setPipeline(renderer.stars.GetPipeline());
+      renderPass.setVertexBuffer(0, application.getPointBuffer().get(), 0, application.getPointBuffer().size());
+      renderPass.setIndexBuffer(application.getIndexBuffer().get(), wgpu::IndexFormat::Uint16, 0,
+                                application.getIndexBuffer().size());
 
-   uint32_t dynamicOffset = 0;
-   dynamicOffset          = application.getUniformBuffer().index(0);
-   renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
-   renderPass.drawIndexed(application.getIndexBuffer().count(), 1, 0, 0, 0);
+      uint32_t dynamicOffset = 0;
+      dynamicOffset          = application.getUniformBuffer().index(0);
+      renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
+      renderPass.drawIndexed(application.getIndexBuffer().count(), 1, 0, 0, 0);
+   }
+   /*
 
    dynamicOffset = application.getUniformBuffer().index(1);
    renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
    renderPass.drawIndexed(application.getIndexBuffer().count(), 1, 0, 0, 0);
+   */
+
+   {
+      auto            u1        = std::forward_as_tuple(application.getSquareObjectVertexUniform(), 0);
+      auto            u2        = std::forward_as_tuple(application.getSquareObjectFragmentUniform(), 0);
+      wgpu::BindGroup bindGroup = SquareObjectLayout::BindGroup(
+         device, u1, u2, application.floorTexture().getTextureView(), application.floorTexture().getSampler());
+      renderPass.setPipeline(renderer.squareObject.GetPipeline());
+      renderPass.setBindGroup(0, bindGroup, 0, nullptr);
+      renderPass.setIndexBuffer(application.getIndexBuffer().get(), wgpu::IndexFormat::Uint16, 0,
+                                application.getIndexBuffer().size());
+      renderPass.setVertexBuffer(0, application.getSquareObjectPointBuffer().get(), 0,
+                                 application.getSquareObjectPointBuffer().size());
+      renderPass.drawIndexed(application.getIndexBuffer().count(), 1, 0, 0, 0);
+   }
 
 
    renderPass.end();

@@ -20,21 +20,21 @@ using StarUniformBinding =
 
 
 
-class SquareObjectVertex {
+struct SquareObjectVertex {
    glm::vec2 position;
    glm::vec2 uv;
 };
 
-class SquareObjectVertexUniform {
+struct SquareObjectVertexUniform {
    glm::mat4 u_MVP;
 };
 
-class SquareObjectFragmentUniform {
+struct SquareObjectFragmentUniform {
    glm::vec4 u_Color;
 };
 
-using SquareObjectUniformLayout = BindGroupLayout<
-   BufferBinding<SquareObjectVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, true>,
-   BufferBinding<SquareObjectFragmentUniform, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, true>,
+using SquareObjectLayout = BindGroupLayout<
+   BufferBinding<SquareObjectVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, false>,
+   BufferBinding<SquareObjectFragmentUniform, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, false>,
    TextureBinding<wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float, wgpu::TextureViewDimension::_2D>,
    SamplerBinding<wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering>>;

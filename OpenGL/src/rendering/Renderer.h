@@ -13,8 +13,8 @@ class Renderer {
 public:
    Renderer();
 
-   RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>>  stars;
-   RenderPipeline<BindGroupLayouts<SquareObjectUniformLayout>, VertexBufferLayout<glm::vec2, glm::vec2>> squareObject;
+   RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>> stars;
+   RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>       squareObject;
 
    // SquareObjectData squareObjectData;
 
