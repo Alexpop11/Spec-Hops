@@ -3,7 +3,7 @@ struct VertexOutput {
 }
 
 @vertex 
-fn vs_main(@location(0) position: vec4<f32>) -> VertexOutput {
+fn vertex_main(@location(0) position: vec4<f32>) -> VertexOutput {
     return VertexOutput(position);
 }
 
@@ -235,7 +235,7 @@ fn main_1() {
 }
 
 @fragment 
-fn fs_main(@builtin(position) gl_FragCoord: vec4<f32>) -> FragmentOutput {
+fn fragment_main(@builtin(position) gl_FragCoord: vec4<f32>) -> FragmentOutput {
     gl_FragCoord_1 = gl_FragCoord;
     main_1();
     let _e9 = color;

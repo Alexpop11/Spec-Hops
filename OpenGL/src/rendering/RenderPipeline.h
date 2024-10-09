@@ -37,14 +37,14 @@ public:
       // Define fragment state
       wgpu::FragmentState fragmentState = {};
       fragmentState.module              = shader.GetShaderModule();
-      fragmentState.entryPoint          = "fs_main";
+      fragmentState.entryPoint          = "fragment_main";
       fragmentState.targetCount         = 1;
       fragmentState.targets             = &colorTarget;
 
       // Define vertex state
       wgpu::VertexState vertexState = {};
       vertexState.module            = shader.GetShaderModule();
-      vertexState.entryPoint        = "vs_main";
+      vertexState.entryPoint        = "vertex_main";
       vertexState.bufferCount       = static_cast<uint32_t>(wgpuVertexLayouts.size());
       vertexState.buffers           = wgpuVertexLayouts.data();
 

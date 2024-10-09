@@ -18,7 +18,23 @@ using StarUniformBinding =
                  wgpu::BufferBindingType::Uniform,                                   // Buffer binding type
                  true>;
 
+
+
 class SquareObjectVertex {
    glm::vec2 position;
    glm::vec2 uv;
 };
+
+class SquareObjectVertexUniform {
+   glm::mat4 u_MVP;
+};
+
+class SquareObjectFragmentUniform {
+   glm::vec4 u_Color;
+};
+
+using SquareObjectUniformLayout = BindGroupLayout<
+   BufferBinding<SquareObjectVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, true>,
+   BufferBinding<SquareObjectFragmentUniform, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, true>,
+   TextureBinding<wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float, wgpu::TextureViewDimension::_2D>,
+   SamplerBinding<wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering>>;

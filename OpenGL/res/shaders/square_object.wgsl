@@ -1,11 +1,11 @@
 // Vertex Uniforms
 struct VertexUniforms {
-    u_MVP: mat4x4<f32>;
+    u_MVP: mat4x4<f32>
 };
 
 // Fragment Uniforms
 struct FragmentUniforms {
-    u_Color: vec4<f32>;
+    u_Color: vec4<f32>
 };
 
 // Vertex Input Structure
@@ -25,7 +25,6 @@ struct FragmentOutput {
     @location(0) color: vec4<f32>,
 };
 
-// Bind Group 0 Bindings
 @group(0) @binding(0)
 var<uniform> vertexUniforms: VertexUniforms;
 

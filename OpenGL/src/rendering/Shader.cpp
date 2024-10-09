@@ -22,7 +22,7 @@ Shader::Shader(wgpu::Device device, const std::filesystem::path& filePath)
 #endif
 
    moduleDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&wgslDesc);
-   moduleDesc.label       = "Shader Module";
+   moduleDesc.label       = filePath.c_str();
 
    shaderModule = device.createShaderModule(moduleDesc);
 
