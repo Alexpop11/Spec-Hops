@@ -3,7 +3,7 @@ struct VertexOutput {
 }
 
 @vertex 
-fn main(@location(0) position: vec4<f32>) -> VertexOutput {
+fn vs_main(@location(0) position: vec4<f32>) -> VertexOutput {
     return VertexOutput(position);
 }
 
@@ -116,7 +116,7 @@ fn starColor(seed: f32) -> vec3<f32> {
 fn main_1() {
     var uv_2: vec2<f32>;
     var aspectRatio: f32;
-    var numStars: i32 = 2i;
+    var numStars: i32 = 200i;
     var finalColor: vec3<f32> = vec3(0f);
     var i: i32 = 0i;
     var seed_2: f32;
@@ -235,7 +235,7 @@ fn main_1() {
 }
 
 @fragment 
-fn main(@builtin(position) gl_FragCoord: vec4<f32>) -> FragmentOutput {
+fn fs_main(@builtin(position) gl_FragCoord: vec4<f32>) -> FragmentOutput {
     gl_FragCoord_1 = gl_FragCoord;
     main_1();
     let _e9 = color;
