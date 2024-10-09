@@ -325,6 +325,8 @@ wgpu::TextureView Application::GetNextSurfaceTextureView() {
 void mainLoop(Application& application, Renderer& renderer) {
    glfwPollEvents();
 
+   auto device = application.getDevice();
+
    // Get the next target texture view
    wgpu::TextureView targetView = application.GetNextSurfaceTextureView();
    if (!targetView)
@@ -344,7 +346,7 @@ void mainLoop(Application& application, Renderer& renderer) {
    // Create a command encoder for the draw call
    wgpu::CommandEncoderDescriptor encoderDesc = {};
    encoderDesc.label                          = "My command encoder";
-   wgpu::CommandEncoder encoder               = wgpuDeviceCreateCommandEncoder(application.getDevice(), &encoderDesc);
+   wgpu::CommandEncoder encoder               = wgpuDeviceCreateCommandEncoder(device, &encoderDesc);
 
    // Create the render pass that clears the screen with our color
    wgpu::RenderPassDescriptor renderPassDesc = {};
@@ -367,7 +369,7 @@ void mainLoop(Application& application, Renderer& renderer) {
 
    wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
 
-   wgpu::BindGroup bindGroup = renderer.stars.BindGroup(application.getUniformBuffer());
+   wgpu::BindGroup bindGroup = BindGroupLayout<StarUniformBinding>::BindGroup(device, application.getUniformBuffer());
 
    renderPass.setPipeline(renderer.stars.GetPipeline());
    renderPass.setVertexBuffer(0, application.getPointBuffer().get(), 0, application.getPointBuffer().size());

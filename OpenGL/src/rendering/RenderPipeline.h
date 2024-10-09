@@ -75,57 +75,6 @@ public:
       pipeline = device.createRenderPipeline(pipelineDesc);
    };
 
-   wgpu::BindGroup BindGroup(ToBind<Bindings>&... resources) {
-      // Create a tuple of references to the resources
-      auto resourcesTuple = std::forward_as_tuple(resources...);
-
-      // Create the bind group using the resources
-      wgpu::BindGroup bindGroup = createBindGroup(resourcesTuple, std::index_sequence_for<Bindings...>{});
-
-      return bindGroup;
-   }
-
-   template <typename Tuple, size_t... I>
-   wgpu::BindGroup createBindGroup(Tuple& resources, std::index_sequence<I...>) {
-      // Create an array of BindGroupEntry
-      std::array<wgpu::BindGroupEntry, sizeof...(Bindings)> entries = {
-         createBindGroupEntry<I, Bindings>(std::get<I>(resources))...};
-
-      // Create the BindGroupDescriptor
-      wgpu::BindGroupDescriptor bindGroupDesc{};
-      bindGroupDesc.layout     = bindGroupLayout;
-      bindGroupDesc.entryCount = static_cast<uint32_t>(entries.size());
-      bindGroupDesc.entries    = entries.data();
-
-      // Create and return the BindGroup
-      return device.createBindGroup(bindGroupDesc);
-   }
-
-   template <size_t I, typename Binding, typename Resource>
-   wgpu::BindGroupEntry createBindGroupEntry(Resource& resource) const {
-      wgpu::BindGroupEntry entry{};
-      entry.binding = static_cast<uint32_t>(I);
-      if constexpr (Binding::bindingType == BindingType::Buffer && !Binding::dynamicOffset) {
-         // Assuming ToBind<T> is Buffer
-         entry.buffer = std::get<0>(resource).get();
-         entry.offset = std::get<1>(resource);
-         entry.size   = sizeof(typename Binding::Type);
-      } else if constexpr (Binding::bindingType == BindingType::Buffer && Binding::dynamicOffset) {
-         entry.buffer = resource.get();
-         entry.offset = 0;
-         entry.size   = sizeof(typename Binding::Type);
-
-      } else if constexpr (Binding::bindingType == BindingType::Sampler) {
-         // Assuming ToBind<T> is wgpu::Sampler
-         entry.sampler = resource.Get(); // Replace Get() with actual method to retrieve the sampler handle
-      } else if constexpr (Binding::bindingType == BindingType::Texture) {
-         // Assuming ToBind<T> is wgpu::TextureView
-         entry.textureView = resource.Get(); // Replace Get() with actual method to retrieve the texture view handle
-      }
-      return entry;
-   }
-
-
    ~RenderPipeline() {
       if (pipeline) {
          pipeline.release();
