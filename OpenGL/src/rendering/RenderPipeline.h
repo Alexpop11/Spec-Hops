@@ -7,6 +7,7 @@
 #include "glm/glm.hpp"
 #include "VertexBufferLayout.h"
 #include "BindGroupLayout.h"
+#include "DataFormats.h"
 
 template <typename BindGroupType, typename VertexBufferLayoutType>
 class RenderPipeline;

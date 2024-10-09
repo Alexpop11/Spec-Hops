@@ -27,6 +27,7 @@
 #include "rendering/VertexBufferLayout.h"
 #include "rendering/Buffer.h"
 #include "rendering/BindGroupLayout.h"
+#include "rendering/Renderer.h"
 
 #include "glm/glm.hpp"
 
@@ -136,7 +137,7 @@ wgpu::RequiredLimits getRequiredLimits(wgpu::Adapter& adapter) {
    return requiredLimits;
 }
 
-wgpu::Device getDevice(wgpu::Adapter& adapter) {
+wgpu::Device createDevice(wgpu::Adapter& adapter) {
    std::cout << "Requesting device..." << std::endl;
    wgpu::DeviceDescriptor deviceDesc   = {};
    deviceDesc.label                    = "My Device";
@@ -187,7 +188,7 @@ wgpu::TextureFormat preferredFormat(wgpu::Surface& surface, wgpu::Adapter& adapt
    return capabilities.formats[0];
 }
 
-Buffer<float> getPointBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+Buffer<float> createPointBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    std::vector<float> pointData = {
       // x,   y,
       -1, -1, +1, -1, +1, +1, -1, +1,
@@ -195,7 +196,7 @@ Buffer<float> getPointBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    return Buffer<float>(device, queue, pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
 }
 
-Buffer<uint16_t> getIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+Buffer<uint16_t> createIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    std::vector<uint16_t> indexData = {
       0, 1, 2, // Triangle #0 connects points #0, #1 and #2
       0, 2, 3  // Triangle #1 connects points #0, #2 and #3
@@ -203,7 +204,7 @@ Buffer<uint16_t> getIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    return Buffer<uint16_t>(device, queue, indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 }
 
-UniformBuffer<StarUniforms> getUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+UniformBuffer<StarUniforms> createUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    StarUniforms uniform;
    uniform.time       = 1.0f;
    uniform.resolution = {640, 480};
@@ -223,14 +224,13 @@ Application::Application()
    , instance(wgpuCreateInstance(nullptr))
    , surface(glfwCreateWindowWGPUSurface(instance, window))
    , adapter(getAdapter(instance, surface))
-   , device(getDevice(adapter))
+   , device(createDevice(adapter))
    , uncapturedErrorCallbackHandle(getUncapturedErrorCallbackHandle(device))
    , queue(device.getQueue())
    , surfaceFormat(preferredFormat(surface, adapter))
-   , pipeline(initializePipeline(device, surfaceFormat))
-   , pointBuffer(getPointBuffer(device, queue))
-   , indexBuffer(getIndexBuffer(device, queue))
-   , uniformBuffer(getUniformBuffer(device, queue)) {
+   , pointBuffer(createPointBuffer(device, queue))
+   , indexBuffer(createIndexBuffer(device, queue))
+   , uniformBuffer(createUniformBuffer(device, queue)) {
 
    // Configure the surface
    wgpu::SurfaceConfiguration config = {};
@@ -255,96 +255,6 @@ Application::Application()
 
    initialized = true;
 }
-
-
-// Draw a frame and handle events
-void Application::MainLoop() {
-   glfwPollEvents();
-   // Get the next target texture view
-   wgpu::TextureView targetView = GetNextSurfaceTextureView();
-   if (!targetView)
-      return;
-
-   // Update the uniform buffer
-   StarUniforms uniform;
-   uniform.time       = glfwGetTime();
-   uniform.resolution = {640, 480};
-   StarUniforms uniform2;
-   uniform2.time       = -glfwGetTime();
-   uniform2.resolution = {640, 480};
-
-   std::vector<StarUniforms> uniformData = {uniform, uniform2};
-   uniformBuffer.upload(uniformData);
-
-   // Create a command encoder for the draw call
-   wgpu::CommandEncoderDescriptor encoderDesc = {};
-   encoderDesc.label                          = "My command encoder";
-   wgpu::CommandEncoder encoder               = wgpuDeviceCreateCommandEncoder(device, &encoderDesc);
-
-   // Create the render pass that clears the screen with our color
-   wgpu::RenderPassDescriptor renderPassDesc = {};
-
-   // The attachment part of the render pass descriptor describes the target texture of the pass
-   wgpu::RenderPassColorAttachment renderPassColorAttachment = {};
-   renderPassColorAttachment.view                            = targetView;
-   renderPassColorAttachment.resolveTarget                   = nullptr;
-   renderPassColorAttachment.loadOp                          = wgpu::LoadOp::Clear;
-   renderPassColorAttachment.storeOp                         = wgpu::StoreOp::Store;
-   renderPassColorAttachment.clearValue                      = WGPUColor{0.1, 0.1, 0.1, 1.0};
-#ifndef WEBGPU_BACKEND_WGPU
-   renderPassColorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
-#endif // NOT WEBGPU_BACKEND_WGPU
-
-   renderPassDesc.colorAttachmentCount   = 1;
-   renderPassDesc.colorAttachments       = &renderPassColorAttachment;
-   renderPassDesc.depthStencilAttachment = nullptr;
-   renderPassDesc.timestampWrites        = nullptr;
-
-   wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
-
-   wgpu::BindGroup bindGroup = pipeline.BindGroup(uniformBuffer);
-
-   renderPass.setPipeline(pipeline.GetPipeline());
-   renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.size());
-   renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.size());
-
-   uint32_t dynamicOffset = 0;
-   dynamicOffset          = uniformBuffer.index(0);
-   renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
-   renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
-
-   dynamicOffset = uniformBuffer.index(1);
-   renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
-   renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
-
-
-   renderPass.end();
-   renderPass.release();
-
-   // Finally encode and submit the render pass
-   wgpu::CommandBufferDescriptor cmdBufferDescriptor = {};
-   cmdBufferDescriptor.label                         = "Command buffer";
-   wgpu::CommandBuffer command                       = encoder.finish(cmdBufferDescriptor);
-   encoder.release();
-
-   std::cout << "Submitting command..." << std::endl;
-   queue.submit(1, &command);
-   command.release();
-   std::cout << "Command submitted." << std::endl;
-
-   // At the enc of the frame
-   targetView.release();
-#ifndef __EMSCRIPTEN__
-   surface.present();
-#endif
-
-#if defined(WEBGPU_BACKEND_DAWN)
-   device.tick();
-#elif defined(WEBGPU_BACKEND_WGPU)
-   device.poll(false);
-#endif
-}
-
 
 void Application::InitializeResPath() {
    namespace fs = std::filesystem;
@@ -410,21 +320,113 @@ wgpu::TextureView Application::GetNextSurfaceTextureView() {
    return targetView;
 }
 
+
+// Draw a frame and handle events
+void mainLoop(Application& application, Renderer& renderer) {
+   glfwPollEvents();
+
+   // Get the next target texture view
+   wgpu::TextureView targetView = application.GetNextSurfaceTextureView();
+   if (!targetView)
+      return;
+
+   // Update the uniform buffer
+   StarUniforms uniform;
+   uniform.time       = glfwGetTime();
+   uniform.resolution = {640, 480};
+   StarUniforms uniform2;
+   uniform2.time       = -glfwGetTime();
+   uniform2.resolution = {640, 480};
+
+   std::vector<StarUniforms> uniformData = {uniform, uniform2};
+   application.getUniformBuffer().upload(uniformData);
+
+   // Create a command encoder for the draw call
+   wgpu::CommandEncoderDescriptor encoderDesc = {};
+   encoderDesc.label                          = "My command encoder";
+   wgpu::CommandEncoder encoder               = wgpuDeviceCreateCommandEncoder(application.getDevice(), &encoderDesc);
+
+   // Create the render pass that clears the screen with our color
+   wgpu::RenderPassDescriptor renderPassDesc = {};
+
+   // The attachment part of the render pass descriptor describes the target texture of the pass
+   wgpu::RenderPassColorAttachment renderPassColorAttachment = {};
+   renderPassColorAttachment.view                            = targetView;
+   renderPassColorAttachment.resolveTarget                   = nullptr;
+   renderPassColorAttachment.loadOp                          = wgpu::LoadOp::Clear;
+   renderPassColorAttachment.storeOp                         = wgpu::StoreOp::Store;
+   renderPassColorAttachment.clearValue                      = WGPUColor{0.1, 0.1, 0.1, 1.0};
+#ifndef WEBGPU_BACKEND_WGPU
+   renderPassColorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
+#endif // NOT WEBGPU_BACKEND_WGPU
+
+   renderPassDesc.colorAttachmentCount   = 1;
+   renderPassDesc.colorAttachments       = &renderPassColorAttachment;
+   renderPassDesc.depthStencilAttachment = nullptr;
+   renderPassDesc.timestampWrites        = nullptr;
+
+   wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
+
+   wgpu::BindGroup bindGroup = renderer.stars.BindGroup(application.getUniformBuffer());
+
+   renderPass.setPipeline(renderer.stars.GetPipeline());
+   renderPass.setVertexBuffer(0, application.getPointBuffer().get(), 0, application.getPointBuffer().size());
+   renderPass.setIndexBuffer(application.getIndexBuffer().get(), wgpu::IndexFormat::Uint16, 0,
+                             application.getIndexBuffer().size());
+
+   uint32_t dynamicOffset = 0;
+   dynamicOffset          = application.getUniformBuffer().index(0);
+   renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
+   renderPass.drawIndexed(application.getIndexBuffer().count(), 1, 0, 0, 0);
+
+   dynamicOffset = application.getUniformBuffer().index(1);
+   renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
+   renderPass.drawIndexed(application.getIndexBuffer().count(), 1, 0, 0, 0);
+
+
+   renderPass.end();
+   renderPass.release();
+
+   // Finally encode and submit the render pass
+   wgpu::CommandBufferDescriptor cmdBufferDescriptor = {};
+   cmdBufferDescriptor.label                         = "Command buffer";
+   wgpu::CommandBuffer command                       = encoder.finish(cmdBufferDescriptor);
+   encoder.release();
+
+   std::cout << "Submitting command..." << std::endl;
+   application.getQueue().submit(1, &command);
+   command.release();
+   std::cout << "Command submitted." << std::endl;
+
+   // At the enc of the frame
+   targetView.release();
+#ifndef __EMSCRIPTEN__
+   application.getSurface().present();
+#endif
+
+#if defined(WEBGPU_BACKEND_DAWN)
+   application.getDevice().tick();
+#elif defined(WEBGPU_BACKEND_WGPU)
+   application.getDevice().poll(false);
+#endif
+}
+
 int main(void) {
 
-   Application& app = Application::get();
+   Application& application = Application::get();
+   Renderer     renderer    = Renderer();
 
    // Not Emscripten-friendly
-   if (!app.initialized) {
+   if (!application.initialized) {
       return 1;
    }
 
    // Not emscripten-friendly
-   while (app.IsRunning()) {
-      app.MainLoop();
+   while (application.IsRunning()) {
+      mainLoop(application, renderer);
    }
 
-   app.Terminate();
+   application.Terminate();
 
    return 0;
 
