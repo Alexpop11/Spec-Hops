@@ -69,8 +69,13 @@ void key_callback(GLFWwindow* window, int key, int /* scancode */, int action, i
 GLFWwindow* createWindow() {
    glfwInit();
    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-   auto window = glfwCreateWindow(640, 480, "Spec Hops", nullptr, nullptr);
+   glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
+   GLFWmonitor*       primaryMonitor = glfwGetPrimaryMonitor();
+   const GLFWvidmode* mode           = glfwGetVideoMode(primaryMonitor);
+
+   // Create a fullscreen window
+   auto window = glfwCreateWindow(mode->width, mode->height, "Spec Hops", nullptr, nullptr);
 
    return window;
 }
@@ -284,6 +289,35 @@ UniformBuffer<SquareObjectFragmentUniform> createSquareObjectFragmentUniformBuff
    return Buffer<SquareObjectFragmentUniform, true>(device, queue, uniformData,
                                                     wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
 }
+
+glm::ivec2 Application::windowSize() {
+   int width, height;
+   glfwGetFramebufferSize(window, &width, &height);
+   return {width, height};
+}
+
+void Application::configureSurface() {
+   // Configure the surface
+   wgpu::SurfaceConfiguration config = {};
+
+   // Configuration of the textures created for the underlying swap chain
+   auto windowSize = this->windowSize();
+
+   config.width  = windowSize.x;
+   config.height = windowSize.y;
+   config.usage  = wgpu::TextureUsage::RenderAttachment;
+   config.format = surfaceFormat;
+
+   // And we do not need any particular view format:
+   config.viewFormatCount = 0;
+   config.viewFormats     = nullptr;
+   config.device          = device;
+   config.presentMode     = wgpu::PresentMode::Fifo;
+   config.alphaMode       = wgpu::CompositeAlphaMode::Auto;
+
+   surface.configure(config);
+}
+
 // Initialize everything and return true if it went all right
 Application::Application()
    : window(createWindow())
@@ -300,29 +334,22 @@ Application::Application()
    , squareObjectPointBuffer(createSquareObjectPointBuffer(device, queue))
    , squareObjectVertexUniform(createSquareObjectVertexUniformBuffer(device, queue))
    , squareObjectFragmentUniform(createSquareObjectFragmentUniformBuffer(device, queue)) {
-
-   // Configure the surface
-   wgpu::SurfaceConfiguration config = {};
-
-   // Configuration of the textures created for the underlying swap chain
-   config.width  = 640;
-   config.height = 480;
-   config.usage  = wgpu::TextureUsage::RenderAttachment;
-   config.format = surfaceFormat;
-
-   // And we do not need any particular view format:
-   config.viewFormatCount = 0;
-   config.viewFormats     = nullptr;
-   config.device          = device;
-   config.presentMode     = wgpu::PresentMode::Fifo;
-   config.alphaMode       = wgpu::CompositeAlphaMode::Auto;
-
-   surface.configure(config);
-
+   glfwSetWindowUserPointer(window, this);
+   // Use a non-capturing lambda as resize callback
+   glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int, int) {
+      auto that = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
+      if (that != nullptr)
+         that->onResize();
+   });
+   configureSurface();
 
    InitializeResPath();
 
    initialized = true;
+}
+
+void Application::onResize() {
+   configureSurface();
 }
 
 void Application::InitializeResPath() {
@@ -395,6 +422,7 @@ void mainLoop(Application& application, Renderer& renderer) {
    glfwPollEvents();
 
    auto device = application.getDevice();
+   auto windowSize = application.windowSize();
 
    // Get the next target texture view
    wgpu::TextureView targetView = application.GetNextSurfaceTextureView();
@@ -404,10 +432,10 @@ void mainLoop(Application& application, Renderer& renderer) {
    // Update the uniform buffer
    StarUniforms uniform;
    uniform.time       = glfwGetTime();
-   uniform.resolution = {640, 480};
+   uniform.resolution = {windowSize.x, windowSize.y};
    StarUniforms uniform2;
    uniform2.time       = -glfwGetTime();
-   uniform2.resolution = {640, 480};
+   uniform2.resolution = {windowSize.x, windowSize.y};
 
    std::vector<StarUniforms> uniformData = {uniform, uniform2};
    application.getUniformBuffer().upload(uniformData);

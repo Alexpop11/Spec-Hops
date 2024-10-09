@@ -39,6 +39,9 @@ public:
    }
 
    wgpu::TextureView GetNextSurfaceTextureView();
+   void              onResize();
+   void              configureSurface();
+   glm::ivec2        windowSize();
 
 private:
    void InitializeResPath();
