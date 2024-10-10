@@ -421,7 +421,7 @@ wgpu::TextureView Application::GetNextSurfaceTextureView() {
 void mainLoop(Application& application, Renderer& renderer) {
    glfwPollEvents();
 
-   auto device = application.getDevice();
+   auto device     = application.getDevice();
    auto windowSize = application.windowSize();
 
    // Get the next target texture view
@@ -471,9 +471,9 @@ void mainLoop(Application& application, Renderer& renderer) {
          BindGroupLayout<StarUniformBinding>::BindGroup(device, application.getUniformBuffer());
 
       renderPass.setPipeline(renderer.stars.GetPipeline());
-      renderPass.setVertexBuffer(0, application.getPointBuffer().get(), 0, application.getPointBuffer().size());
+      renderPass.setVertexBuffer(0, application.getPointBuffer().get(), 0, application.getPointBuffer().sizeBytes());
       renderPass.setIndexBuffer(application.getIndexBuffer().get(), wgpu::IndexFormat::Uint16, 0,
-                                application.getIndexBuffer().size());
+                                application.getIndexBuffer().sizeBytes());
 
       uint32_t dynamicOffset = 0;
       dynamicOffset          = application.getUniformBuffer().index(0);
@@ -495,9 +495,9 @@ void mainLoop(Application& application, Renderer& renderer) {
       renderPass.setPipeline(renderer.squareObject.GetPipeline());
       renderPass.setBindGroup(0, bindGroup, 0, nullptr);
       renderPass.setIndexBuffer(application.getIndexBuffer().get(), wgpu::IndexFormat::Uint16, 0,
-                                application.getIndexBuffer().size());
+                                application.getIndexBuffer().sizeBytes());
       renderPass.setVertexBuffer(0, application.getSquareObjectPointBuffer().get(), 0,
-                                 application.getSquareObjectPointBuffer().size());
+                                 application.getSquareObjectPointBuffer().sizeBytes());
       renderPass.drawIndexed(application.getIndexBuffer().count(), 1, 0, 0, 0);
    }
 
