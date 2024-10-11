@@ -17,14 +17,12 @@ public:
 
    RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>> stars;
    RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>       squareObject;
-   Texture                                                                                              player;
-
-   // SquareObjectData squareObjectData;
 
    template <typename B, typename V>
    void Draw(RenderPipeline<B, V>& pipeline) {};
 
    wgpu::RenderPassEncoder renderPass;
+   wgpu::Device            device;
 };
 
 

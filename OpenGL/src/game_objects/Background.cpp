@@ -25,17 +25,14 @@ void Background::render(Renderer& renderer) {
    StarUniforms uniform(glfwGetTime(), Application::get().windowSize()); // TODO: use world time
    uniformBuffer.upload({uniform});
 
-   {
-      wgpu::BindGroup bindGroup = renderer.stars.BindGroups(std::forward_as_tuple(uniformBuffer)).front();
+   wgpu::BindGroup bindGroup =
+      renderer.stars.BindGroups(std::forward_as_tuple(std::forward_as_tuple(uniformBuffer, 0))).front();
 
-      uint32_t dynamicOffset = indexBuffer.index(0);
-      renderer.renderPass.setPipeline(renderer.stars.GetPipeline());
-      renderer.renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
-      renderer.renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.sizeBytes());
-      renderer.renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.sizeBytes());
-      renderer.renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
-   }
-   // TODO
+   renderer.renderPass.setPipeline(renderer.stars.GetPipeline());
+   renderer.renderPass.setBindGroup(0, bindGroup, 0, nullptr);
+   renderer.renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.sizeBytes());
+   renderer.renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.sizeBytes());
+   renderer.renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
 }
 
 void Background::update() {

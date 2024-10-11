@@ -13,9 +13,9 @@
 class Texture {
 public:
    // Constructor: Loads an image from the given path and creates a WebGPU texture
-   Texture(wgpu::Device& device, wgpu::Queue& queue, const std::string& path)
-      : device_(device)
-      , queue_(queue)
+   Texture(const std::string& path)
+      : device_(Application::get().getDevice())
+      , queue_(Application::get().getQueue())
       , path_(Application::get().res_path / "textures" / path) {
       std::cout << "Initializing texture: " << path_ << std::endl;
 
@@ -97,7 +97,7 @@ public:
       copySize.depthOrArrayLayers = 1;
 
       // Upload the texture data
-      queue.writeTexture(destination, pixels.data(), pixels.size(), dataLayout, copySize);
+      queue_.writeTexture(destination, pixels.data(), pixels.size(), dataLayout, copySize);
 
       // Create a sampler
       wgpu::SamplerDescriptor samplerDesc = {};

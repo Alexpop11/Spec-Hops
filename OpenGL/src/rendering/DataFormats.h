@@ -19,8 +19,8 @@ struct StarUniforms {
 using StarUniformBinding =
    BufferBinding<StarUniforms,                                                       // Type of the buffer
                  wgpu::both(wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment), // Shader visibility
-                 wgpu::BufferBindingType::Uniform,                                   // Buffer binding type
-                 true>;
+                 wgpu::BufferBindingType::Uniform                                    // Buffer binding type
+                 >;
 
 
 
@@ -42,7 +42,7 @@ struct SquareObjectFragmentUniform {
 };
 
 using SquareObjectLayout = BindGroupLayout<
-   BufferBinding<SquareObjectVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, false>,
-   BufferBinding<SquareObjectFragmentUniform, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, false>,
+   BufferBinding<SquareObjectVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, true>,
+   BufferBinding<SquareObjectFragmentUniform, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, true>,
    TextureBinding<wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float, wgpu::TextureViewDimension::_2D>,
    SamplerBinding<wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering>>;

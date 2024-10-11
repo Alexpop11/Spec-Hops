@@ -25,14 +25,7 @@ RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec
       "Stars", device, shader, wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
 }
 
-Texture createTexture() {
-   auto& application = Application::get();
-   auto  device      = application.getDevice();
-   auto  queue       = application.getQueue();
-   return Texture(device, queue, "/Users/andrepopovitch/coding/SpaceBoom/OpenGL/res/textures/alternate-player.png");
-}
-
 Renderer::Renderer()
    : stars(starPipeline())
    , squareObject(squareObjectPipeline())
-   , player(createTexture()) {}
+   , device(Application::get().getDevice()) {}

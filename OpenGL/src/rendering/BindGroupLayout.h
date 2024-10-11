@@ -29,7 +29,7 @@ struct GetToBind<BufferBinding<T, Visibility, BufferType, false>> {
 };
 template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType>
 struct GetToBind<BufferBinding<T, Visibility, BufferType, true>> {
-   using type = const Buffer<T, BufferType == wgpu::BufferBindingType::Uniform>&;
+   using type = const BufferView<T, BufferType == wgpu::BufferBindingType::Uniform>&;
 };
 
 
@@ -126,7 +126,7 @@ struct BindGroupLayout {
             entry.offset = std::get<1>(resource);
             entry.size   = sizeof(typename Binding::Type);
          } else if constexpr (Binding::dynamicOffset) {
-            entry.buffer = resource.get();
+            entry.buffer = resource.getBuffer()->get();
             entry.offset = 0;
             entry.size   = sizeof(typename Binding::Type);
          }

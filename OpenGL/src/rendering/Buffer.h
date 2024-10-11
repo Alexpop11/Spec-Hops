@@ -209,11 +209,7 @@ public:
       , index_(index) {}
 
    // Destructor: Frees the index back to the Buffer
-   ~BufferView() {
-      if (auto buf = buffer_.lock()) {
-         buf->freeIndex(index_);
-      }
-   }
+   ~BufferView() { buffer_->freeIndex(index_); }
 
    // Deleted copy constructor and assignment operator
    BufferView(const BufferView&)             = delete;
@@ -222,16 +218,12 @@ public:
    BufferView& operator=(BufferView&& other) = delete;
 
    // Update method to modify the data at this index
-   void Update(const T& data) {
-      if (auto buf = buffer_.lock()) {
-         buf->updateBuffer(data, index_);
-      } else {
-         std::cerr << "Buffer is no longer valid." << std::endl;
-      }
-   }
+   void Update(const T& data) { buffer_->updateBuffer(data, index_); }
 
    // Getter for the index
-   size_t getIndex() const { return index_; }
+   std::shared_ptr<Buffer<T, Uniform>> getBuffer() const { return buffer_; }
+   size_t                              getIndex() const { return index_; }
+   size_t                              getOffset() const { return index_ * buffer_->elementStride(); }
 
    static BufferView<T, Uniform> create(const T& data) {
       static std::shared_ptr<Buffer<T, Uniform>> buffer = std::make_shared<Buffer<T, Uniform>>(
@@ -240,8 +232,8 @@ public:
    }
 
 private:
-   std::weak_ptr<Buffer<T, Uniform>> buffer_;
-   size_t                            index_;
+   std::shared_ptr<Buffer<T, Uniform>> buffer_;
+   size_t                              index_;
 };
 
 template <typename T>
