@@ -42,6 +42,7 @@
 #include "game_objects/Background.h"
 #include "game_objects/SquareObject.h"
 #include "game_objects/Tile.h"
+#include "World.h"
 
 #define GL_SILENCE_DEPRECATION
 
@@ -49,6 +50,9 @@
    #include <GLES2/gl2.h>
 #endif
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
+
+
+const float TICKS_PER_SECOND = 3.0f;
 
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
    int            width, height, channels;
@@ -291,6 +295,8 @@ Application::Application()
    , uncapturedErrorCallbackHandle(getUncapturedErrorCallbackHandle(device))
    , queue(device.getQueue())
    , surfaceFormat(preferredFormat(surface, adapter)) {
+   glfwSetKeyCallback(window, key_callback);
+
    glfwSetWindowUserPointer(window, this);
    // Use a non-capturing lambda as resize callback
    glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int, int) {
@@ -301,6 +307,9 @@ Application::Application()
    configureSurface();
 
    InitializeResPath();
+
+   std::string icon_path = res_path / "images" / "Logo2.png";
+   setWindowIcon(window, icon_path.c_str());
 
    initialized = true;
 }
@@ -374,12 +383,12 @@ wgpu::TextureView Application::GetNextSurfaceTextureView() {
 }
 
 // Draw a frame and handle events
-void mainLoop(Application& application, Renderer& renderer, std::vector<std::unique_ptr<GameObject>>& gameobjects) {
+void mainLoop(Application& application, Renderer& renderer) {
    glfwPollEvents();
 
    auto device = application.getDevice();
 
-   for (auto& gameobject : gameobjects) {
+   for (auto& gameobject : World::gameobjects) {
       gameobject->update();
    }
 
@@ -391,9 +400,7 @@ void mainLoop(Application& application, Renderer& renderer, std::vector<std::uni
       RenderPass renderPass(encoder);
       renderer.renderPass = renderPass.get();
 
-      for (auto& gameobject : gameobjects) {
-         gameobject->render(renderer);
-      }
+      World::RenderObjects(renderer);
 
       // The render pass and command encoder will be ended and submitted in their destructors
    }
@@ -415,11 +422,7 @@ int main(void) {
    Application& application = Application::get();
    Renderer     renderer    = Renderer();
 
-   std::vector<std::unique_ptr<GameObject>> gameobjects;
-   gameobjects.push_back(std::make_unique<Background>("Stars"));
-   gameobjects.push_back(std::make_unique<SquareObject>("Floor", DrawPriority::Floor, 0, 0, "floor.png"));
-   gameobjects.push_back(std::make_unique<Tile>("Tile", true, true, 1, 0));
-   gameobjects.push_back(std::make_unique<Tile>("Tile", false, true, 0, 1));
+   World::LoadMap("SpaceShip.txt");
 
    // Not Emscripten-friendly
    if (!application.initialized) {
@@ -428,7 +431,7 @@ int main(void) {
 
    // Not emscripten-friendly
    while (application.IsRunning()) {
-      mainLoop(application, renderer, gameobjects);
+      mainLoop(application, renderer);
    }
 
    application.Terminate();
@@ -437,47 +440,6 @@ int main(void) {
 
 
    /*
-   const float TICKS_PER_SECOND = 3.0f;
-
-   /* Initialize the library * /
-   if (!glfwInit())
-      return -1;
-
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-   // Get the primary monitor
-   GLFWmonitor*       primaryMonitor = glfwGetPrimaryMonitor();
-   const GLFWvidmode* mode           = glfwGetVideoMode(primaryMonitor);
-
-   // Create a fullscreen window
-   GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "SpaceBoom", NULL, NULL);
-   if (!window) {
-      std::cerr << "Failed to create GLFW window" << std::endl;
-      glfwTerminate();
-      return -1;
-   }
-
-   glfwSetKeyCallback(window, key_callback);
-
-   // Set the window icon
-   std::string icon_path = Renderer::ResPath() + "images/Logo2.png";
-   setWindowIcon(window, icon_path.c_str());
-
-   /* Make the window's context current * /
-   glfwMakeContextCurrent(window);
-
-   glfwSwapInterval(1);
-
-   if (glewInit() != GLEW_OK)
-      std::cout << "Error!" << std::endl;
-
-   std::cout << "current version of GL: " << glGetString(GL_VERSION) << std::endl;
-
-   GLCall(glEnable(GL_BLEND));
-   GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
    // Initialize ImGui
    IMGUI_CHECKVERSION();
    ImGui::CreateContext();

@@ -8,6 +8,7 @@
 #include <cstring>     // For std::memcpy
 #include <stb_image.h> // Ensure stb_image is included in your project
 #include "../Application.h"
+#include "../WeakMemoizeConstructor.hpp"
 
 // Texture abstraction class
 class Texture {
@@ -207,6 +208,9 @@ public:
    uint32_t getWidth() const { return m_Width; }
    uint32_t getHeight() const { return m_Height; }
    int32_t  getBPP() const { return m_BPP; }
+
+   // Declare the global memoized constructor
+   DECLARE_GLOBAL_MEMOIZED_CONSTRUCTOR(Texture)
 
 private:
    wgpu::Device&     device_;

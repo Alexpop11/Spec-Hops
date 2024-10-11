@@ -97,7 +97,7 @@ public:
          freeIndices_.pop_back();
       } else {
          // Check if there's space in the current buffer
-         if (capacity_ < count_) {
+         if (count_ < capacity_) {
             allocatedIndex = count_;
             ++count_;
          } else {

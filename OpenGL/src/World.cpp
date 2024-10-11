@@ -1,16 +1,17 @@
+#include "World.h"
+
 #include <iostream>
 #include <fstream>
-#include "World.h"
 #include <algorithm>
 
-#include "Renderer.h"
-#include "game_objects/Player.h"
+#include "rendering/Renderer.h"
+// #include "game_objects/Player.h"
 #include "game_objects/Background.h"
 #include "game_objects/Camera.h"
 #include "game_objects/Tile.h"
-#include "game_objects/enemies/Bomber.h"
-#include "game_objects/enemies/Turret.h"
-#include "game_objects/Mine.h"
+// #include "game_objects/enemies/Bomber.h"
+// #include "game_objects/enemies/Turret.h"
+// #include "game_objects/Mine.h"
 
 std::vector<std::shared_ptr<GameObject>> World::gameobjects      = {};
 std::vector<std::unique_ptr<GameObject>> World::gameobjectstoadd = {};
@@ -18,13 +19,15 @@ float                                    World::timeSpeed        = 1.0f;
 bool                                     World::settingTimeSpeed = false;
 bool                                     World::shouldTick       = false;
 
-void World::LoadMap(const std::string& map_path) {
+void World::LoadMap(const std::filesystem::path& map_path) {
    gameobjects.clear();
 
-   std::ifstream file(Renderer::ResPath() + map_path);
+   std::filesystem::path map_path_full = Application::get().res_path / "maps" / map_path;
+
+   std::ifstream file(map_path_full);
 
    if (!file.is_open()) {
-      std::cerr << "Error opening file: " << map_path << std::endl;
+      std::cerr << "Error opening file: " << map_path_full << std::endl;
    }
 
    std::vector<std::string> lines;
@@ -43,32 +46,32 @@ void World::LoadMap(const std::string& map_path) {
          size_t y = total_rows - row;
          if (c != '\n') {
             if (c == 'b') { // Background
-               gameobjects.push_back(std::make_shared<Background>(Background("Background")));
+               gameobjects.push_back(std::make_shared<Background>("Background"));
             }
             if (c == 'p') { // player
-               gameobjects.push_back(std::make_shared<Player>(Player("Coolbox", (float)x, (float)y)));
-               gameobjects.push_back(std::make_shared<Tile>(Tile("Floor", (float)x, (float)y)));
+               // gameobjects.push_back(std::make_shared<Player>(Player("Coolbox", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
             }
             if (c == 'f') { // floor
-               gameobjects.push_back(std::make_shared<Tile>(Tile("Floor", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
             }
             if (c == 'w') { // wall
-               gameobjects.push_back(std::make_shared<Tile>(Tile("Wall", true, false, (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>("Wall", true, false, (float)x, (float)y));
             }
             if (c == 'W') { // wall
-               gameobjects.push_back(std::make_shared<Tile>(Tile("Wall", true, true, (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>("Wall", true, true, (float)x, (float)y));
             }
             if (c == 'e') { // enemy Bomber
-               gameobjects.push_back(std::make_shared<Bomber>(Bomber("bomber", (float)x, (float)y)));
-               gameobjects.push_back(std::make_shared<Tile>(Tile("Floor", (float)x, (float)y)));
+               // gameobjects.push_back(std::make_shared<Bomber>(Bomber("bomber", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
             }
             if (c == 't') { // Turret
-               gameobjects.push_back(std::make_shared<Turret>(Turret("turret", (float)x, (float)y)));
-               gameobjects.push_back(std::make_shared<Tile>(Tile("Floor", (float)x, (float)y)));
+               // gameobjects.push_back(std::make_shared<Turret>(Turret("turret", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
             }
             if (c == 'm') { // Mine
-               gameobjects.push_back(std::make_shared<Mine>(Mine("mine", (float)x, (float)y)));
-               gameobjects.push_back(std::make_shared<Tile>(Tile("Floor", (float)x, (float)y)));
+               // gameobjects.push_back(std::make_shared<Mine>(Mine("mine", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
             }
          }
       }
@@ -126,6 +129,8 @@ void World::RenderObjects(Renderer& renderer) {
 }
 
 bool World::ticksPaused() {
-   auto player = getFirst<Player>();
-   return player->pauseTicks();
+   // TODO: uncomment
+   // auto player = getFirst<Player>();
+   // return player->pauseTicks();
+   return false;
 }

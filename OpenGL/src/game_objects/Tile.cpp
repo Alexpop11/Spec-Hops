@@ -4,10 +4,9 @@ Tile::Tile(const std::string& name, bool wall, bool unbreakable, float x, float 
    : SquareObject(name, DrawPriority::Floor, x, y, "alt-wall-bright.png")
    , wall(wall)
    , unbreakable(unbreakable)
-   , wallTexture(std::make_shared<Texture>("alt-wall-bright.png"))
-   , wallTextureUnbreakable(std::make_shared<Texture>("alt-wall-unbreakable.png"))
-   , floorTexture(
-        std::make_shared<Texture>(std::vector<std::string>{"2-alt-floor.png", "2-alt-floor-2.png"}[rand() % 2])) {
+   , wallTexture(Texture::create("alt-wall-bright.png"))
+   , wallTextureUnbreakable(Texture::create("alt-wall-unbreakable.png"))
+   , floorTexture(Texture::create(std::vector<std::string>{"2-alt-floor.png", "2-alt-floor-2.png"}[rand() % 2])) {
    setTexture();
 }
 
