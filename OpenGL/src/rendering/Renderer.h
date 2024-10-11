@@ -5,6 +5,7 @@
 #include "RenderPipeline.h"
 #include "Texture.h"
 
+
 class SquareObjectData {
    IndexBuffer                indexBuffer;
    Buffer<SquareObjectVertex> pointBuffer;
@@ -25,3 +26,6 @@ public:
 
    wgpu::RenderPassEncoder renderPass;
 };
+
+
+glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale);

@@ -9,11 +9,9 @@
 
 #include "../Application.h"
 
-// Forward declaration of BufferView
 template <typename T, bool Uniform>
 class BufferView;
 
-// Template class for Buffer abstraction
 template <typename T, bool Uniform = false>
 class Buffer : public std::enable_shared_from_this<Buffer<T, Uniform>> {
 public:
@@ -90,7 +88,7 @@ public:
    size_t count() const { return count_; }
 
    // Add method: Allocates a new index and returns a BufferView
-   std::shared_ptr<BufferView<T, Uniform>> Add(const T& data) {
+   BufferView<T, Uniform> Add(const T& data) {
       size_t allocatedIndex;
 
       // Reuse a deleted index if available
@@ -104,7 +102,7 @@ public:
             ++capacity_;
          } else {
             // Need to resize the buffer
-            expandBuffer(count_ * 2);
+            expandBuffer();
             allocatedIndex = capacity_;
             ++capacity_;
          }
@@ -114,7 +112,7 @@ public:
       updateBuffer(data, allocatedIndex);
 
       // Return a BufferView managing this index
-      return std::make_shared<BufferView<T, Uniform>>(this->shared_from_this(), allocatedIndex);
+      return BufferView<T, Uniform>(this->shared_from_this(), allocatedIndex);
    }
 
    size_t sizeBytes() const { return count_ * elementStride(); }
@@ -138,6 +136,7 @@ private:
    // Method to resize the buffer
    void expandBuffer() {
       size_t newSize = capacityBytes() * 2;
+      newSize        = std::max(newSize, elementStride()); // Ensure the buffer is at least 256 bytes
 
       // Create a new buffer with the new size
       wgpu::BufferDescriptor newBufferDesc = {};
@@ -201,16 +200,13 @@ template <typename T>
 using UniformBuffer = Buffer<T, true>;
 
 
-// BufferView class definition
-template <typename T, bool Uniform>
+template <typename T, bool Uniform = true>
 class BufferView {
 public:
    // Constructor: Acquires an index from the Buffer
    BufferView(std::shared_ptr<Buffer<T, Uniform>> buffer, size_t index)
       : buffer_(buffer)
-      , index_(index) {
-      assert(buffer_ && "Buffer must be valid.");
-   }
+      , index_(index) {}
 
    // Destructor: Frees the index back to the Buffer
    ~BufferView() {
@@ -220,29 +216,10 @@ public:
    }
 
    // Deleted copy constructor and assignment operator
-   BufferView(const BufferView&)            = delete;
-   BufferView& operator=(const BufferView&) = delete;
-
-   // Move constructor and assignment operator
-   BufferView(BufferView&& other) noexcept
-      : buffer_(std::move(other.buffer_))
-      , index_(other.index_) {
-      other.index_ = static_cast<size_t>(-1); // Invalidate the moved-from object
-   }
-
-   BufferView& operator=(BufferView&& other) noexcept {
-      if (this != &other) {
-         // Free current index
-         if (auto buf = buffer_.lock()) {
-            buf->freeIndex(index_);
-         }
-
-         buffer_      = std::move(other.buffer_);
-         index_       = other.index_;
-         other.index_ = static_cast<size_t>(-1); // Invalidate the moved-from object
-      }
-      return *this;
-   }
+   BufferView(const BufferView&)             = delete;
+   BufferView& operator=(const BufferView&)  = delete;
+   BufferView(BufferView&& other)            = delete;
+   BufferView& operator=(BufferView&& other) = delete;
 
    // Update method to modify the data at this index
    void Update(const T& data) {
@@ -255,6 +232,12 @@ public:
 
    // Getter for the index
    size_t getIndex() const { return index_; }
+
+   static BufferView<T, Uniform> create(const T& data) {
+      static std::shared_ptr<Buffer<T, Uniform>> buffer = std::make_shared<Buffer<T, Uniform>>(
+         std::vector<T>{}, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+      return buffer->Add(data);
+   }
 
 private:
    std::weak_ptr<Buffer<T, Uniform>> buffer_;

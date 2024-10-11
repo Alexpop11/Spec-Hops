@@ -37,7 +37,6 @@
 #include "rendering/RenderPass.h"
 
 #include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 
 #include "game_objects/GameObject.h"
 #include "game_objects/Background.h"
@@ -231,33 +230,7 @@ IndexBuffer createIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    return IndexBuffer(indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 }
 
-glm::mat4 CalculateMVP(std::tuple<int, int> windowSize, const glm::vec2& objectPosition, float objectRotationDegrees,
-                       float objectScale) {
-   // Retrieve window size from the renderer
-   auto [width, height] = windowSize;
-
-   // Calculate aspect ratio
-   float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-
-   // Create orthographic projection matrix
-   float     orthoWidth = 18 * aspectRatio;
-   glm::mat4 projection = glm::ortho(-orthoWidth / 2.0f, orthoWidth / 2.0f, -18 / 2.0f, 18 / 2.0f, -1.0f, 1.0f);
-
-   // Create view matrix
-   glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-glm::vec2(1, 1), 0.0f));
-
-   // Create model matrix
-   glm::mat4 model           = glm::translate(glm::mat4(1.0f), glm::vec3(objectPosition, 0.0f));
-   float     rotationRadians = glm::radians(objectRotationDegrees);
-   model                     = glm::rotate(model, rotationRadians, glm::vec3(0.0f, 0.0f, 1.0f));
-   model                     = glm::scale(model, glm::vec3(objectScale, objectScale, 1.0f));
-
-   // Combine matrices to form MVP
-   glm::mat4 mvp = projection * view * model;
-
-   return mvp;
-}
-
+/*
 UniformBuffer<SquareObjectVertexUniform> createSquareObjectVertexUniformBuffer(wgpu::Device& device,
                                                                                wgpu::Queue&  queue) {
    SquareObjectVertexUniform uniform{};
@@ -267,7 +240,7 @@ UniformBuffer<SquareObjectVertexUniform> createSquareObjectVertexUniformBuffer(w
    std::vector<SquareObjectVertexUniform> uniformData = {uniform};
    return Buffer<SquareObjectVertexUniform, true>(uniformData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
 }
-
+*/
 /*
 UniformBuffer<SquareObjectFragmentUniform> createSquareObjectFragmentUniformBuffer(wgpu::Device& device,
                                                                                    wgpu::Queue&  queue) {

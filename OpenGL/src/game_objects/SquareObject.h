@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "../rendering/Renderer.h"
 #include "../rendering/Texture.h"
 #include <glm/glm.hpp>
 
@@ -16,7 +17,8 @@ protected:
    std::shared_ptr<Texture> texture;
 
 private:
-   Buffer<SquareObjectVertex>                 pointBuffer;
-   IndexBuffer                                indexBuffer;
-   UniformBuffer<SquareObjectFragmentUniform> uniformBuffer;
+   Buffer<SquareObjectVertex>              pointBuffer;
+   IndexBuffer                             indexBuffer;
+   BufferView<SquareObjectVertexUniform>   vertexUniform;
+   BufferView<SquareObjectFragmentUniform> fragmentUniform;
 };
