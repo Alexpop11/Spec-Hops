@@ -12,7 +12,7 @@ Background::Background(const std::string& name)
            glm::vec2(-1, +1),
         },
         wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex))
-   , indexBuffer(Buffer<uint16_t>(
+   , indexBuffer(IndexBuffer(
         {
            0, 1, 2, // Triangle #0 connects points #0, #1 and #2
            0, 2, 3  // Triangle #1 connects points #0, #2 and #3

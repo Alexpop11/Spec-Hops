@@ -10,7 +10,7 @@ Texture::Texture(const std::string& path)
    , m_Width(0)
    , m_Height(0)
    , m_BPP(0) {
-   std::cout << "Initializing texture " << path << std::endl;
+   std::cout << "Initializing texture " << Application::get().res_path / "images" / path << std::endl;
    stbi_set_flip_vertically_on_load(1);
    m_LocalBuffer = stbi_load(path.c_str(), &m_Width, &m_Height, &m_BPP, 4);
 

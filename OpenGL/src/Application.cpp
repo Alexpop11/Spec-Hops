@@ -41,6 +41,7 @@
 
 #include "game_objects/GameObject.h"
 #include "game_objects/Background.h"
+#include "game_objects/SquareObject.h"
 
 #define GL_SILENCE_DEPRECATION
 
@@ -222,12 +223,12 @@ Buffer<SquareObjectVertex> createSquareObjectPointBuffer(wgpu::Device& device, w
    return Buffer<SquareObjectVertex>(pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
 }
 
-Buffer<uint16_t> createIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
+IndexBuffer createIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
    std::vector<uint16_t> indexData = {
       0, 1, 2, // Triangle #0 connects points #0, #1 and #2
       0, 2, 3  // Triangle #1 connects points #0, #2 and #3
    };
-   return Buffer<uint16_t>(indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
+   return IndexBuffer(indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 }
 
 glm::mat4 CalculateMVP(std::tuple<int, int> windowSize, const glm::vec2& objectPosition, float objectRotationDegrees,
@@ -267,16 +268,16 @@ UniformBuffer<SquareObjectVertexUniform> createSquareObjectVertexUniformBuffer(w
    return Buffer<SquareObjectVertexUniform, true>(uniformData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
 }
 
+/*
 UniformBuffer<SquareObjectFragmentUniform> createSquareObjectFragmentUniformBuffer(wgpu::Device& device,
                                                                                    wgpu::Queue&  queue) {
    SquareObjectFragmentUniform uniform;
    uniform.u_Color = {1.0f, 0.0f, 0.0f, 0.1f};
-
-
    std::vector<SquareObjectFragmentUniform> uniformData = {uniform};
    return Buffer<SquareObjectFragmentUniform, true>(uniformData,
                                                     wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
 }
+*/
 
 glm::ivec2 Application::windowSize() {
    int width, height;
@@ -442,6 +443,7 @@ int main(void) {
 
    std::vector<std::unique_ptr<GameObject>> gameobjects;
    gameobjects.push_back(std::make_unique<Background>("Stars"));
+   gameobjects.push_back(std::make_unique<SquareObject>("Floor", DrawPriority::Floor, 0, 0, "floor.png"));
 
    // Not Emscripten-friendly
    if (!application.initialized) {

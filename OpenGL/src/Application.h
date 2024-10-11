@@ -45,7 +45,7 @@ private:
    wgpu::TextureFormat                  surfaceFormat;
 
    // Buffer<float>               pointBuffer;
-   // Buffer<uint16_t>            indexBuffer;
+   // IndexBuffer            indexBuffer;
    // UniformBuffer<StarUniforms> uniformBuffer;
 
    // Buffer<SquareObjectVertex>                 squareObjectPointBuffer;

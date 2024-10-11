@@ -6,7 +6,7 @@
 #include "Texture.h"
 
 class SquareObjectData {
-   Buffer<uint16_t>           indexBuffer;
+   IndexBuffer                indexBuffer;
    Buffer<SquareObjectVertex> pointBuffer;
 };
 

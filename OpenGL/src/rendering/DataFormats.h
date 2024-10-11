@@ -27,6 +27,10 @@ using StarUniformBinding =
 struct SquareObjectVertex {
    glm::vec2 position;
    glm::vec2 uv;
+
+   SquareObjectVertex(glm::vec2 position, glm::vec2 uv)
+      : position(position)
+      , uv(uv) {}
 };
 
 struct SquareObjectVertexUniform {

@@ -11,6 +11,6 @@ public:
 
 private:
    Buffer<glm::vec2>           pointBuffer;
-   Buffer<uint16_t>            indexBuffer;
+   IndexBuffer                 indexBuffer;
    UniformBuffer<StarUniforms> uniformBuffer;
 };

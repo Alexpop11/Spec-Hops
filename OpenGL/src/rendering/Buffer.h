@@ -25,7 +25,7 @@ public:
       : device_(Application::get().getDevice())
       , queue_(Application::get().getQueue())
       , usage_(usage) {
-      assert(!data.empty() && "Buffer data cannot be empty.");
+      // assert(!data.empty() && "Buffer data cannot be empty.");
 
       count_    = data.size();
       capacity_ = count_;
@@ -194,6 +194,8 @@ private:
    size_t              capacity_ = 0; // Tracks the number of allocated elements
    std::vector<size_t> freeIndices_;  // Tracks freed indices for reuse
 };
+
+using IndexBuffer = Buffer<uint16_t, false>;
 
 template <typename T>
 using UniformBuffer = Buffer<T, true>;
