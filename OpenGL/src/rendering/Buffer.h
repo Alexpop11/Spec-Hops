@@ -98,13 +98,13 @@ public:
       } else {
          // Check if there's space in the current buffer
          if (capacity_ < count_) {
-            allocatedIndex = capacity_;
-            ++capacity_;
+            allocatedIndex = count_;
+            ++count_;
          } else {
             // Need to resize the buffer
             expandBuffer();
-            allocatedIndex = capacity_;
-            ++capacity_;
+            allocatedIndex = count_;
+            ++count_;
          }
       }
 
@@ -169,7 +169,7 @@ private:
       buffer_ = newBuffer;
 
       // Update buffer capaticy now that it's been resized
-      capacity_ *= 2;
+      capacity_ = newSize / elementStride();
    }
 
    // Method to free an index (called by BufferView destructor)

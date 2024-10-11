@@ -18,5 +18,7 @@ private:
    IndexBuffer                             indexBuffer;
    BufferView<SquareObjectVertexUniform>   vertexUniform;
    BufferView<SquareObjectFragmentUniform> fragmentUniform;
-   Texture                                 texture;
+
+protected:
+   std::shared_ptr<Texture> texture;
 };

@@ -41,6 +41,7 @@
 #include "game_objects/GameObject.h"
 #include "game_objects/Background.h"
 #include "game_objects/SquareObject.h"
+#include "game_objects/Tile.h"
 
 #define GL_SILENCE_DEPRECATION
 
@@ -417,6 +418,8 @@ int main(void) {
    std::vector<std::unique_ptr<GameObject>> gameobjects;
    gameobjects.push_back(std::make_unique<Background>("Stars"));
    gameobjects.push_back(std::make_unique<SquareObject>("Floor", DrawPriority::Floor, 0, 0, "floor.png"));
+   gameobjects.push_back(std::make_unique<Tile>("Tile", true, true, 1, 0));
+   gameobjects.push_back(std::make_unique<Tile>("Tile", false, true, 0, 1));
 
    // Not Emscripten-friendly
    if (!application.initialized) {

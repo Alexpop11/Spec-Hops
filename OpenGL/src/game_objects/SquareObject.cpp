@@ -28,7 +28,7 @@ SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, i
       SquareObjectVertexUniform{CalculateMVP(glm::vec2{tile_x, tile_y}, 0, 1)})),
    fragmentUniform(
       BufferView<SquareObjectFragmentUniform>::create(SquareObjectFragmentUniform{glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)})),
-   texture(Texture(texturePath)) {}
+   texture(std::make_shared<Texture>(texturePath)) {}
 
 void SquareObject::render(Renderer& renderer) {
    this->vertexUniform.Update(SquareObjectVertexUniform{CalculateMVP(glm::vec2{tile_x, tile_y}, 0, 1)});
@@ -37,7 +37,7 @@ void SquareObject::render(Renderer& renderer) {
    renderer.renderPass.setPipeline(renderer.squareObject.GetPipeline());
 
    wgpu::BindGroup       bindGroup = SquareObjectLayout::BindGroup(renderer.device, vertexUniform, fragmentUniform,
-                                                                   texture.getTextureView(), texture.getSampler());
+                                                                   texture->getTextureView(), texture->getSampler());
    std::vector<uint32_t> offset{
       (uint32_t)vertexUniform.getOffset(),
       (uint32_t)fragmentUniform.getOffset(),
