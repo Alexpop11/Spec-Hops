@@ -11,8 +11,6 @@ Text::Text(const std::string& text, ImFont* font, glm::vec2 position)
    : GameObject(text, DrawPriority::UI, position)
    , font(font) {}
 
-void Text::setUpShader(Renderer& renderer) {}
-
 void Text::render(Renderer& renderer) {
    ImGui::PushFont(font);
    DrawTextOverlay(name, position, IM_COL32(255, 255, 255, 255));

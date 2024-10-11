@@ -9,6 +9,8 @@ public:
 
    wgpu::CommandEncoder& get();
 
+   static void DestroyDeadBuffers();
+
 private:
    wgpu::Device         device_;
    wgpu::CommandEncoder encoder_;

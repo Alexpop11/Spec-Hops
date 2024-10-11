@@ -2,6 +2,7 @@
 #include <webgpu/webgpu.hpp>
 #include <filesystem>
 
+#include "imgui.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
@@ -21,10 +22,13 @@ public:
    bool                  initialized;
    std::filesystem::path res_path;
 
+   GLFWwindow*          getWindow() { return window; }
    wgpu::TextureFormat& getSurfaceFormat() { return surfaceFormat; }
    wgpu::Device&        getDevice() { return device; }
    wgpu::Surface&       getSurface() { return surface; }
    wgpu::Queue&         getQueue() { return queue; }
+   ImGuiIO&             getImGuiIO() { return io; }
+   glm::vec2            MousePos();
 
    wgpu::TextureView GetNextSurfaceTextureView();
    void              onResize();
@@ -32,9 +36,6 @@ public:
    glm::ivec2        windowSize();
 
 private:
-   void InitializeResPath();
-
-
    GLFWwindow*                          window;
    wgpu::Instance                       instance;
    wgpu::Surface                        surface;
@@ -43,12 +44,11 @@ private:
    std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
    wgpu::Queue                          queue;
    wgpu::TextureFormat                  surfaceFormat;
+   ImGuiIO&                             io;
 
-   // Buffer<float>               pointBuffer;
-   // IndexBuffer            indexBuffer;
-   // UniformBuffer<StarUniforms> uniformBuffer;
-
-   // Buffer<SquareObjectVertex>                 squareObjectPointBuffer;
-   // UniformBuffer<SquareObjectVertexUniform>   squareObjectVertexUniform;
-   // UniformBuffer<SquareObjectFragmentUniform> squareObjectFragmentUniform;
+public:
+   // Fonts
+   ImFont* jacquard12_big;
+   ImFont* jacquard12_small;
+   ImFont* pixelify;
 };

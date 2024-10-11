@@ -10,7 +10,7 @@ SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, i
 })
    , tile_x(tile_x)
    , tile_y(tile_y)
-   , pointBuffer(Buffer<SquareObjectVertex>(
+   , pointBuffer(Buffer<SquareObjectVertex>::create(
         {
            SquareObjectVertex{glm::vec2(-0.5f, -0.5f), glm::vec2(0.0f, 0.0f)}, // 0
            SquareObjectVertex{glm::vec2(0.5f, -0.5f), glm::vec2(1.0f, 0.0f)},  // 1
@@ -18,7 +18,7 @@ SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, i
            SquareObjectVertex{glm::vec2(-0.5f, 0.5f), glm::vec2(0.0f, 1.0f)},  // 3
         },
         wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex)),
-   indexBuffer(IndexBuffer(
+   indexBuffer(IndexBuffer::create(
       {
          0, 1, 2, // Triangle #0 connects points #0, #1 and #2
          0, 2, 3  // Triangle #1 connects points #0, #2 and #3
@@ -43,9 +43,9 @@ void SquareObject::render(Renderer& renderer) {
       (uint32_t)fragmentUniform.getOffset(),
    };
    renderer.renderPass.setBindGroup(0, bindGroup, offset.size(), offset.data());
-   renderer.renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.sizeBytes());
-   renderer.renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.sizeBytes());
-   renderer.renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
+   renderer.renderPass.setVertexBuffer(0, pointBuffer->get(), 0, pointBuffer->sizeBytes());
+   renderer.renderPass.setIndexBuffer(indexBuffer->get(), wgpu::IndexFormat::Uint16, 0, indexBuffer->sizeBytes());
+   renderer.renderPass.drawIndexed(indexBuffer->count(), 1, 0, 0, 0);
 }
 
 void SquareObject::update() {

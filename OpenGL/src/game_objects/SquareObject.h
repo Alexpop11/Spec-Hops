@@ -14,10 +14,10 @@ public:
    int          tile_y    = 0;
 
 private:
-   Buffer<SquareObjectVertex>              pointBuffer;
-   IndexBuffer                             indexBuffer;
-   BufferView<SquareObjectVertexUniform>   vertexUniform;
-   BufferView<SquareObjectFragmentUniform> fragmentUniform;
+   std::shared_ptr<Buffer<SquareObjectVertex>> pointBuffer;
+   std::shared_ptr<IndexBuffer>                indexBuffer;
+   BufferView<SquareObjectVertexUniform>       vertexUniform;
+   BufferView<SquareObjectFragmentUniform>     fragmentUniform;
 
 protected:
    std::shared_ptr<Texture> texture;

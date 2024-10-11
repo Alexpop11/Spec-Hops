@@ -12,10 +12,13 @@
 template <typename BGLs, typename VBL>
 class RenderPipeline {
 public:
-   RenderPipeline(const std::string& label, wgpu::Device& device, Shader& shader, wgpu::PrimitiveTopology topology,
-                  wgpu::TextureFormat colorFormat)
-      : device(device)
+   RenderPipeline(std::filesystem::path   shaderPath,
+                  wgpu::PrimitiveTopology topology = wgpu::PrimitiveTopology::TriangleList)
+      : device(Application::get().getDevice())
       , bindGroupLayouts(BGLs::CreateLayouts(device)) {
+      std::string label = shaderPath.stem().string();
+      Shader      shader(device, shaderPath);
+
       // Create vertex buffer layouts
       auto vertexInfo = VBL::CreateLayout();
 
@@ -41,7 +44,7 @@ public:
       blendState.color                   = blendColor;
       blendState.alpha                   = blendAlpha;
       wgpu::ColorTargetState colorTarget = {};
-      colorTarget.format                 = colorFormat;
+      colorTarget.format                 = Application::get().getSurfaceFormat();
       colorTarget.blend                  = &blendState; // Enable blending
       colorTarget.writeMask              = wgpu::ColorWriteMask::All;
 

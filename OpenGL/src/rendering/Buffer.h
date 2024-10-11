@@ -9,8 +9,33 @@
 
 #include "../Application.h"
 
+static std::vector<wgpu::Buffer> dead_buffers = {};
+
 template <typename T, bool Uniform>
 class BufferView;
+
+
+// Key structure to hold the data and usage
+template <typename T>
+struct Key {
+   std::vector<T>  data;
+   WGPUBufferUsage usage;
+
+   bool operator==(const Key& other) const { return data == other.data && usage == other.usage; }
+};
+
+// Custom hash function for Key
+template <typename T>
+struct KeyHash {
+   std::size_t operator()(const Key<T>& k) const {
+      std::size_t h1 = std::hash<WGPUBufferUsage>{}(k.usage);
+      std::size_t h2 = 0;
+      for (const auto& elem : k.data) {
+         h2 ^= std::hash<T>{}(elem) + 0x9e3779b9 + (h2 << 6) + (h2 >> 2);
+      }
+      return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
+   }
+};
 
 template <typename T, bool Uniform = false>
 class Buffer : public std::enable_shared_from_this<Buffer<T, Uniform>> {
@@ -23,7 +48,7 @@ public:
       : device_(Application::get().getDevice())
       , queue_(Application::get().getQueue())
       , usage_(usage) {
-      // assert(!data.empty() && "Buffer data cannot be empty.");
+      std::cout << "Creating buffer..." << std::endl;
 
       count_    = data.size();
       capacity_ = count_;
@@ -48,7 +73,7 @@ public:
    // Destructor: Releases the buffer resource
    ~Buffer() {
       if (buffer_) {
-         buffer_.destroy();
+         dead_buffers.push_back(buffer_);
       }
    }
 
@@ -118,6 +143,23 @@ public:
    size_t sizeBytes() const { return count_ * elementStride(); }
    size_t capacityBytes() const { return capacity_ * elementStride(); }
 
+   static std::shared_ptr<Buffer<T, Uniform>> create(const std::vector<T>& data, wgpu::BufferUsage usage) {
+      // Static unordered_map with custom key and hash function
+      static std::unordered_map<Key<T>, std::shared_ptr<Buffer<T, Uniform>>, KeyHash<T>> bufferMap;
+
+      Key<T> key{data, usage};
+      auto   it = bufferMap.find(key);
+      if (it != bufferMap.end()) {
+         // Return the existing shared_ptr if found
+         return it->second;
+      } else {
+         // Create a new buffer and insert it into the map
+         auto buffer    = std::make_shared<Buffer<T, Uniform>>(data, usage);
+         bufferMap[key] = buffer;
+         return buffer;
+      }
+   }
+
 private:
    // Method to update data at a specific index
    void updateBuffer(const T& data, size_t index) {
@@ -165,7 +207,7 @@ private:
       queue_.submit(1, &commands);
 
       // Destroy the old buffer and replace it with the new buffer
-      buffer_.destroy();
+      dead_buffers.push_back(buffer_);
       buffer_ = newBuffer;
 
       // Update buffer capaticy now that it's been resized

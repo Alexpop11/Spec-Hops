@@ -11,9 +11,12 @@ public:
    static bool  left_mouse_pressed_down;
    static bool  right_mouse_pressed;
    static bool  right_mouse_pressed_down;
+   
    static float startTime;
    static float deltaTime;
    static float currentTime;
+   static double realTimeLastFrame;
+   static double lastTick;
 
 private:
    static bool keys_pressed_last_frame[GLFW_KEY_LAST];
@@ -28,9 +31,9 @@ public:
       for (int key = 0; key < GLFW_KEY_LAST; ++key) {
          keys_pressed_down[key] = !keys_pressed_last_frame[key] && keys_pressed[key];
       }
-      
-      left_mouse_pressed_down = !left_mouse_pressed && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
-      left_mouse_pressed      = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+
+      left_mouse_pressed_down  = !left_mouse_pressed && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+      left_mouse_pressed       = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
       right_mouse_pressed_down = !right_mouse_pressed && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
       right_mouse_pressed      = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
    }

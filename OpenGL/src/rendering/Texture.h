@@ -219,9 +219,9 @@ private:
    wgpu::TextureView textureView_ = nullptr;
    wgpu::Sampler     sampler_     = nullptr;
 
-   std::string    path_;
-   int            m_Width       = 0;
-   int            m_Height      = 0;
-   int            m_BPP         = 0;       // Bits per pixel (channels)
-   unsigned char* m_LocalBuffer = nullptr; // Pointer to image data loaded by stb_image
+   std::filesystem::path path_;
+   int                   m_Width       = 0;
+   int                   m_Height      = 0;
+   int                   m_BPP         = 0;       // Bits per pixel (channels)
+   unsigned char*        m_LocalBuffer = nullptr; // Pointer to image data loaded by stb_image
 };

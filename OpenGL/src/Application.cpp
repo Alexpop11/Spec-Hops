@@ -44,13 +44,9 @@
 #include "game_objects/Tile.h"
 #include "World.h"
 
-#define GL_SILENCE_DEPRECATION
-
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-   #include <GLES2/gl2.h>
-#endif
-#include <GLFW/glfw3.h> // Will drag system OpenGL headers
-
+// TODO: Not emscripten friendly, see https://github.com/ocornut/imgui/blob/master/examples/example_glfw_wgpu/main.cpp
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_wgpu.h"
 
 const float TICKS_PER_SECOND = 3.0f;
 
@@ -193,16 +189,6 @@ auto getUncapturedErrorCallbackHandle(wgpu::Device& device) {
    });
 }
 
-RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>>
-initializePipeline(wgpu::Device& device, wgpu::TextureFormat& surfaceFormat) {
-   // Load the shader module
-   Shader             shader(device, "stars.wgsl");
-   wgpu::ShaderModule shaderModule = shader.GetShaderModule();
-
-   return RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>>(
-      "Stars", device, shader, wgpu::PrimitiveTopology::TriangleList, surfaceFormat);
-}
-
 wgpu::TextureFormat preferredFormat(wgpu::Surface& surface, wgpu::Adapter& adapter) {
    wgpu::SurfaceCapabilities capabilities;
    surface.getCapabilities(adapter, &capabilities);
@@ -285,16 +271,74 @@ void Application::configureSurface() {
    surface.configure(config);
 }
 
+ImGuiIO& setUpImgui(wgpu::Device& device, GLFWwindow* window, wgpu::TextureFormat surfaceFormat) {
+   IMGUI_CHECKVERSION();
+   ImGui::CreateContext();
+   ImGuiIO& io = ImGui::GetIO();
+   (void)io;
+   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+   io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+
+   // Setup Dear ImGui style
+   ImGui::StyleColorsDark();
+   // ImGui::StyleColorsLight();
+
+   // Setup Platform/Renderer backends
+   ImGui_ImplGlfw_InitForOther(window, true);
+#ifdef __EMSCRIPTEN__
+   ImGui_ImplGlfw_InstallEmscriptenCallbacks(window, "#canvas");
+#endif
+   ImGui_ImplWGPU_InitInfo init_info;
+   init_info.Device             = device;
+   init_info.NumFramesInFlight  = 3;
+   init_info.RenderTargetFormat = surfaceFormat;
+   init_info.DepthStencilFormat = WGPUTextureFormat_Undefined;
+   ImGui_ImplWGPU_Init(&init_info);
+   return io;
+}
+
+std::filesystem::path getResPath() {
+   namespace fs = std::filesystem;
+
+   // Get the path of the executable
+   fs::path exe_path = fs::weakly_canonical(fs::path("/proc/self/exe"));
+   fs::path exe_dir  = exe_path.parent_path();
+
+   std::filesystem::path res_path;
+
+   // Check for "res/shaders" relative to the executable's directory
+   if (fs::exists(exe_dir / "res" / "shaders")) {
+      res_path = (exe_dir / "res").string() + "/";
+   } else if (fs::exists(RES_PATH "/res/shaders")) {
+      res_path = RES_PATH "/res/";
+   } else {
+      std::cout << "Resource directory not found relative to " << exe_dir << " or " << RES_PATH << std::endl;
+      res_path = "./res/";
+   }
+   return res_path;
+}
+
+ImFont* load_font(std::filesystem::path res_path, ImGuiIO* io, const std::string& font_name, int size) {
+   auto    f    = res_path / "fonts" / font_name;
+   ImFont* font = io->Fonts->AddFontFromFileTTF(f.c_str(), size);
+   return font;
+}
+
 // Initialize everything and return true if it went all right
 Application::Application()
-   : window(createWindow())
+   : res_path(getResPath())
+   , window(createWindow())
    , instance(wgpuCreateInstance(nullptr))
    , surface(glfwCreateWindowWGPUSurface(instance, window))
    , adapter(getAdapter(instance, surface))
    , device(createDevice(adapter))
    , uncapturedErrorCallbackHandle(getUncapturedErrorCallbackHandle(device))
    , queue(device.getQueue())
-   , surfaceFormat(preferredFormat(surface, adapter)) {
+   , surfaceFormat(preferredFormat(surface, adapter))
+   , io(setUpImgui(device, window, surfaceFormat))
+   , jacquard12_big(load_font(res_path, &io, "Jacquard12.ttf", 40))
+   , jacquard12_small(load_font(res_path, &io, "Jacquard12.ttf", 18))
+   , pixelify(load_font(res_path, &io, "PixelifySans.ttf", 16)) {
    glfwSetKeyCallback(window, key_callback);
 
    glfwSetWindowUserPointer(window, this);
@@ -306,10 +350,9 @@ Application::Application()
    });
    configureSurface();
 
-   InitializeResPath();
-
    std::string icon_path = res_path / "images" / "Logo2.png";
    setWindowIcon(window, icon_path.c_str());
+
 
    initialized = true;
 }
@@ -317,27 +360,6 @@ Application::Application()
 void Application::onResize() {
    configureSurface();
 }
-
-void Application::InitializeResPath() {
-   namespace fs = std::filesystem;
-
-   if (res_path.empty()) {
-      // Get the path of the executable
-      fs::path exe_path = fs::weakly_canonical(fs::path("/proc/self/exe"));
-      fs::path exe_dir  = exe_path.parent_path();
-
-      // Check for "res/shaders" relative to the executable's directory
-      if (fs::exists(exe_dir / "res" / "shaders")) {
-         res_path = (exe_dir / "res").string() + "/";
-      } else if (fs::exists(RES_PATH "/res/shaders")) {
-         res_path = RES_PATH "/res/";
-      } else {
-         std::cout << "Resource directory not found relative to " << exe_dir << " or " << RES_PATH << std::endl;
-         res_path = "./res/";
-      }
-   }
-}
-
 
 // Uninitialize everything that was initialized
 void Application::Terminate() {
@@ -385,11 +407,25 @@ wgpu::TextureView Application::GetNextSurfaceTextureView() {
 // Draw a frame and handle events
 void mainLoop(Application& application, Renderer& renderer) {
    glfwPollEvents();
-
    auto device = application.getDevice();
 
-   for (auto& gameobject : World::gameobjects) {
-      gameobject->update();
+   double lastFrameTime     = Input::currentTime;
+   Input::deltaTime         = World::timeSpeed * (glfwGetTime() - Input::realTimeLastFrame);
+   Input::currentTime       = Input::currentTime + Input::deltaTime;
+   Input::realTimeLastFrame = glfwGetTime();
+   Input::updateKeyStates(application.getWindow());
+
+   World::UpdateObjects();
+
+   if (!World::ticksPaused()) {
+      if (World::shouldTick) {
+         World::TickObjects();
+         Input::lastTick   = Input::currentTime;
+         World::shouldTick = false;
+      } else if (Input::lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime) {
+         World::TickObjects();
+         Input::lastTick = Input::lastTick + (1.0 / TICKS_PER_SECOND);
+      }
    }
 
    {
@@ -400,10 +436,30 @@ void mainLoop(Application& application, Renderer& renderer) {
       RenderPass renderPass(encoder);
       renderer.renderPass = renderPass.get();
 
+      // Start the Dear ImGui frame
+      ImGui_ImplWGPU_NewFrame();
+      ImGui_ImplGlfw_NewFrame();
+      ImGui::NewFrame();
+
       World::RenderObjects(renderer);
+      renderer.DrawDebug();
+
+      // Performance info
+      {
+         ImGui::PushFont(application.pixelify);
+         ImGui::Begin("Performance Info");
+         ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / application.getImGuiIO().Framerate,
+                     application.getImGuiIO().Framerate);
+         ImGui::End();
+         ImGui::PopFont();
+      }
+
+      ImGui::Render();
+      ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass.get());
 
       // The render pass and command encoder will be ended and submitted in their destructors
    }
+   CommandEncoder::DestroyDeadBuffers();
 
 
 #ifndef __EMSCRIPTEN__
@@ -417,12 +473,22 @@ void mainLoop(Application& application, Renderer& renderer) {
 #endif
 }
 
-int main(void) {
+glm::vec2 Application::MousePos() {
+   double x, y;
+   glfwGetCursorPos(window, &x, &y);
+   return {x, y};
+}
 
+int main(void) {
    Application& application = Application::get();
    Renderer     renderer    = Renderer();
 
    World::LoadMap("SpaceShip.txt");
+
+   Input::currentTime       = glfwGetTime();
+   Input::realTimeLastFrame = Input::currentTime;
+   Input::lastTick          = Input::startTime;
+   // audio().Song.play();
 
    // Not Emscripten-friendly
    if (!application.initialized) {

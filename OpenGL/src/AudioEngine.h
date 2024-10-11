@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <filesystem>
 #include "miniaudio.h"
 
 class Sound {
@@ -39,7 +40,7 @@ class AudioEngine {
 private:
    MiniAudioEngine engine;
 
-   Sound getSound(const std::string& name);
+   Sound getSound(const std::filesystem::path& name);
 
 public:
    AudioEngine();

@@ -20,9 +20,6 @@ enum class DrawPriority {
 class GameObject {
 public:
    GameObject(const std::string& name, DrawPriority drawPriority, glm::vec2 position);
-   GameObject(GameObject&& mE)            = default;
-   GameObject& operator=(GameObject&& mE) = default;
-
 
    virtual ~GameObject() = default;
    bool ShouldDestroy    = false;

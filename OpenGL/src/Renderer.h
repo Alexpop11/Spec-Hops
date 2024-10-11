@@ -23,6 +23,7 @@ public:
    glm::vec2 end;
    glm::vec4 color;
 };
+
 class Renderer {
 public:
    Renderer(GLFWwindow* window, ImGuiIO* io);

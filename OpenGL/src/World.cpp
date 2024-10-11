@@ -5,7 +5,7 @@
 #include <algorithm>
 
 #include "rendering/Renderer.h"
-// #include "game_objects/Player.h"
+#include "game_objects/Player.h"
 #include "game_objects/Background.h"
 #include "game_objects/Camera.h"
 #include "game_objects/Tile.h"
@@ -49,7 +49,7 @@ void World::LoadMap(const std::filesystem::path& map_path) {
                gameobjects.push_back(std::make_shared<Background>("Background"));
             }
             if (c == 'p') { // player
-               // gameobjects.push_back(std::make_shared<Player>(Player("Coolbox", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Player>("Coolbox", (float)x, (float)y));
                gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
             }
             if (c == 'f') { // floor
@@ -129,8 +129,6 @@ void World::RenderObjects(Renderer& renderer) {
 }
 
 bool World::ticksPaused() {
-   // TODO: uncomment
-   // auto player = getFirst<Player>();
-   // return player->pauseTicks();
-   return false;
+   auto player = getFirst<Player>();
+   return player->pauseTicks();
 }

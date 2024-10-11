@@ -1,5 +1,4 @@
 #include "AudioEngine.h"
-#include "Renderer.h"
 #include <cstring>
 #include "World.h"
 
@@ -61,17 +60,17 @@ AudioEngine::AudioEngine()
    , Hurt_Sound(getSound("ouch2.wav"))
    , Bomb_Place(getSound("bomb_place.wav"))
    , Bomb_Tick(getSound("bomb_tick.wav"))
-   , Enemy_Hurt(getSound("enemy_ouch.wav")) 
+   , Enemy_Hurt(getSound("enemy_ouch.wav"))
    , Zap(getSound("zap.wav"))
-   , Impact(getSound("impact.wav")) 
+   , Impact(getSound("impact.wav"))
    , Scuff(getSound("scuff.wav"))
-   , Song(getSound("acid_splash.wav")){
+   , Song(getSound("acid_splash.wav")) {
 
-    Update(World::timeSpeed);
+   Update(World::timeSpeed);
 }
 
-Sound AudioEngine::getSound(const std::string& name) {
-   return Sound(Renderer::ResPath() + "sounds/" + name, &engine.engine);
+Sound AudioEngine::getSound(const std::filesystem::path& name) {
+   return Sound(Application::get().res_path / "sounds" / name, &engine.engine);
 }
 
 void AudioEngine::Update(float newTimeSpeed) {
