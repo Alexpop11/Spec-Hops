@@ -116,7 +116,7 @@ fn starColor(seed: f32) -> vec3<f32> {
 fn main_1() {
     var uv_2: vec2<f32>;
     var aspectRatio: f32;
-    var numStars: i32 = 200i;
+    var numStars: i32 = 2i;
     var finalColor: vec3<f32> = vec3(0f);
     var i: i32 = 0i;
     var seed_2: f32;

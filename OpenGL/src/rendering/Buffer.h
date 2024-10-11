@@ -7,21 +7,23 @@
 #include <cstring> // For std::memcpy
 #include <memory>  // For std::shared_ptr and std::weak_ptr
 
-// Forward declaration of BufferItem
+#include "../Application.h"
+
+// Forward declaration of BufferView
 template <typename T, bool Uniform>
-class BufferItem;
+class BufferView;
 
 // Template class for Buffer abstraction
 template <typename T, bool Uniform = false>
 class Buffer : public std::enable_shared_from_this<Buffer<T, Uniform>> {
 public:
-   // Friend declaration to allow BufferItem access to private members
-   friend class BufferItem<T, Uniform>;
+   // Friend declaration to allow BufferView access to private members
+   friend class BufferView<T, Uniform>;
 
    // Constructor: Creates a buffer with specified usage and data
-   Buffer(wgpu::Device& device, wgpu::Queue& queue, const std::vector<T>& data, wgpu::BufferUsage usage)
-      : device_(device)
-      , queue_(queue)
+   Buffer(const std::vector<T>& data, wgpu::BufferUsage usage)
+      : device_(Application::get().getDevice())
+      , queue_(Application::get().getQueue())
       , usage_(usage) {
       assert(!data.empty() && "Buffer data cannot be empty.");
 
@@ -55,40 +57,9 @@ public:
    // Deleted copy constructor and assignment operator to prevent copying
    Buffer(const Buffer&)            = delete;
    Buffer& operator=(const Buffer&) = delete;
-
    // Move constructor and assignment operator
-   Buffer(Buffer&& other) noexcept
-      : device_(other.device_)
-      , queue_(other.queue_)
-      , buffer_(other.buffer_)
-      , count_(other.count_)
-      , usage_(other.usage_)
-      , freeIndices_(std::move(other.freeIndices_)) {
-      other.buffer_        = nullptr;
-      other.size_          = 0;
-      other.count_         = 0;
-      other.elementStride_ = 0;
-   }
-
-   Buffer& operator=(Buffer&& other) noexcept {
-      if (this != &other) {
-         if (buffer_) {
-            buffer_.destroy();
-         }
-         device_      = other.device_;
-         queue_       = other.queue_;
-         buffer_      = other.buffer_;
-         count_       = other.count_;
-         usage_       = other.usage_;
-         freeIndices_ = std::move(other.freeIndices_);
-
-         other.buffer_        = nullptr;
-         other.size_          = 0;
-         other.count_         = 0;
-         other.elementStride_ = 0;
-      }
-      return *this;
-   }
+   Buffer(Buffer&& other)            = delete;
+   Buffer& operator=(Buffer&& other) = delete;
 
    // Method to upload data to the buffer
    void upload(const std::vector<T>& data) {
@@ -118,8 +89,8 @@ public:
    // Getter for buffer size
    size_t count() const { return count_; }
 
-   // Add method: Allocates a new index and returns a BufferItem
-   std::shared_ptr<BufferItem<T, Uniform>> Add(const T& data) {
+   // Add method: Allocates a new index and returns a BufferView
+   std::shared_ptr<BufferView<T, Uniform>> Add(const T& data) {
       size_t allocatedIndex;
 
       // Reuse a deleted index if available
@@ -142,8 +113,8 @@ public:
       // Update the buffer with the new data
       updateBuffer(data, allocatedIndex);
 
-      // Return a BufferItem managing this index
-      return std::make_shared<BufferItem<T, Uniform>>(this->shared_from_this(), allocatedIndex);
+      // Return a BufferView managing this index
+      return std::make_shared<BufferView<T, Uniform>>(this->shared_from_this(), allocatedIndex);
    }
 
    size_t sizeBytes() const { return count_ * elementStride(); }
@@ -202,7 +173,7 @@ private:
       capacity_ *= 2;
    }
 
-   // Method to free an index (called by BufferItem destructor)
+   // Method to free an index (called by BufferView destructor)
    void freeIndex(size_t index) { freeIndices_.push_back(index); }
 
    wgpu::Device&     device_;
@@ -228,36 +199,36 @@ template <typename T>
 using UniformBuffer = Buffer<T, true>;
 
 
-// BufferItem class definition
+// BufferView class definition
 template <typename T, bool Uniform>
-class BufferItem {
+class BufferView {
 public:
    // Constructor: Acquires an index from the Buffer
-   BufferItem(std::shared_ptr<Buffer<T, Uniform>> buffer, size_t index)
+   BufferView(std::shared_ptr<Buffer<T, Uniform>> buffer, size_t index)
       : buffer_(buffer)
       , index_(index) {
       assert(buffer_ && "Buffer must be valid.");
    }
 
    // Destructor: Frees the index back to the Buffer
-   ~BufferItem() {
+   ~BufferView() {
       if (auto buf = buffer_.lock()) {
          buf->freeIndex(index_);
       }
    }
 
    // Deleted copy constructor and assignment operator
-   BufferItem(const BufferItem&)            = delete;
-   BufferItem& operator=(const BufferItem&) = delete;
+   BufferView(const BufferView&)            = delete;
+   BufferView& operator=(const BufferView&) = delete;
 
    // Move constructor and assignment operator
-   BufferItem(BufferItem&& other) noexcept
+   BufferView(BufferView&& other) noexcept
       : buffer_(std::move(other.buffer_))
       , index_(other.index_) {
       other.index_ = static_cast<size_t>(-1); // Invalidate the moved-from object
    }
 
-   BufferItem& operator=(BufferItem&& other) noexcept {
+   BufferView& operator=(BufferView&& other) noexcept {
       if (this != &other) {
          // Free current index
          if (auto buf = buffer_.lock()) {
@@ -288,6 +259,5 @@ private:
    size_t                            index_;
 };
 
-// Alias for BufferItem
 template <typename T>
-using UniformBufferItem = BufferItem<T, true>;
+using UniformBufferView = BufferView<T, true>;

@@ -1,10 +1,6 @@
 #pragma once
 #include <webgpu/webgpu.hpp>
-
-#include "rendering/RenderPipeline.h"
-#include "rendering/Buffer.h"
-#include "rendering/BindGroupLayout.h"
-#include "rendering/DataFormats.h"
+#include <filesystem>
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -25,18 +21,10 @@ public:
    bool                  initialized;
    std::filesystem::path res_path;
 
-   wgpu::TextureFormat                             getSurfaceFormat() { return surfaceFormat; }
-   wgpu::Device                                    getDevice() { return device; }
-   wgpu::Surface                                   getSurface() { return surface; }
-   wgpu::Queue                                     getQueue() { return queue; }
-   Buffer<float>&                                  getPointBuffer() { return pointBuffer; }
-   Buffer<SquareObjectVertex>&                     getSquareObjectPointBuffer() { return squareObjectPointBuffer; }
-   Buffer<uint16_t>&                               getIndexBuffer() { return indexBuffer; }
-   UniformBuffer<StarUniforms>&                    getUniformBuffer() { return uniformBuffer; }
-   const UniformBuffer<SquareObjectVertexUniform>& getSquareObjectVertexUniform() { return squareObjectVertexUniform; }
-   const UniformBuffer<SquareObjectFragmentUniform>& getSquareObjectFragmentUniform() {
-      return squareObjectFragmentUniform;
-   }
+   wgpu::TextureFormat& getSurfaceFormat() { return surfaceFormat; }
+   wgpu::Device&        getDevice() { return device; }
+   wgpu::Surface&       getSurface() { return surface; }
+   wgpu::Queue&         getQueue() { return queue; }
 
    wgpu::TextureView GetNextSurfaceTextureView();
    void              onResize();
@@ -56,11 +44,11 @@ private:
    wgpu::Queue                          queue;
    wgpu::TextureFormat                  surfaceFormat;
 
-   Buffer<float>               pointBuffer;
-   Buffer<uint16_t>            indexBuffer;
-   UniformBuffer<StarUniforms> uniformBuffer;
+   // Buffer<float>               pointBuffer;
+   // Buffer<uint16_t>            indexBuffer;
+   // UniformBuffer<StarUniforms> uniformBuffer;
 
-   Buffer<SquareObjectVertex>                 squareObjectPointBuffer;
-   UniformBuffer<SquareObjectVertexUniform>   squareObjectVertexUniform;
-   UniformBuffer<SquareObjectFragmentUniform> squareObjectFragmentUniform;
+   // Buffer<SquareObjectVertex>                 squareObjectPointBuffer;
+   // UniformBuffer<SquareObjectVertexUniform>   squareObjectVertexUniform;
+   // UniformBuffer<SquareObjectFragmentUniform> squareObjectFragmentUniform;
 };

@@ -113,6 +113,11 @@ public:
       return *this;
    };
 
+   template <typename... Ts>
+   auto BindGroups(Ts&&... ts) {
+      return BGLs::BindGroups(device, std::forward<Ts>(ts)...);
+   }
+
    wgpu::RenderPipeline               GetPipeline() const { return pipeline; }
    std::vector<wgpu::BindGroupLayout> GetBindGroupLayouts() const { return bindGroupLayouts; }
 

@@ -1,34 +1,41 @@
 #include "Background.h"
-#include <array>
+
+#include "../Application.h"
 
 Background::Background(const std::string& name)
-   : GameObject(name, DrawPriority::Background, {0, 0}) {
-   shader = Shader::create(Renderer::ResPath() + "shaders/stars.shader");
-
-   std::array<float, 8> positions = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
-
-   std::array<uint32_t, 6> indices = {0, 1, 2, 2, 3, 0};
-
-   vb = VertexBuffer::create(positions);
-   VertexBufferLayout layout;
-   layout.Push<float>(2);
-   va = std::make_shared<VertexArray>(vb, layout);
-   ib = std::make_shared<IndexBuffer>(IndexBuffer(indices));
-}
-
-void Background::setUpShader(Renderer& renderer) {
-   GameObject::setUpShader(renderer);
-   auto [width, height] = renderer.WindowSize();
-   shader->SetUniform2f("u_Resolution", {(float)width, (float)height});
-}
+   : GameObject(name, DrawPriority::Background, {0, 0})
+   , pointBuffer(Buffer<glm::vec2>(
+        {
+           glm::vec2(-1, -1),
+           glm::vec2(+1, -1),
+           glm::vec2(+1, +1),
+           glm::vec2(-1, +1),
+        },
+        wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex))
+   , indexBuffer(Buffer<uint16_t>(
+        {
+           0, 1, 2, // Triangle #0 connects points #0, #1 and #2
+           0, 2, 3  // Triangle #1 connects points #0, #2 and #3
+        },
+        wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index))
+   , uniformBuffer(UniformBuffer<StarUniforms>({StarUniforms(0.0f, Application::get().windowSize())},
+                                               wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform)) {}
 
 void Background::render(Renderer& renderer) {
-   GameObject::render(renderer);
+   StarUniforms uniform(glfwGetTime(), Application::get().windowSize()); // TODO: use world time
+   uniformBuffer.upload({uniform});
 
-   // draw if va, ib, and shader are set:
-   if (va && ib && shader) {
-      renderer.Draw(*va, *ib, *shader);
+   {
+      wgpu::BindGroup bindGroup = renderer.stars.BindGroups(std::forward_as_tuple(uniformBuffer)).front();
+
+      uint32_t dynamicOffset = indexBuffer.index(0);
+      renderer.renderPass.setPipeline(renderer.stars.GetPipeline());
+      renderer.renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
+      renderer.renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.sizeBytes());
+      renderer.renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.sizeBytes());
+      renderer.renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
    }
+   // TODO
 }
 
 void Background::update() {

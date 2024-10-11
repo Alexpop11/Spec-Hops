@@ -10,6 +10,10 @@ struct StarUniforms {
    float     time; // at byte offset 0
    float     _pad0;
    glm::vec2 resolution; // at byte offset 8
+
+   StarUniforms(float time, glm::vec2 resolution)
+      : time(time)
+      , resolution(resolution) {}
 };
 
 using StarUniformBinding =

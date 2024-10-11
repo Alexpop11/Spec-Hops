@@ -22,4 +22,6 @@ public:
 
    template <typename B, typename V>
    void Draw(RenderPipeline<B, V>& pipeline) {};
+
+   wgpu::RenderPassEncoder renderPass;
 };

@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(VENDOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
 # Add application code
-file(GLOB cpp_files "src/Application.cpp", "src/rendering/*.cpp")
-file(GLOB header_files "src/Application.h", "src/rendering/*.h")
+file(GLOB cpp_files "src/Application.cpp" "src/rendering/*.cpp" "src/game_objects/GameObject.cpp" "src/game_objects/Background.cpp")
+file(GLOB header_files "src/Application.h" "src/rendering/*.h" "src/game_objects/GameObject.h" "src/game_objects/Background.h")
 
 # Add resource files
 file(GLOB_RECURSE res_files "res/*")

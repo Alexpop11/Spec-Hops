@@ -33,11 +33,14 @@
 #include "rendering/BindGroupLayout.h"
 #include "rendering/Renderer.h"
 #include "rendering/Texture.h"
+#include "rendering/CommandEncoder.h"
+#include "rendering/RenderPass.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-
+#include "game_objects/GameObject.h"
+#include "game_objects/Background.h"
 
 #define GL_SILENCE_DEPRECATION
 
@@ -206,7 +209,7 @@ Buffer<float> createPointBuffer(wgpu::Device& device, wgpu::Queue& queue) {
       // x,   y,
       -1, -1, +1, -1, +1, +1, -1, +1,
    };
-   return Buffer<float>(device, queue, pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
+   return Buffer<float>(pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
 }
 
 Buffer<SquareObjectVertex> createSquareObjectPointBuffer(wgpu::Device& device, wgpu::Queue& queue) {
@@ -216,7 +219,7 @@ Buffer<SquareObjectVertex> createSquareObjectPointBuffer(wgpu::Device& device, w
       SquareObjectVertex{glm::vec2(0.5f,  0.5f),  glm::vec2(1.0f, 1.0f)}, // 2
       SquareObjectVertex{glm::vec2(-0.5f, 0.5f),  glm::vec2(0.0f, 1.0f)}, // 3
    };
-   return Buffer<SquareObjectVertex>(device, queue, pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
+   return Buffer<SquareObjectVertex>(pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
 }
 
 Buffer<uint16_t> createIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
@@ -224,21 +227,7 @@ Buffer<uint16_t> createIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
       0, 1, 2, // Triangle #0 connects points #0, #1 and #2
       0, 2, 3  // Triangle #1 connects points #0, #2 and #3
    };
-   return Buffer<uint16_t>(device, queue, indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
-}
-
-UniformBuffer<StarUniforms> createStarUniformBuffer(wgpu::Device& device, wgpu::Queue& queue) {
-   StarUniforms uniform;
-   uniform.time       = 1.0f;
-   uniform.resolution = {640, 480};
-   StarUniforms uniform2;
-   uniform2.time       = 2.0f;
-   uniform2.resolution = {640, 480};
-
-
-   std::vector<StarUniforms> uniformData = {uniform, uniform2};
-   return Buffer<StarUniforms, true>(device, queue, uniformData,
-                                     wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+   return Buffer<uint16_t>(indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 }
 
 glm::mat4 CalculateMVP(std::tuple<int, int> windowSize, const glm::vec2& objectPosition, float objectRotationDegrees,
@@ -275,8 +264,7 @@ UniformBuffer<SquareObjectVertexUniform> createSquareObjectVertexUniformBuffer(w
 
 
    std::vector<SquareObjectVertexUniform> uniformData = {uniform};
-   return Buffer<SquareObjectVertexUniform, true>(device, queue, uniformData,
-                                                  wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+   return Buffer<SquareObjectVertexUniform, true>(uniformData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
 }
 
 UniformBuffer<SquareObjectFragmentUniform> createSquareObjectFragmentUniformBuffer(wgpu::Device& device,
@@ -286,7 +274,7 @@ UniformBuffer<SquareObjectFragmentUniform> createSquareObjectFragmentUniformBuff
 
 
    std::vector<SquareObjectFragmentUniform> uniformData = {uniform};
-   return Buffer<SquareObjectFragmentUniform, true>(device, queue, uniformData,
+   return Buffer<SquareObjectFragmentUniform, true>(uniformData,
                                                     wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
 }
 
@@ -327,13 +315,7 @@ Application::Application()
    , device(createDevice(adapter))
    , uncapturedErrorCallbackHandle(getUncapturedErrorCallbackHandle(device))
    , queue(device.getQueue())
-   , surfaceFormat(preferredFormat(surface, adapter))
-   , pointBuffer(createPointBuffer(device, queue))
-   , indexBuffer(createIndexBuffer(device, queue))
-   , uniformBuffer(createStarUniformBuffer(device, queue))
-   , squareObjectPointBuffer(createSquareObjectPointBuffer(device, queue))
-   , squareObjectVertexUniform(createSquareObjectVertexUniformBuffer(device, queue))
-   , squareObjectFragmentUniform(createSquareObjectFragmentUniformBuffer(device, queue)) {
+   , surfaceFormat(preferredFormat(surface, adapter)) {
    glfwSetWindowUserPointer(window, this);
    // Use a non-capturing lambda as resize callback
    glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int, int) {
@@ -416,108 +398,32 @@ wgpu::TextureView Application::GetNextSurfaceTextureView() {
    return targetView;
 }
 
-
 // Draw a frame and handle events
-void mainLoop(Application& application, Renderer& renderer) {
+void mainLoop(Application& application, Renderer& renderer, std::vector<std::unique_ptr<GameObject>>& gameobjects) {
    glfwPollEvents();
 
-   auto device     = application.getDevice();
-   auto windowSize = application.windowSize();
+   auto device = application.getDevice();
 
-   // Get the next target texture view
-   wgpu::TextureView targetView = application.GetNextSurfaceTextureView();
-   if (!targetView)
-      return;
-
-   // Update the uniform buffer
-   StarUniforms uniform;
-   uniform.time       = glfwGetTime();
-   uniform.resolution = {windowSize.x, windowSize.y};
-   StarUniforms uniform2;
-   uniform2.time       = -glfwGetTime();
-   uniform2.resolution = {windowSize.x, windowSize.y};
-
-   std::vector<StarUniforms> uniformData = {uniform, uniform2};
-   application.getUniformBuffer().upload(uniformData);
-
-   // Create a command encoder for the draw call
-   wgpu::CommandEncoderDescriptor encoderDesc = {};
-   encoderDesc.label                          = "My command encoder";
-   wgpu::CommandEncoder encoder               = wgpuDeviceCreateCommandEncoder(device, &encoderDesc);
-
-   // Create the render pass that clears the screen with our color
-   wgpu::RenderPassDescriptor renderPassDesc = {};
-
-   // The attachment part of the render pass descriptor describes the target texture of the pass
-   wgpu::RenderPassColorAttachment renderPassColorAttachment = {};
-   renderPassColorAttachment.view                            = targetView;
-   renderPassColorAttachment.resolveTarget                   = nullptr;
-   renderPassColorAttachment.loadOp                          = wgpu::LoadOp::Clear;
-   renderPassColorAttachment.storeOp                         = wgpu::StoreOp::Store;
-   renderPassColorAttachment.clearValue                      = WGPUColor{0.1, 0.1, 0.1, 1.0};
-#ifndef WEBGPU_BACKEND_WGPU
-   renderPassColorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
-#endif // NOT WEBGPU_BACKEND_WGPU
-
-   renderPassDesc.colorAttachmentCount   = 1;
-   renderPassDesc.colorAttachments       = &renderPassColorAttachment;
-   renderPassDesc.depthStencilAttachment = nullptr;
-   renderPassDesc.timestampWrites        = nullptr;
-
-   wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
-
-   {
-      wgpu::BindGroup bindGroup =
-         BindGroupLayout<StarUniformBinding>::BindGroup(device, application.getUniformBuffer());
-
-      renderPass.setPipeline(renderer.stars.GetPipeline());
-      renderPass.setVertexBuffer(0, application.getPointBuffer().get(), 0, application.getPointBuffer().sizeBytes());
-      renderPass.setIndexBuffer(application.getIndexBuffer().get(), wgpu::IndexFormat::Uint16, 0,
-                                application.getIndexBuffer().sizeBytes());
-
-      uint32_t dynamicOffset = 0;
-      dynamicOffset          = application.getUniformBuffer().index(0);
-      renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
-      renderPass.drawIndexed(application.getIndexBuffer().count(), 1, 0, 0, 0);
+   for (auto& gameobject : gameobjects) {
+      gameobject->update();
    }
-   /*
-
-   dynamicOffset = application.getUniformBuffer().index(1);
-   renderPass.setBindGroup(0, bindGroup, 1, &dynamicOffset);
-   renderPass.drawIndexed(application.getIndexBuffer().count(), 1, 0, 0, 0);
-   */
 
    {
-      auto            u1 = std::forward_as_tuple(application.getSquareObjectVertexUniform(), 0);
-      auto            u2 = std::forward_as_tuple(application.getSquareObjectFragmentUniform(), 0);
-      wgpu::BindGroup bindGroup =
-         SquareObjectLayout::BindGroup(device, u1, u2, renderer.player.getTextureView(), renderer.player.getSampler());
-      renderPass.setPipeline(renderer.squareObject.GetPipeline());
-      renderPass.setBindGroup(0, bindGroup, 0, nullptr);
-      renderPass.setIndexBuffer(application.getIndexBuffer().get(), wgpu::IndexFormat::Uint16, 0,
-                                application.getIndexBuffer().sizeBytes());
-      renderPass.setVertexBuffer(0, application.getSquareObjectPointBuffer().get(), 0,
-                                 application.getSquareObjectPointBuffer().sizeBytes());
-      renderPass.drawIndexed(application.getIndexBuffer().count(), 1, 0, 0, 0);
+      // Create a command encoder for the draw call
+      CommandEncoder encoder(device);
+
+      // Create the render pass
+      RenderPass renderPass(encoder);
+      renderer.renderPass = renderPass.get();
+
+      for (auto& gameobject : gameobjects) {
+         gameobject->render(renderer);
+      }
+
+      // The render pass and command encoder will be ended and submitted in their destructors
    }
 
 
-   renderPass.end();
-   renderPass.release();
-
-   // Finally encode and submit the render pass
-   wgpu::CommandBufferDescriptor cmdBufferDescriptor = {};
-   cmdBufferDescriptor.label                         = "Command buffer";
-   wgpu::CommandBuffer command                       = encoder.finish(cmdBufferDescriptor);
-   encoder.release();
-
-   std::cout << "Submitting command..." << std::endl;
-   application.getQueue().submit(1, &command);
-   command.release();
-   std::cout << "Command submitted." << std::endl;
-
-   // At the enc of the frame
-   targetView.release();
 #ifndef __EMSCRIPTEN__
    application.getSurface().present();
 #endif
@@ -534,6 +440,9 @@ int main(void) {
    Application& application = Application::get();
    Renderer     renderer    = Renderer();
 
+   std::vector<std::unique_ptr<GameObject>> gameobjects;
+   gameobjects.push_back(std::make_unique<Background>("Stars"));
+
    // Not Emscripten-friendly
    if (!application.initialized) {
       return 1;
@@ -541,7 +450,7 @@ int main(void) {
 
    // Not emscripten-friendly
    while (application.IsRunning()) {
-      mainLoop(application, renderer);
+      mainLoop(application, renderer, gameobjects);
    }
 
    application.Terminate();
