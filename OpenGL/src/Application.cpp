@@ -487,7 +487,7 @@ int main(void) {
 
    Input::currentTime       = glfwGetTime();
    Input::realTimeLastFrame = Input::currentTime;
-   Input::lastTick          = Input::startTime;
+   Input::lastTick          = Input::currentTime;
    // audio().Song.play();
 
    // Not Emscripten-friendly
