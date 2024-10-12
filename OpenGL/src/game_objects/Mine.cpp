@@ -2,6 +2,7 @@
 #include "../World.h"
 #include "Tile.h"
 #include "Player.h"
+#include "../AudioEngine.h"
 
 Mine::Mine(const std::string& name, float x, float y)
    : Bomb(name, x, y) {

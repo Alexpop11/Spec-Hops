@@ -1,6 +1,8 @@
 #include "Turret.h"
+#include "../../AudioEngine.h"
+
 Turret::Turret(const std::string& name, float x, float y)
-   : Character(name, x, y, "textures/enemy.png") {
+   : Character(name, x, y, "enemy.png") {
    drawPriority = DrawPriority::Character;
    health       = 1;
 }
@@ -63,17 +65,14 @@ void Turret::tickUpdate() {
       if (bulletsToShoot >= 1) {
          audio().Bullet_Sound.play();
          World::gameobjectstoadd.push_back(std::make_unique<Bullet>(
-            Bullet("CoolBullet", tile_x + aimDirection_x, tile_y + aimDirection_y, aimDirection_x, aimDirection_y)));
+            "CoolBullet", tile_x + aimDirection_x, tile_y + aimDirection_y, aimDirection_x, aimDirection_y));
          bulletsToShoot -= 1;
       } else {
          // Reset aim direction if no players are detected or no bullets left to shoot
          aimDirection_x = 0;
          aimDirection_y = 0;
       }
-   }
-   else {
+   } else {
       stunnedLength--;
    }
 }
-
-

@@ -9,9 +9,9 @@
 #include "game_objects/Background.h"
 #include "game_objects/Camera.h"
 #include "game_objects/Tile.h"
-// #include "game_objects/enemies/Bomber.h"
-// #include "game_objects/enemies/Turret.h"
-// #include "game_objects/Mine.h"
+#include "game_objects/enemies/Bomber.h"
+#include "game_objects/enemies/Turret.h"
+#include "game_objects/Mine.h"
 
 std::vector<std::shared_ptr<GameObject>> World::gameobjects      = {};
 std::vector<std::unique_ptr<GameObject>> World::gameobjectstoadd = {};
@@ -62,15 +62,15 @@ void World::LoadMap(const std::filesystem::path& map_path) {
                gameobjects.push_back(std::make_shared<Tile>("Wall", true, true, (float)x, (float)y));
             }
             if (c == 'e') { // enemy Bomber
-               // gameobjects.push_back(std::make_shared<Bomber>(Bomber("bomber", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Bomber>("bomber", (float)x, (float)y));
                gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
             }
             if (c == 't') { // Turret
-               // gameobjects.push_back(std::make_shared<Turret>(Turret("turret", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Turret>("turret", (float)x, (float)y));
                gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
             }
             if (c == 'm') { // Mine
-               // gameobjects.push_back(std::make_shared<Mine>(Mine("mine", (float)x, (float)y)));
+               gameobjects.push_back(std::make_shared<Mine>("mine", (float)x, (float)y));
                gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
             }
          }
