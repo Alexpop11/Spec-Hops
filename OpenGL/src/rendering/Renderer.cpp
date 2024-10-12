@@ -69,11 +69,7 @@ void Renderer::DrawLine(Line line) {
    BindGroup bindGroup = LineLayout::ToBindGroup(device, std::forward_as_tuple(vertexUniformBuffer, 0),
                                                  std::forward_as_tuple(fragmentUniformBuffer, 0));
 
-   this->setPipeline(this->line);
-   this->setBindGroup(0, bindGroup.get(), {});
-   this->setVertexBuffer(linePoints);
-   this->setIndexBuffer(lineIndices);
-   this->renderPass.drawIndexed(lineIndices.count(), 1, 0, 0, 0);
+   Draw(this->line, linePoints, lineIndices, bindGroup, {});
 }
 
 

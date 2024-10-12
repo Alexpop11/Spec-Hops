@@ -75,6 +75,16 @@ public:
       }
    }
 
+   template <typename Pipeline, typename Vertex>
+   void Draw(const Pipeline& pipeline, const Buffer<Vertex>& pointBuffer, const IndexBuffer& indexBuffer,
+             BindGroup bindGroup, std::vector<uint32_t> offset) {
+      setPipeline(pipeline);
+      setBindGroup(0, bindGroup, offset);
+      setVertexBuffer(pointBuffer);
+      setIndexBuffer(indexBuffer);
+      renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
+   }
+
    // Debug assistance
    static void DebugLine(glm::vec2 start, glm::vec2 end, glm::vec3 color);
    static void DebugLine(glm::vec2 start, glm::vec2 end, glm::vec4 color);

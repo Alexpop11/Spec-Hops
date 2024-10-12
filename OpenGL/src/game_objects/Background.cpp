@@ -24,16 +24,10 @@ Background::Background(const std::string& name)
 void Background::render(Renderer& renderer) {
    StarUniforms uniform(glfwGetTime(), Application::get().windowSize()); // TODO: use world time
    uniformBuffer.upload({uniform});
-
    BindGroup bindGroup =
       renderer.stars.BindGroups(std::forward_as_tuple(std::forward_as_tuple(uniformBuffer, 0))).front();
 
-   renderer.setPipeline(renderer.stars);
-   std::vector<uint32_t> offset{};
-   renderer.setBindGroup(0, bindGroup, offset);
-   renderer.setVertexBuffer(pointBuffer);
-   renderer.setIndexBuffer(indexBuffer);
-   renderer.renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
+   renderer.Draw(renderer.stars, pointBuffer, indexBuffer, bindGroup, {});
 }
 
 void Background::update() {
