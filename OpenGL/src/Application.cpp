@@ -351,8 +351,9 @@ Application::Application()
    });
    configureSurface();
 
-   std::string icon_path = res_path / "images" / "Logo2.png";
-   setWindowIcon(window, icon_path.c_str());
+   std::filesystem::path icon_path     = res_path / "images" / "Logo2.png";
+   std::string           icon_path_str = icon_path.string();
+   setWindowIcon(window, icon_path_str.c_str());
 
 
    initialized = true;
