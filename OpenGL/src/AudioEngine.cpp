@@ -3,9 +3,10 @@
 #include "World.h"
 
 
-Sound::Sound(const std::string& filename, ma_engine* engine)
+Sound::Sound(const std::filesystem::path& filename, ma_engine* engine)
    : engine(engine) {
-   ma_result result = ma_sound_init_from_file(engine, filename.c_str(), MA_SOUND_FLAG_STREAM, NULL, NULL, &sound);
+   std::string filenameStr = filename.string();
+   ma_result   result = ma_sound_init_from_file(engine, filenameStr.c_str(), MA_SOUND_FLAG_STREAM, NULL, NULL, &sound);
    if (result != MA_SUCCESS) {
       std::cout << "Failed to load sound - " << result << std::endl;
    }
