@@ -104,8 +104,18 @@ public:
          // Upload the padded data to the GPU buffer
          queue_.writeBuffer(buffer_, 0, paddedData.data(), capacityBytes());
       } else {
-         // No padding needed; upload data directly
-         queue_.writeBuffer(buffer_, 0, data.data(), data.size() * sizeof(T));
+         // Calculate the padded size to ensure it's a multiple of 4 bytes
+         size_t dataSize = data.size() * sizeof(T);
+         size_t paddedSize = ((dataSize + 3) / 4) * 4;
+         
+         // Create a temporary buffer with padding
+         std::vector<uint8_t> paddedData(paddedSize, 0);
+         
+         // Copy the actual data
+         std::memcpy(paddedData.data(), data.data(), dataSize);
+         
+         // Upload the padded data to the GPU buffer
+         queue_.writeBuffer(buffer_, 0, paddedData.data(), paddedSize);
       }
    }
 
@@ -147,7 +157,10 @@ public:
    }
 
    size_t sizeBytes() const { return count_ * elementStride(); }
-   size_t capacityBytes() const { return capacity_ * elementStride(); }
+   size_t capacityBytes() const {
+      size_t bytes = capacity_ * elementStride();
+      return ((bytes + 3) / 4) * 4; // Round up to the next multiple of 4
+   }
 
    static std::shared_ptr<Buffer<T, Uniform>> create(const std::vector<T>& data, wgpu::BufferUsage usage) {
       // Static unordered_map with custom key and hash function

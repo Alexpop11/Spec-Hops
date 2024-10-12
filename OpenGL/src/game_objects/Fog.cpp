@@ -10,13 +10,15 @@ using namespace Clipper2Lib;
 using namespace GeometryUtils;
 
 Fog::Fog()
-   : GameObject("Fog of War", DrawPriority::Fog, {0, 0}) {
-   mainFogColor = {0.1, 0.1, 0.1, 1};
-   tintFogColor = {0.1, 0.1, 0.1, 0};
-}
+   : GameObject("Fog of War", DrawPriority::Fog, {0, 0})
+   , vertexUniform(UniformBuffer<FogVertexUniform>({FogVertexUniform(CalculateMVP(position, rotation, scale))},
+                                                   wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform))
+   , fragmentUniform(UniformBuffer<FogFragmentUniform>({FogFragmentUniform(mainFogColor, tintFogColor, {0, 0})},
+                                                       wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform)) {}
 
 void Fog::render(Renderer& renderer) {
    bool showWalls = true;
+   vertexUniform.upload({FogVertexUniform(CalculateMVP(position, rotation, scale))});
 
    // Collect all tile bounds
    std::vector<std::vector<glm::vec2>> allBounds;
@@ -27,7 +29,7 @@ void Fog::render(Renderer& renderer) {
 
    // Get the player
    auto player = World::getFirst<Player>(); // Simplified retrieval of the first player
-   // shader->SetUniform2f("uPlayerPosition", player->position);
+   fragmentUniform.upload({FogFragmentUniform(mainFogColor, tintFogColor, player->position)});
 
    // Compute the union of all tile bounds
    PolyTreeD combined;
@@ -81,15 +83,24 @@ void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree, glm::vec
       }
 
       // Triangulate the invisibility regions
-      std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(invisibility);
+      std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(invisibility);
 
       // Collect vertices
-      std::vector<glm::vec2> vertices;
+      std::vector<FogVertex> vertices;
       for (const auto& shape : invisibility) {
          for (const auto& point : shape) {
-            vertices.emplace_back(point.x, point.y);
+            vertices.emplace_back(glm::vec2(point.x, point.y));
          }
       }
+
+      // make vertex buffer
+      auto vertexBuffer = Buffer<FogVertex>(vertices, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
+      // make index buffer
+      auto indexBuffer = IndexBuffer(indices, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
+      // make bind group
+      BindGroup bindGroup = FogLayout::ToBindGroup(renderer.device, std::forward_as_tuple(vertexUniform, 0),
+                                                   std::forward_as_tuple(fragmentUniform, 0));
+      renderer.Draw(renderer.fog, vertexBuffer, indexBuffer, bindGroup, {});
 
       /*
       // Create buffers and draw
