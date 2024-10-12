@@ -6,6 +6,7 @@
 #include "Texture.h"
 #include "TextureSampler.h"
 #include "CommandEncoder.h"
+#include "Buffer.h"
 
 #include "imgui.h"
 
@@ -59,6 +60,21 @@ public:
       }
    }
 
+   template <typename T>
+   void setVertexBuffer(const Buffer<T>& buffer) {
+      if (last_set_vertex_buffer != (int32_t)buffer.summed_id()) {
+         renderPass.setVertexBuffer(0, buffer.get(), 0, buffer.sizeBytes());
+         last_set_vertex_buffer = buffer.summed_id();
+      }
+   }
+
+   void setIndexBuffer(const IndexBuffer& buffer) {
+      if (last_set_index_buffer != (int32_t)buffer.summed_id()) {
+         renderPass.setIndexBuffer(buffer.get(), wgpu::IndexFormat::Uint16, 0, buffer.sizeBytes());
+         last_set_index_buffer = buffer.summed_id();
+      }
+   }
+
    // Debug assistance
    static void DebugLine(glm::vec2 start, glm::vec2 end, glm::vec3 color);
    static void DebugLine(glm::vec2 start, glm::vec2 end, glm::vec4 color);
@@ -70,15 +86,22 @@ public:
       last_set_bind_group        = -1;
       last_set_bind_group_id     = -1;
       last_set_bind_group_offset = std::vector<uint32_t>();
+      last_set_vertex_buffer     = -1;
+      last_set_index_buffer      = -1;
    }
 
 private:
    void DrawLine(Line line);
 
+   Buffer<LineVertex> linePoints;
+   IndexBuffer        lineIndices;
+
    int32_t               last_set_render_pipeline = -1;
    int32_t               last_set_bind_group      = -1;
    int32_t               last_set_bind_group_id   = -1;
    std::vector<uint32_t> last_set_bind_group_offset;
+   int32_t               last_set_vertex_buffer = -1;
+   int32_t               last_set_index_buffer  = -1;
 };
 
 

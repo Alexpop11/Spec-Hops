@@ -10,7 +10,21 @@ Renderer::Renderer()
    , squareObject(RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>(
         "square_object.wgsl"))
    , line(RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayout<LineVertex>>("line.wgsl"))
-   , device(Application::get().getDevice()) {}
+   , device(Application::get().getDevice())
+   , linePoints(
+        std::vector<LineVertex>{
+           LineVertex{0.0f, -0.5f},
+           LineVertex{1.0f, -0.5f},
+           LineVertex{1.0f, +0.5f},
+           LineVertex{0.0f, +0.5f},
+},
+        wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex),
+   lineIndices(
+      std::vector<uint16_t>{
+         0, 1, 2, // Triangle #0 connects points #0, #1 and #2
+         2, 3, 0  // Triangle #1 connects points #0, #2 and #3
+      },
+      wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index) {}
 
 glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale) {
    glm::ivec2 windowSize = Application::get().windowSize();
@@ -51,27 +65,15 @@ void Renderer::DrawLine(Line line) {
                                                           wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
    UniformBuffer<LineFragmentUniform> fragmentUniformBuffer({fragmentUniform},
                                                             wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
-   auto                               points = std::vector<LineVertex>{
-      LineVertex{0.0f, -0.5f},
-      LineVertex{1.0f, -0.5f},
-      LineVertex{1.0f, +0.5f},
-      LineVertex{0.0f, +0.5f},
-   };
-   Buffer<LineVertex> pointBuffer(points, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
-   auto               indices = std::vector<uint16_t>{
-      0, 1, 2, // Triangle #0 connects points #0, #1 and #2
-      2, 3, 0  // Triangle #1 connects points #0, #2 and #3
-   };
-   IndexBuffer indexBuffer(indices, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 
    BindGroup bindGroup = LineLayout::ToBindGroup(device, std::forward_as_tuple(vertexUniformBuffer, 0),
                                                  std::forward_as_tuple(fragmentUniformBuffer, 0));
 
    this->setPipeline(this->line);
    this->setBindGroup(0, bindGroup.get(), {});
-   this->renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.sizeBytes());
-   this->renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.sizeBytes());
-   this->renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
+   this->setVertexBuffer(linePoints);
+   this->setIndexBuffer(lineIndices);
+   this->renderPass.drawIndexed(lineIndices.count(), 1, 0, 0, 0);
 }
 
 

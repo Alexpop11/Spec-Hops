@@ -12,9 +12,8 @@
 
 #include "../Application.h"
 #include "../WeakMemoizeConstructor.hpp"
+#include "Id.h"
 #include "TextureSampler.h"
-
-static int32_t created_textures = 0;
 
 class Texture {
 public:
@@ -22,7 +21,7 @@ public:
 
    // Constructor: Loads an image from the given path and creates a WebGPU texture
    Texture(const std::string& path)
-      : id(created_textures++)
+      : id(Id::get())
       , device_(Application::get().getDevice())
       , queue_(Application::get().getQueue())
       , path_(Application::get().res_path / "textures" / path) {

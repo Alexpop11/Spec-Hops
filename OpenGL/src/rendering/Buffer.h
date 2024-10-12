@@ -7,6 +7,7 @@
 #include <cstring> // For std::memcpy
 #include <memory>  // For std::shared_ptr and std::weak_ptr
 
+#include "Id.h"
 #include "../Application.h"
 
 static std::vector<wgpu::Buffer> dead_buffers = {};
@@ -40,8 +41,6 @@ struct KeyHash {
 };
 // -----------------------------------------
 
-static int32_t created_buffers = 0;
-
 template <typename T, bool Uniform = false>
 class Buffer : public std::enable_shared_from_this<Buffer<T, Uniform>> {
 public:
@@ -52,12 +51,11 @@ public:
 
    // Constructor: Creates a buffer with specified usage and data
    Buffer(const std::vector<T>& data, wgpu::BufferUsage usage)
-      : id(created_buffers++)
+      : id(Id::get())
+      , generation(0)
       , device_(Application::get().getDevice())
       , queue_(Application::get().getQueue())
       , usage_(usage) {
-      std::cout << "Creating buffer..." << std::endl;
-
       count_    = data.size();
       capacity_ = count_;
 

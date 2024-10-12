@@ -44,8 +44,8 @@ void SquareObject::render(Renderer& renderer) {
       (uint32_t)fragmentUniform.getOffset(),
    };
    renderer.setBindGroup(0, bindGroup, offset);
-   renderer.renderPass.setVertexBuffer(0, pointBuffer->get(), 0, pointBuffer->sizeBytes());
-   renderer.renderPass.setIndexBuffer(indexBuffer->get(), wgpu::IndexFormat::Uint16, 0, indexBuffer->sizeBytes());
+   renderer.setVertexBuffer(*pointBuffer);
+   renderer.setIndexBuffer(*indexBuffer);
    renderer.renderPass.drawIndexed(indexBuffer->count(), 1, 0, 0, 0);
 }
 
