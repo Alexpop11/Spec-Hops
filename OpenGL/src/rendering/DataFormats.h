@@ -124,14 +124,14 @@ struct FogFragmentUniform {
 using FogVertexUniformBinding = BufferBinding<FogVertexUniform,                 // Type of the buffer
                                               wgpu::ShaderStage::Vertex,        // Shader visibility
                                               wgpu::BufferBindingType::Uniform, // Buffer binding type
-                                              false // Whether the buffer is dynamically offset
+                                              false                             // Buffer is not dynamically offset
                                               >;
 
 // Fragment Uniform Buffer Binding for Fog Shader
 using FogFragmentUniformBinding = BufferBinding<FogFragmentUniform,               // Type of the buffer
                                                 wgpu::ShaderStage::Fragment,      // Shader visibility
                                                 wgpu::BufferBindingType::Uniform, // Buffer binding type
-                                                false // Whether the buffer is dynamically offset
+                                                true                              // Buffer is dynamically offset
                                                 >;
 
 using FogLayout = BindGroupLayout<FogVertexUniformBinding, FogFragmentUniformBinding>;

@@ -13,11 +13,12 @@ public:
    glm::vec4 tintFogColor = glm::vec4(0.1f, 0.1f, 0.1f, 0.0f);
 
 private:
-   virtual void renderPolyTree(Renderer& renderer, const Clipper2Lib::PolyTreeD& polytree, glm::vec4 color,
-                               glm::vec4 bandColor) const;
+   virtual void renderPolyTree(Renderer& renderer, const Clipper2Lib::PolyTreeD& polytree,
+                               const UniformBufferView<FogFragmentUniform>& fragmentUniform) const;
 
 
 private:
-   UniformBuffer<FogVertexUniform>   vertexUniform;
-   UniformBuffer<FogFragmentUniform> fragmentUniform;
+   UniformBuffer<FogVertexUniform>       vertexUniform;
+   UniformBufferView<FogFragmentUniform> fragmentUniformWalls;
+   UniformBufferView<FogFragmentUniform> fragmentUniformOther;
 };

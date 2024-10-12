@@ -13,8 +13,10 @@ Fog::Fog()
    : GameObject("Fog of War", DrawPriority::Fog, {0, 0})
    , vertexUniform(UniformBuffer<FogVertexUniform>({FogVertexUniform(CalculateMVP(position, rotation, scale))},
                                                    wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform))
-   , fragmentUniform(UniformBuffer<FogFragmentUniform>({FogFragmentUniform(mainFogColor, tintFogColor, {0, 0})},
-                                                       wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform)) {}
+   , fragmentUniformWalls(
+        UniformBufferView<FogFragmentUniform>::create(FogFragmentUniform(mainFogColor, tintFogColor, {0, 0})))
+   , fragmentUniformOther(
+        UniformBufferView<FogFragmentUniform>::create(FogFragmentUniform(mainFogColor, mainFogColor, {0, 0}))) {}
 
 void Fog::render(Renderer& renderer) {
    bool showWalls = true;
@@ -29,7 +31,8 @@ void Fog::render(Renderer& renderer) {
 
    // Get the player
    auto player = World::getFirst<Player>(); // Simplified retrieval of the first player
-   fragmentUniform.upload({FogFragmentUniform(mainFogColor, tintFogColor, player->position)});
+   fragmentUniformWalls.Update(FogFragmentUniform(mainFogColor, tintFogColor, player->position));
+   fragmentUniformOther.Update(FogFragmentUniform(mainFogColor, mainFogColor, player->position));
 
    // Compute the union of all tile bounds
    PolyTreeD combined;
@@ -57,7 +60,7 @@ void Fog::render(Renderer& renderer) {
    clipper.Execute(ClipType::Difference, FillRule::NonZero, invisibilityPaths);
 
    // Render the invisibility regions
-   renderPolyTree(renderer, invisibilityPaths, mainFogColor, mainFogColor);
+   renderPolyTree(renderer, invisibilityPaths, fragmentUniformOther);
 
    if (showWalls) {
       // Tint all the walls that are not visible
@@ -67,19 +70,20 @@ void Fog::render(Renderer& renderer) {
       PolyTreeD tintPaths;
       tint.Execute(ClipType::Difference, FillRule::NonZero, tintPaths);
 
-      renderPolyTree(renderer, tintPaths, mainFogColor, tintFogColor);
+      renderPolyTree(renderer, tintPaths, fragmentUniformWalls);
    }
 }
 
 void Fog::update() {}
 
-void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree, glm::vec4 color, glm::vec4 bandColor) const {
+void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree,
+                         const UniformBufferView<FogFragmentUniform>& fragmentUniform) const {
    for (auto& shadedRegion : polytree) {
       std::vector<PointD>              shaded       = shadedRegion->Polygon();
       std::vector<std::vector<PointD>> invisibility = {shaded};
       for (auto& holeRegion : *shadedRegion) {
          invisibility.push_back(holeRegion->Polygon());
-         renderPolyTree(renderer, *holeRegion, color, bandColor);
+         renderPolyTree(renderer, *holeRegion, fragmentUniform);
       }
 
       // Triangulate the invisibility regions
@@ -98,24 +102,8 @@ void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree, glm::vec
       // make index buffer
       auto indexBuffer = IndexBuffer(indices, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
       // make bind group
-      BindGroup bindGroup = FogLayout::ToBindGroup(renderer.device, std::forward_as_tuple(vertexUniform, 0),
-                                                   std::forward_as_tuple(fragmentUniform, 0));
-      renderer.Draw(renderer.fog, vertexBuffer, indexBuffer, bindGroup, {});
-
-      /*
-      // Create buffers and draw
-      VertexBufferLayout layout;
-      layout.Push<float>(2);
-      auto vb = std::make_shared<VertexBuffer>(vertices);
-      auto va = std::make_shared<VertexArray>(vb, layout);
-      auto ib = std::make_shared<IndexBuffer>(indices);
-
-      shader->SetUniform4f("u_Color", color);
-      shader->SetUniform4f("u_BandColor", bandColor);
-
-      if (va && ib && shader) {
-         renderer.Draw(*va, *ib, *shader);
-      }
-      */
+      BindGroup bindGroup =
+         FogLayout::ToBindGroup(renderer.device, std::forward_as_tuple(vertexUniform, 0), fragmentUniform);
+      renderer.Draw(renderer.fog, vertexBuffer, indexBuffer, bindGroup, {(unsigned int)fragmentUniform.getOffset()});
    }
 }
