@@ -319,8 +319,9 @@ std::filesystem::path getResPath() {
 }
 
 ImFont* load_font(std::filesystem::path res_path, ImGuiIO* io, const std::string& font_name, int size) {
-   auto    f    = res_path / "fonts" / font_name;
-   ImFont* font = io->Fonts->AddFontFromFileTTF(f.c_str(), size);
+   auto        font_path     = res_path / "fonts" / font_name;
+   std::string font_path_str = font_path.string();
+   ImFont*     font          = io->Fonts->AddFontFromFileTTF(font_path_str.c_str(), size);
    return font;
 }
 
