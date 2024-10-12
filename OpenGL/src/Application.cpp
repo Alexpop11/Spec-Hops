@@ -473,12 +473,6 @@ void mainLoop(Application& application, Renderer& renderer) {
 #endif
 }
 
-glm::vec2 Application::MousePos() {
-   double x, y;
-   glfwGetCursorPos(window, &x, &y);
-   return {x, y};
-}
-
 int main(void) {
    Application& application = Application::get();
    Renderer     renderer    = Renderer();

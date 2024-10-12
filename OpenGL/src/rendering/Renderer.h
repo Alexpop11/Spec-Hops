@@ -33,6 +33,10 @@ public:
    wgpu::RenderPassEncoder renderPass;
    wgpu::Device            device;
 
+   static glm::vec2 MousePos();
+   static glm::vec2 ScreenToWorldPosition(const glm::vec2& screenPos);
+
+
    template <typename T>
    void setPipeline(const T& pass) {
       if (last_set_render_pipeline != pass.id) {

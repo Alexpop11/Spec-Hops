@@ -12,7 +12,6 @@ Renderer::Renderer()
    , line(RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayout<LineVertex>>("line.wgsl"))
    , device(Application::get().getDevice()) {}
 
-
 glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale) {
    glm::ivec2 windowSize = Application::get().windowSize();
 
@@ -21,8 +20,13 @@ glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegr
 
    // Create orthographic projection matrix
    float     orthoWidth = Camera::scale * aspectRatio;
-   glm::mat4 projection =
-      glm::ortho(-orthoWidth / 2.0f, orthoWidth / 2.0f, -Camera::scale / 2.0f, Camera::scale / 2.0f, -1.0f, 1.0f);
+   float     left       = -orthoWidth / 2.0f;
+   float     right      = orthoWidth / 2.0f;
+   float     bottom     = -Camera::scale / 2.0f;
+   float     top        = Camera::scale / 2.0f;
+   float     near       = -1.0f;
+   float     far        = 1.0f;
+   glm::mat4 projection = glm::ortho(left, right, bottom, top, near, far);
 
    // Create view matrix
    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-Camera::position, 0.0f));
@@ -48,22 +52,20 @@ void Renderer::DrawLine(Line line) {
    UniformBuffer<LineFragmentUniform> fragmentUniformBuffer({fragmentUniform},
                                                             wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
    auto                               points = std::vector<LineVertex>{
-      LineVertex{0.0f, -1.0f},
-      LineVertex{1.0f, -1.0f},
-      LineVertex{1.0f, +1.0f},
-      LineVertex{0.0f, +1.0f},
+      LineVertex{0.0f, -0.5f},
+      LineVertex{1.0f, -0.5f},
+      LineVertex{1.0f, +0.5f},
+      LineVertex{0.0f, +0.5f},
    };
    Buffer<LineVertex> pointBuffer(points, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
    auto               indices = std::vector<uint16_t>{
       0, 1, 2, // Triangle #0 connects points #0, #1 and #2
-      0, 2, 3  // Triangle #1 connects points #0, #2 and #3
+      2, 3, 0  // Triangle #1 connects points #0, #2 and #3
    };
    IndexBuffer indexBuffer(indices, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 
-   BindGroup bindGroup = this->line
-                            .BindGroups(std::forward_as_tuple(std::forward_as_tuple(vertexUniformBuffer, 0),
-                                                              std::forward_as_tuple(fragmentUniformBuffer, 0)))
-                            .front();
+   BindGroup bindGroup = LineLayout::ToBindGroup(device, std::forward_as_tuple(vertexUniformBuffer, 0),
+                                                 std::forward_as_tuple(fragmentUniformBuffer, 0));
 
    this->setPipeline(this->line);
    this->setBindGroup(0, bindGroup.get(), {});
@@ -92,4 +94,52 @@ void Renderer::DrawDebug() {
       this->DrawLine(line);
    }
    GetDebugLines().clear();
+}
+
+
+glm::vec2 Renderer::MousePos() {
+   double x, y;
+   float  xscale, yscale;
+
+   auto window = Application::get().getWindow();
+   glfwGetCursorPos(window, &x, &y);
+   glfwGetWindowContentScale(window, &xscale, &yscale);
+
+   x *= xscale;
+   y *= yscale;
+
+   return ScreenToWorldPosition({static_cast<float>(x), static_cast<float>(y)});
+}
+
+glm::vec2 Renderer::ScreenToWorldPosition(const glm::vec2& screenPos) {
+   // Retrieve window size from the renderer
+   auto windowSize = Application::get().windowSize();
+   auto width      = windowSize.x;
+   auto height     = windowSize.y;
+
+   // Calculate aspect ratio
+   float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+
+   // Calculate orthographic projection matrix
+   float     orthoWidth = Camera::scale * aspectRatio;
+   glm::mat4 projection =
+      glm::ortho(-orthoWidth / 2.0f, orthoWidth / 2.0f, -Camera::scale / 2.0f, Camera::scale / 2.0f, -1.0f, 1.0f);
+
+   // Create view matrix
+   glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-Camera::position, 0.0f));
+
+   // Inverse of MVP
+   glm::mat4 invVP = glm::inverse(projection * view);
+
+   // Normalize screen coordinates (convert to [-1, 1] range)
+   glm::vec2 normalizedScreenPos;
+   normalizedScreenPos.x = (2.0f * screenPos.x) / width - 1.0f;
+   normalizedScreenPos.y = 1.0f - (2.0f * screenPos.y) / height;
+
+   // Convert to world space by applying the inverse matrix
+   glm::vec4 clipSpacePos  = glm::vec4(normalizedScreenPos, 0.0f, 1.0f);
+   glm::vec4 worldSpacePos = invVP * clipSpacePos;
+
+   // Return world position with z=0
+   return glm::vec2(worldSpacePos.x, worldSpacePos.y);
 }

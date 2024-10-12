@@ -34,7 +34,6 @@ public:
    wgpu::Surface& getSurface() { return surface; }
    wgpu::Queue&   getQueue() { return queue; }
    ImGuiIO&       getImGuiIO() { return io; }
-   glm::vec2      MousePos();
 
    wgpu::TextureView GetNextSurfaceTextureView();
    void              onResize();

@@ -85,7 +85,7 @@ void Player::update() {
 
 void Player::render(Renderer& renderer) {
    Character::render(renderer);
-   auto mousePos = Application::get().MousePos();
+   auto mousePos = Renderer::MousePos();
    if (Input::left_mouse_pressed_down) {
       if (gunCooldown == 0) {
          Renderer::DebugLine(position, mousePos, {1, 0, 0, 1});
