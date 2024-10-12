@@ -40,15 +40,19 @@ struct KeyHash {
 };
 // -----------------------------------------
 
+static int32_t created_buffers = 0;
+
 template <typename T, bool Uniform = false>
 class Buffer : public std::enable_shared_from_this<Buffer<T, Uniform>> {
 public:
    // Friend declaration to allow BufferView access to private members
    friend class BufferView<T, Uniform>;
+   int32_t id;
 
    // Constructor: Creates a buffer with specified usage and data
    Buffer(const std::vector<T>& data, wgpu::BufferUsage usage)
-      : device_(Application::get().getDevice())
+      : id(created_buffers++)
+      , device_(Application::get().getDevice())
       , queue_(Application::get().getQueue())
       , usage_(usage) {
       std::cout << "Creating buffer..." << std::endl;
@@ -133,6 +137,7 @@ public:
             expandBuffer();
             allocatedIndex = count_;
             ++count_;
+            id = created_buffers++;
          }
       }
 

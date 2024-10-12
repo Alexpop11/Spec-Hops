@@ -4,11 +4,16 @@
 #include <webgpu/webgpu.hpp>
 #include <iostream>
 
+static int32_t created_samplers = 0;
+
 class TextureSampler {
 public:
+   int32_t id;
+
    // Constructor: Creates a WebGPU sampler with the specified descriptor
    TextureSampler()
-      : device_(Application::get().getDevice()) {
+      : id(created_samplers++)
+      , device_(Application::get().getDevice()) {
       wgpu::SamplerDescriptor samplerDesc = {};
       samplerDesc.minFilter               = wgpu::FilterMode::Nearest;
       samplerDesc.magFilter               = wgpu::FilterMode::Nearest;
