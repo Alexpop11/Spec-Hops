@@ -7,6 +7,9 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/hash.hpp"
 
+// Background
+// ============================================================
+
 // Laid out with
 // https://eliemichel.github.io/WebGPU-AutoLayout/
 struct StarUniforms {
@@ -24,11 +27,10 @@ using StarUniformBinding =
                  wgpu::both(wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment), // Shader visibility
                  wgpu::BufferBindingType::Uniform                                    // Buffer binding type
                  >;
-
-
+// ============================================================
 
 // SquareObjects
-
+// ============================================================
 struct SquareObjectVertex {
    glm::vec2 position;
    glm::vec2 uv;
@@ -64,9 +66,10 @@ using SquareObjectLayout = BindGroupLayout<
    BufferBinding<SquareObjectFragmentUniform, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, true>,
    TextureBinding<wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float, wgpu::TextureViewDimension::_2D>,
    SamplerBinding<wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering>>;
-
+// ============================================================
 
 // Line
+// ============================================================
 
 // Laid out with
 // https://eliemichel.github.io/WebGPU-AutoLayout/
@@ -94,3 +97,43 @@ using LineLayout = BindGroupLayout<
    BufferBinding<LineVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, false>,    // vertex
    BufferBinding<LineFragmentUniform, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, false> // fragment
    >;
+// ============================================================
+
+// Fog
+// ============================================================
+struct FogVertexUniform {
+   glm::mat4 u_MVP; // Model-View-Projection matrix at byte offset 0
+
+   FogVertexUniform(glm::mat4 u_MVP)
+      : u_MVP(u_MVP) {}
+};
+
+
+struct FogFragmentUniform {
+   glm::vec4 u_Color;         // at byte offset 0
+   glm::vec4 u_BandColor;     // at byte offset 16
+   glm::vec2 uPlayerPosition; // at byte offset 32
+   float     _pad0[2];
+
+   FogFragmentUniform(glm::vec4 u_Color, glm::vec4 u_BandColor, glm::vec2 uPlayerPosition)
+      : u_Color(u_Color)
+      , u_BandColor(u_BandColor)
+      , uPlayerPosition(uPlayerPosition) {}
+};
+
+using FogVertexUniformBinding = BufferBinding<FogVertexUniform,                 // Type of the buffer
+                                              wgpu::ShaderStage::Vertex,        // Shader visibility
+                                              wgpu::BufferBindingType::Uniform, // Buffer binding type
+                                              false // Whether the buffer is dynamically offset
+                                              >;
+
+// Fragment Uniform Buffer Binding for Fog Shader
+using FogFragmentUniformBinding = BufferBinding<FogFragmentUniform,               // Type of the buffer
+                                                wgpu::ShaderStage::Fragment,      // Shader visibility
+                                                wgpu::BufferBindingType::Uniform, // Buffer binding type
+                                                false // Whether the buffer is dynamically offset
+                                                >;
+
+using FogLayout = BindGroupLayout<FogVertexUniformBinding, FogFragmentUniformBinding>;
+using FogVertex = glm::vec2;
+// ============================================================

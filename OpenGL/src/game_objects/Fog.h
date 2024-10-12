@@ -8,7 +8,6 @@ public:
    Fog();
    virtual void render(Renderer& renderer) override;
    virtual void update() override;
-   virtual void setUpShader(Renderer& renderer) override;
 
    glm::vec4 mainFogColor;
    glm::vec4 tintFogColor;

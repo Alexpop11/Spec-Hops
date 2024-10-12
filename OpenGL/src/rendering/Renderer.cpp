@@ -10,6 +10,7 @@ Renderer::Renderer()
    , squareObject(RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>(
         "square_object.wgsl"))
    , line(RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayout<LineVertex>>("line.wgsl"))
+   , fog(RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayout<FogVertex>>("fog.wgsl"))
    , device(Application::get().getDevice())
    , linePoints(
         std::vector<LineVertex>{

@@ -42,6 +42,7 @@
 #include "game_objects/Background.h"
 #include "game_objects/SquareObject.h"
 #include "game_objects/Tile.h"
+#include "game_objects/Fog.h"
 #include "World.h"
 
 // TODO: Not emscripten friendly, see https://github.com/ocornut/imgui/blob/master/examples/example_glfw_wgpu/main.cpp
@@ -480,6 +481,7 @@ int main(void) {
    Renderer     renderer    = Renderer();
 
    World::LoadMap("SpaceShip.txt");
+   World::gameobjects.push_back(std::make_unique<Fog>());
 
    Input::currentTime       = glfwGetTime();
    Input::realTimeLastFrame = Input::currentTime;

@@ -3,7 +3,7 @@
 #include "Player.h"
 #include <vector>
 #include "clipper2/clipper.h"
-#include "GeometryUtils.h"
+#include "../GeometryUtils.h"
 #include "earcut.hpp"
 
 using namespace Clipper2Lib;
@@ -11,18 +11,11 @@ using namespace GeometryUtils;
 
 Fog::Fog()
    : GameObject("Fog of War", DrawPriority::Fog, {0, 0}) {
-   shader       = Shader::create(Renderer::ResPath() + "shaders/fog.shader");
    mainFogColor = {0.1, 0.1, 0.1, 1};
    tintFogColor = {0.1, 0.1, 0.1, 0};
 }
 
-void Fog::setUpShader(Renderer& renderer) {
-   GameObject::setUpShader(renderer);
-}
-
 void Fog::render(Renderer& renderer) {
-   
-   GameObject::render(renderer);
    bool showWalls = true;
 
    // Collect all tile bounds
@@ -34,7 +27,7 @@ void Fog::render(Renderer& renderer) {
 
    // Get the player
    auto player = World::getFirst<Player>(); // Simplified retrieval of the first player
-   shader->SetUniform2f("uPlayerPosition", player->position);
+   // shader->SetUniform2f("uPlayerPosition", player->position);
 
    // Compute the union of all tile bounds
    PolyTreeD combined;
@@ -98,6 +91,7 @@ void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree, glm::vec
          }
       }
 
+      /*
       // Create buffers and draw
       VertexBufferLayout layout;
       layout.Push<float>(2);
@@ -111,5 +105,6 @@ void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree, glm::vec
       if (va && ib && shader) {
          renderer.Draw(*va, *ib, *shader);
       }
+      */
    }
 }

@@ -6,8 +6,6 @@
 #include <cstdlib>
 #include "earcut.hpp"
 
-#include "../Renderer.h"
-
 namespace GeometryUtils {
 
 float length2(const glm::vec2& a, const glm::vec2& b) {

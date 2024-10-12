@@ -25,6 +25,7 @@ public:
    RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>> stars;
    RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>       squareObject;
    RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayout<LineVertex>>                         line;
+   RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayout<FogVertex>>                           fog;
 
    TextureSampler sampler;
 
