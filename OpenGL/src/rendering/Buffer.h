@@ -48,6 +48,7 @@ public:
    // Friend declaration to allow BufferView access to private members
    friend class BufferView<T, Uniform>;
    int32_t id;
+   int32_t generation; // Generation counter for BufferView invalidation
 
    // Constructor: Creates a buffer with specified usage and data
    Buffer(const std::vector<T>& data, wgpu::BufferUsage usage)
@@ -137,7 +138,6 @@ public:
             expandBuffer();
             allocatedIndex = count_;
             ++count_;
-            id = created_buffers++;
          }
       }
 
@@ -204,6 +204,7 @@ private:
       // Finish encoding and submit the commands
       wgpu::CommandBuffer commands = encoder.finish();
       queue_.submit(1, &commands);
+      generation++;
 
       // Destroy the old buffer and replace it with the new buffer
       dead_buffers.push_back(buffer_);
