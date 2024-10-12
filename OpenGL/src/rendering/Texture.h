@@ -29,8 +29,9 @@ public:
       std::cout << "Initializing texture: " << path_ << std::endl;
 
       // Load image data using stb_image
-      stbi_set_flip_vertically_on_load(1);                                      // Flip the image vertically if needed
-      m_LocalBuffer = stbi_load(path_.c_str(), &m_Width, &m_Height, &m_BPP, 4); // Force RGBA
+      stbi_set_flip_vertically_on_load(1); // Flip the image vertically if needed
+      auto stbi_path = path_.string();
+      m_LocalBuffer  = stbi_load(stbi_path.c_str(), &m_Width, &m_Height, &m_BPP, 4); // Force RGBA
 
       if (!m_LocalBuffer) {
          std::cerr << "Failed to load image: " << path_ << std::endl;
