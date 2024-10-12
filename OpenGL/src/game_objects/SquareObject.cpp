@@ -36,8 +36,8 @@ void SquareObject::render(Renderer& renderer) {
 
    renderer.setPipeline(renderer.squareObject);
 
-   wgpu::BindGroup       bindGroup = SquareObjectLayout::BindGroup(renderer.device, vertexUniform, fragmentUniform,
-                                                                   texture->getTextureView(), texture->getSampler());
+   wgpu::BindGroup bindGroup =
+      SquareObjectLayout::BindGroup(renderer.device, vertexUniform, fragmentUniform, texture.get(), renderer.sampler);
    std::vector<uint32_t> offset{
       (uint32_t)vertexUniform.getOffset(),
       (uint32_t)fragmentUniform.getOffset(),

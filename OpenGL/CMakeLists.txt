@@ -8,7 +8,7 @@ set(VENDOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
 # Add application code
 file(GLOB cpp_files "src/Application.cpp" "src/rendering/*.cpp" "src/game_objects/GameObject.cpp" "src/game_objects/Background.cpp" "src/game_objects/SquareObject.cpp" "src/Input.cpp" "src/game_objects/Tile.cpp" "src/World.cpp" "src/game_objects/Camera.cpp" "src/WeakMemoizeConstructor.hpp" "${VENDOR_DIR}/imgui/*.cpp" "src/game_objects/Bomb.cpp" "src/game_objects/Player.cpp" "src/game_objects/Character.cpp" "src/game_objects/Entity.cpp" "src/AudioEngine.cpp" "src/game_objects/ui/Text.cpp")
-file(GLOB header_files "src/Application.h" "src/rendering/*.h" "src/game_objects/GameObject.h" "src/game_objects/Background.h" "src/game_objects/SquareObject.h" "src/Input.h" "src/game_objects/Tile.h" "src/World.h" "src/game_objects/Camera.h" "src/game_objects/Bomb.h" "src/game_objects/Player.h" "src/game_objects/Character.h" "src/game_objects/Entity.h" "src/AudioEngine.h" "src/game_objects/ui/Text.h")
+file(GLOB header_files "src/Application.h" "src/rendering/*.h" "src/game_objects/GameObject.h" "src/game_objects/Background.h" "src/game_objects/SquareObject.h" "src/Input.h" "src/game_objects/Tile.h" "src/World.h" "src/game_objects/Camera.h" "src/game_objects/Bomb.h" "src/game_objects/Player.h" "src/game_objects/Character.h" "src/game_objects/Entity.h" "src/AudioEngine.h" "src/game_objects/ui/Text.h" "src/rendering/TextureSampler.h")
 
 add_definitions(-DIMGUI_IMPL_WEBGPU_BACKEND_DAWN)
 

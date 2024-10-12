@@ -1,3 +1,4 @@
+// Texture.hpp
 #pragma once
 
 #include <webgpu/webgpu.hpp>
@@ -5,12 +6,14 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
-#include <cstring>     // For std::memcpy
-#include <stb_image.h> // Ensure stb_image is included in your project
+#include <cstring>
+#include <stb_image.h>
+#include <filesystem>
+
 #include "../Application.h"
 #include "../WeakMemoizeConstructor.hpp"
+#include "TextureSampler.h"
 
-// Texture abstraction class
 class Texture {
 public:
    // Constructor: Loads an image from the given path and creates a WebGPU texture
@@ -101,18 +104,8 @@ public:
       // Upload the texture data
       queue_.writeTexture(destination, pixels.data(), pixels.size(), dataLayout, copySize);
 
-      // Create a sampler
-      wgpu::SamplerDescriptor samplerDesc = {};
-      samplerDesc.minFilter               = wgpu::FilterMode::Nearest;
-      samplerDesc.magFilter               = wgpu::FilterMode::Nearest;
-      samplerDesc.mipmapFilter            = wgpu::MipmapFilterMode::Nearest;
-      samplerDesc.addressModeU            = wgpu::AddressMode::ClampToEdge;
-      samplerDesc.addressModeV            = wgpu::AddressMode::ClampToEdge;
-      samplerDesc.addressModeW            = wgpu::AddressMode::ClampToEdge;
-      samplerDesc.maxAnisotropy           = 1;
-
-
-      sampler_ = device_.createSampler(samplerDesc);
+      // Associate the sampler (previously created)
+      // If additional sampler-related setup is needed, it can be done here
 
       // Free the local image data as it's no longer needed
       stbi_image_free(m_LocalBuffer);
@@ -121,9 +114,6 @@ public:
 
    // Destructor: Releases the texture and associated resources
    ~Texture() {
-      if (sampler_) {
-         sampler_.release();
-      }
       if (textureView_) {
          textureView_.release();
       }
@@ -143,7 +133,6 @@ public:
       , queue_(other.queue_)
       , texture_(other.texture_)
       , textureView_(other.textureView_)
-      , sampler_(other.sampler_)
       , path_(std::move(other.path_))
       , m_Width(other.m_Width)
       , m_Height(other.m_Height)
@@ -151,7 +140,6 @@ public:
       , m_LocalBuffer(other.m_LocalBuffer) {
       other.texture_      = nullptr;
       other.textureView_  = nullptr;
-      other.sampler_      = nullptr;
       other.m_LocalBuffer = nullptr;
       other.m_Width       = 0;
       other.m_Height      = 0;
@@ -162,19 +150,18 @@ public:
    Texture& operator=(Texture&& other) noexcept {
       if (this != &other) {
          // Clean up existing resources
-         if (sampler_)
-            sampler_.release();
-         if (textureView_)
+         if (textureView_) {
             textureView_.release();
-         if (texture_)
+         }
+         if (texture_) {
             texture_.destroy();
+         }
 
          // Move resources from other
          device_       = other.device_;
          queue_        = other.queue_;
          texture_      = other.texture_;
          textureView_  = other.textureView_;
-         sampler_      = other.sampler_;
          path_         = std::move(other.path_);
          m_Width       = other.m_Width;
          m_Height      = other.m_Height;
@@ -184,7 +171,6 @@ public:
          // Nullify other's resources
          other.texture_      = nullptr;
          other.textureView_  = nullptr;
-         other.sampler_      = nullptr;
          other.m_LocalBuffer = nullptr;
          other.m_Width       = 0;
          other.m_Height      = 0;
@@ -201,10 +187,6 @@ public:
    wgpu::TextureView&       getTextureView() { return textureView_; }
    const wgpu::TextureView& getTextureView() const { return textureView_; }
 
-   // Getter for the sampler
-   wgpu::Sampler&       getSampler() { return sampler_; }
-   const wgpu::Sampler& getSampler() const { return sampler_; }
-
    // Getter for texture dimensions
    uint32_t getWidth() const { return m_Width; }
    uint32_t getHeight() const { return m_Height; }
@@ -218,7 +200,6 @@ private:
    wgpu::Queue&      queue_;
    wgpu::Texture     texture_     = nullptr;
    wgpu::TextureView textureView_ = nullptr;
-   wgpu::Sampler     sampler_     = nullptr;
 
    std::filesystem::path path_;
    int                   m_Width       = 0;

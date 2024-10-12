@@ -4,6 +4,8 @@
 #include <vector>
 #include <type_traits>
 #include "Buffer.h"
+#include "Texture.h"
+#include "TextureSampler.h"
 
 enum class BindingType {
    Buffer,
@@ -43,7 +45,7 @@ struct SamplerBinding {
 };
 template <wgpu::ShaderStage Visibility, wgpu::SamplerBindingType SamplerType>
 struct GetToBind<SamplerBinding<Visibility, SamplerType>> {
-   using type = const wgpu::Sampler;
+   using type = const TextureSampler&;
 };
 
 // Helper struct for texture bindings
@@ -59,7 +61,7 @@ struct TextureBinding {
 template <wgpu::ShaderStage Visibility, wgpu::TextureSampleType SampleType, wgpu::TextureViewDimension ViewDimension,
           bool Multisampled>
 struct GetToBind<TextureBinding<Visibility, SampleType, ViewDimension, Multisampled>> {
-   using type = const wgpu::TextureView;
+   using type = Texture* const;
 };
 
 template <typename Binding>
@@ -131,11 +133,11 @@ struct BindGroupLayout {
             entry.size   = sizeof(typename Binding::Type);
          }
       } else if constexpr (Binding::bindingType == BindingType::Sampler) {
-         // Assuming ToBind<T> is wgpu::Sampler
-         entry.sampler = resource; // Replace Get() with actual method to retrieve the sampler handle
+         // Assuming ToBind<T> is TextureSampler
+         entry.sampler = resource.getSampler();
       } else if constexpr (Binding::bindingType == BindingType::Texture) {
-         // Assuming ToBind<T> is wgpu::TextureView
-         entry.textureView = resource; // Replace Get() with actual method to retrieve the texture view handle
+         // Assuming ToBind<T> is Texture
+         entry.textureView = resource->getTextureView();
       }
       return entry;
    }

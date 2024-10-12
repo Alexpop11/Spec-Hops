@@ -4,6 +4,7 @@
 
 #include "RenderPipeline.h"
 #include "Texture.h"
+#include "TextureSampler.h"
 #include "CommandEncoder.h"
 
 #include "imgui.h"
@@ -23,6 +24,8 @@ public:
    RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>> stars;
    RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>       squareObject;
    RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayout<LineVertex>>                         line;
+
+   TextureSampler sampler;
 
    template <typename B, typename V>
    void Draw(RenderPipeline<B, V>& pipeline) {};
