@@ -7,6 +7,7 @@
 #include "Texture.h"
 #include "TextureSampler.h"
 #include "BindGroup.h"
+#include <array>
 
 enum class BindingType {
    Buffer,
