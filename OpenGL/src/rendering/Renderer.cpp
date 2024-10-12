@@ -48,10 +48,10 @@ void Renderer::DrawLine(Line line) {
    UniformBuffer<LineFragmentUniform> fragmentUniformBuffer({fragmentUniform},
                                                             wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
    auto                               points = std::vector<LineVertex>{
-      LineVertex{-1, -1},
-      LineVertex{+1, -1},
-      LineVertex{+1, +1},
-      LineVertex{-1, +1},
+      LineVertex{0.0f, -1.0f},
+      LineVertex{1.0f, -1.0f},
+      LineVertex{1.0f, +1.0f},
+      LineVertex{0.0f, +1.0f},
    };
    Buffer<LineVertex> pointBuffer(points, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
    auto               indices = std::vector<uint16_t>{
@@ -61,12 +61,12 @@ void Renderer::DrawLine(Line line) {
    IndexBuffer indexBuffer(indices, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 
    BindGroup bindGroup = this->line
-                                  .BindGroups(std::forward_as_tuple(std::forward_as_tuple(vertexUniformBuffer, 0),
-                                                                    std::forward_as_tuple(fragmentUniformBuffer, 0)))
-                                  .front();
+                            .BindGroups(std::forward_as_tuple(std::forward_as_tuple(vertexUniformBuffer, 0),
+                                                              std::forward_as_tuple(fragmentUniformBuffer, 0)))
+                            .front();
 
    this->setPipeline(this->line);
-   this->renderPass.setBindGroup(0, bindGroup.get(), 0, nullptr);
+   this->setBindGroup(0, bindGroup.get(), {});
    this->renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.sizeBytes());
    this->renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.sizeBytes());
    this->renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);

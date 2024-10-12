@@ -41,15 +41,15 @@ public:
       }
    }
 
-   void setBindGroup(uint32_t index, BindGroup bindGroup, std::vector<uint32_t> offset) {
+   void setBindGroup(uint32_t group, BindGroup bindGroup, std::vector<uint32_t> offset) {
       // TODO: this is overly conservative because we could be checking the that the bind group / offset is the same as
       // the last time we set that index
-      if ((last_set_bind_group_index != (int32_t)index) ||     // Check index
+      if ((last_set_bind_group != (int32_t)group) ||           // Check index
           (bindGroup.id != (int32_t)last_set_bind_group_id) || // Check bind group id
           offset != last_set_bind_group_offset                 // check offset
       ) {
-         renderPass.setBindGroup(index, bindGroup.get(), offset.size(), offset.data());
-         last_set_bind_group_index  = index;
+         renderPass.setBindGroup(group, bindGroup.get(), offset.size(), offset.data());
+         last_set_bind_group        = group;
          last_set_bind_group_offset = offset;
          last_set_bind_group_id     = bindGroup.id;
       }
@@ -63,7 +63,7 @@ public:
    void FinishFrame() {
       CommandEncoder::DestroyDeadBuffers();
       last_set_render_pipeline   = -1;
-      last_set_bind_group_index  = -1;
+      last_set_bind_group        = -1;
       last_set_bind_group_id     = -1;
       last_set_bind_group_offset = std::vector<uint32_t>();
    }
@@ -71,9 +71,9 @@ public:
 private:
    void DrawLine(Line line);
 
-   int32_t               last_set_render_pipeline  = -1;
-   int32_t               last_set_bind_group_index = -1;
-   int32_t               last_set_bind_group_id    = -1;
+   int32_t               last_set_render_pipeline = -1;
+   int32_t               last_set_bind_group      = -1;
+   int32_t               last_set_bind_group_id   = -1;
    std::vector<uint32_t> last_set_bind_group_offset;
 };
 
