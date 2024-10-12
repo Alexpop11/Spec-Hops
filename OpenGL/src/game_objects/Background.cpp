@@ -28,7 +28,7 @@ void Background::render(Renderer& renderer) {
    wgpu::BindGroup bindGroup =
       renderer.stars.BindGroups(std::forward_as_tuple(std::forward_as_tuple(uniformBuffer, 0))).front();
 
-   renderer.renderPass.setPipeline(renderer.stars.GetPipeline());
+   renderer.setPipeline(renderer.stars);
    renderer.renderPass.setBindGroup(0, bindGroup, 0, nullptr);
    renderer.renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.sizeBytes());
    renderer.renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.sizeBytes());

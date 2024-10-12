@@ -26,6 +26,7 @@ public:
 
       if (!m_LocalBuffer) {
          std::cerr << "Failed to load image: " << path_ << std::endl;
+         assert(false);
          return;
       }
 

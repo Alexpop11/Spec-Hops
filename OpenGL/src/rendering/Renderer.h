@@ -23,13 +23,19 @@ public:
    RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>       squareObject;
    RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayout<LineVertex>>                         line;
 
-
-
    template <typename B, typename V>
    void Draw(RenderPipeline<B, V>& pipeline) {};
 
    wgpu::RenderPassEncoder renderPass;
    wgpu::Device            device;
+
+   template <typename T>
+   void setPipeline(const T& pass) {
+      if (last_set_render_pipeline != pass.id) {
+         renderPass.setPipeline(pass.GetPipeline());
+         last_set_render_pipeline = pass.id;
+      }
+   }
 
    // Debug assistance
    static void DebugLine(glm::vec2 start, glm::vec2 end, glm::vec3 color);
@@ -38,6 +44,8 @@ public:
 
 private:
    void DrawLine(Line line);
+
+   int32_t last_set_render_pipeline = -1;
 };
 
 

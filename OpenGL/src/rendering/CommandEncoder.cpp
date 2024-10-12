@@ -19,9 +19,7 @@ CommandEncoder::~CommandEncoder() {
    auto& application = Application::get();
    auto  queue       = application.getQueue();
 
-   std::cout << "Submitting command..." << std::endl;
    queue.submit(1, &command);
-   std::cout << "Command submitted." << std::endl;
 }
 
 wgpu::CommandEncoder& CommandEncoder::get() {

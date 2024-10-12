@@ -34,7 +34,7 @@ void SquareObject::render(Renderer& renderer) {
    this->vertexUniform.Update(SquareObjectVertexUniform{CalculateMVP(glm::vec2{tile_x, tile_y}, 0, 1)});
    this->fragmentUniform.Update(SquareObjectFragmentUniform{tintColor});
 
-   renderer.renderPass.setPipeline(renderer.squareObject.GetPipeline());
+   renderer.setPipeline(renderer.squareObject);
 
    wgpu::BindGroup       bindGroup = SquareObjectLayout::BindGroup(renderer.device, vertexUniform, fragmentUniform,
                                                                    texture->getTextureView(), texture->getSampler());

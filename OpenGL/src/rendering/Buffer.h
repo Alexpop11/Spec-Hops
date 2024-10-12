@@ -15,6 +15,8 @@ template <typename T, bool Uniform>
 class BufferView;
 
 
+// Memoization stuff
+// -----------------------------------------
 // Key structure to hold the data and usage
 template <typename T>
 struct Key {
@@ -36,6 +38,7 @@ struct KeyHash {
       return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
    }
 };
+// -----------------------------------------
 
 template <typename T, bool Uniform = false>
 class Buffer : public std::enable_shared_from_this<Buffer<T, Uniform>> {

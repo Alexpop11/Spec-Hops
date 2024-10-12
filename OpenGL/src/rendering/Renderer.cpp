@@ -65,7 +65,7 @@ void Renderer::DrawLine(Line line) {
                                                                     std::forward_as_tuple(fragmentUniformBuffer, 0)))
                                   .front();
 
-   this->renderPass.setPipeline(this->line.GetPipeline());
+   this->setPipeline(this->line);
    this->renderPass.setBindGroup(0, bindGroup, 0, nullptr);
    this->renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.sizeBytes());
    this->renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.sizeBytes());

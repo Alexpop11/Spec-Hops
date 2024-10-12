@@ -9,12 +9,15 @@
 #include "BindGroupLayout.h"
 #include "DataFormats.h"
 
+static int32_t created_render_pipelines = 0;
+
 template <typename BGLs, typename VBL>
 class RenderPipeline {
 public:
    RenderPipeline(std::filesystem::path   shaderPath,
                   wgpu::PrimitiveTopology topology = wgpu::PrimitiveTopology::TriangleList)
-      : device(Application::get().getDevice())
+      : id(created_render_pipelines++)
+      , device(Application::get().getDevice())
       , bindGroupLayouts(BGLs::CreateLayouts(device)) {
       std::string label = shaderPath.stem().string();
       Shader      shader(device, shaderPath);
@@ -123,6 +126,8 @@ public:
 
    wgpu::RenderPipeline               GetPipeline() const { return pipeline; }
    std::vector<wgpu::BindGroupLayout> GetBindGroupLayouts() const { return bindGroupLayouts; }
+
+   const int32_t id;
 
 private:
    wgpu::Device                       device;
