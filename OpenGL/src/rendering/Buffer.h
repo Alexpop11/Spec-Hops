@@ -168,6 +168,8 @@ public:
       }
    }
 
+   int32_t summed_id() const { return id * 100000 + generation; }
+
 private:
    // Method to update data at a specific index
    void updateBuffer(const T& data, size_t index) {

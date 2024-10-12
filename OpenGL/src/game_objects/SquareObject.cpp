@@ -36,13 +36,13 @@ void SquareObject::render(Renderer& renderer) {
 
    renderer.setPipeline(renderer.squareObject);
 
-   wgpu::BindGroup bindGroup =
-      SquareObjectLayout::BindGroup(renderer.device, vertexUniform, fragmentUniform, texture.get(), renderer.sampler);
+   BindGroup bindGroup =
+      SquareObjectLayout::ToBindGroup(renderer.device, vertexUniform, fragmentUniform, texture.get(), renderer.sampler);
    std::vector<uint32_t> offset{
       (uint32_t)vertexUniform.getOffset(),
       (uint32_t)fragmentUniform.getOffset(),
    };
-   renderer.renderPass.setBindGroup(0, bindGroup, offset.size(), offset.data());
+   renderer.renderPass.setBindGroup(0, bindGroup.get(), offset.size(), offset.data());
    renderer.renderPass.setVertexBuffer(0, pointBuffer->get(), 0, pointBuffer->sizeBytes());
    renderer.renderPass.setIndexBuffer(indexBuffer->get(), wgpu::IndexFormat::Uint16, 0, indexBuffer->sizeBytes());
    renderer.renderPass.drawIndexed(indexBuffer->count(), 1, 0, 0, 0);

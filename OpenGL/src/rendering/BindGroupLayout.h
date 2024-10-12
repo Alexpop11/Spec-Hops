@@ -6,6 +6,7 @@
 #include "Buffer.h"
 #include "Texture.h"
 #include "TextureSampler.h"
+#include "BindGroup.h"
 
 enum class BindingType {
    Buffer,
@@ -69,6 +70,21 @@ using ToBind = typename GetToBind<Binding>::type;
 template <typename T>
 concept BindingC = requires { typename ToBind<T>; };
 
+// Helper for caching
+// ------------------------------------------------------
+template <std::size_t N>
+using Ids = std::array<std::array<int32_t, 2>, N>;
+template <std::size_t N>
+struct IdsHash {
+   std::size_t operator()(const Ids<N>& ids) const {
+      std::size_t seed = 0;
+      for (const auto& pair : ids) {
+         seed ^= std::hash<int32_t>{}(pair[0]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+         seed ^= std::hash<int32_t>{}(pair[1]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      }
+      return seed;
+   }
+};
 
 
 // Generator for BindGroupLayout
@@ -91,18 +107,27 @@ struct BindGroupLayout {
 
    // Conversion to bind group
    // ========================
-   static wgpu::BindGroup BindGroup(wgpu::Device& device, ToBind<Bindings>&... resources) {
+   static BindGroup ToBindGroup(wgpu::Device& device, ToBind<Bindings>&... resources) {
       // Create a tuple of references to the resources
       auto resourcesTuple = std::forward_as_tuple(resources...);
 
       // Create the bind group using the resources
-      wgpu::BindGroup bindGroup = createBindGroup(device, resourcesTuple, std::index_sequence_for<Bindings...>{});
+      BindGroup bindGroup = createBindGroup(device, resourcesTuple, std::index_sequence_for<Bindings...>{});
 
       return bindGroup;
    }
 
    template <typename Tuple, size_t... I>
-   static wgpu::BindGroup createBindGroup(wgpu::Device& device, Tuple& resources, std::index_sequence<I...>) {
+   static BindGroup createBindGroup(wgpu::Device& device, Tuple& resources, std::index_sequence<I...>) {
+      // Get the ids of the binding resources
+      auto ids = Ids<sizeof...(Bindings)>{getId<I, Bindings>(std::get<I>(resources))...};
+
+      static std::unordered_map<Ids<sizeof...(Bindings)>, BindGroup, IdsHash<sizeof...(Bindings)>> bindGroupsCache;
+      // check if ids is in the cache
+      if (auto it = bindGroupsCache.find(ids); it != bindGroupsCache.end()) {
+         return it->second;
+      }
+
       // Create an array of BindGroupEntry
       std::array<wgpu::BindGroupEntry, sizeof...(Bindings)> entries = {
          createBindGroupEntry<I, Bindings>(device, std::get<I>(resources))...};
@@ -113,8 +138,25 @@ struct BindGroupLayout {
       bindGroupDesc.entryCount = static_cast<uint32_t>(entries.size());
       bindGroupDesc.entries    = entries.data();
 
-      // Create and return the BindGroup
-      return device.createBindGroup(bindGroupDesc);
+      BindGroup bindgroup = BindGroup(device.createBindGroup(bindGroupDesc));
+      bindGroupsCache.emplace(ids, bindgroup);
+      return bindgroup;
+   }
+
+   template <size_t I, typename Binding, typename Resource>
+   static std::array<int32_t, 2> getId(Resource& resource) {
+      if constexpr (Binding::bindingType == BindingType::Buffer) {
+         if constexpr (!Binding::dynamicOffset) {
+            // Assuming ToBind<T> is Buffer
+            return std::array<int32_t, 2>{std::get<0>(resource).summed_id(), (int32_t)std::get<1>(resource)};
+         } else if constexpr (Binding::dynamicOffset) {
+            return std::array<int32_t, 2>{resource.getBuffer()->summed_id(), -1};
+         }
+      } else if constexpr (Binding::bindingType == BindingType::Sampler) {
+         return std::array<int32_t, 2>{resource.id, -1};
+      } else if constexpr (Binding::bindingType == BindingType::Texture) {
+         return std::array<int32_t, 2>{resource->id, -1};
+      }
    }
 
    template <size_t I, typename Binding, typename Resource>
@@ -179,7 +221,7 @@ struct BindGroupLayouts {
 
    // Ensure that the number of tuples matches the number of layouts
    template <typename... Tuples>
-   static std::vector<wgpu::BindGroup> BindGroups(wgpu::Device& device, Tuples&&... tuples) {
+   static std::vector<BindGroup> BindGroups(wgpu::Device& device, Tuples&&... tuples) {
       static_assert(sizeof...(Layouts) == sizeof...(Tuples), "Number of layouts and tuples must match");
 
       // Create a vector and initialize it with the results of each BindGroup call
@@ -189,9 +231,9 @@ struct BindGroupLayouts {
 private:
    // Helper function to call BindGroup for a single layout and tuple
    template <typename Layout, typename Tuple>
-   static wgpu::BindGroup call_bind_group(wgpu::Device& device, Tuple&& tuple) {
+   static BindGroup call_bind_group(wgpu::Device& device, Tuple&& tuple) {
       // Unpack the tuple and pass the resources to Layout::BindGroup
-      return std::apply([&device](auto&&... args) -> wgpu::BindGroup { return Layout::BindGroup(device, args...); },
+      return std::apply([&device](auto&&... args) -> BindGroup { return Layout::ToBindGroup(device, args...); },
                         std::forward<Tuple>(tuple));
    }
 };

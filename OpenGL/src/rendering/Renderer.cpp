@@ -60,13 +60,13 @@ void Renderer::DrawLine(Line line) {
    };
    IndexBuffer indexBuffer(indices, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
 
-   wgpu::BindGroup bindGroup = this->line
+   BindGroup bindGroup = this->line
                                   .BindGroups(std::forward_as_tuple(std::forward_as_tuple(vertexUniformBuffer, 0),
                                                                     std::forward_as_tuple(fragmentUniformBuffer, 0)))
                                   .front();
 
    this->setPipeline(this->line);
-   this->renderPass.setBindGroup(0, bindGroup, 0, nullptr);
+   this->renderPass.setBindGroup(0, bindGroup.get(), 0, nullptr);
    this->renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.sizeBytes());
    this->renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.sizeBytes());
    this->renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);

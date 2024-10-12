@@ -25,11 +25,11 @@ void Background::render(Renderer& renderer) {
    StarUniforms uniform(glfwGetTime(), Application::get().windowSize()); // TODO: use world time
    uniformBuffer.upload({uniform});
 
-   wgpu::BindGroup bindGroup =
+   BindGroup bindGroup =
       renderer.stars.BindGroups(std::forward_as_tuple(std::forward_as_tuple(uniformBuffer, 0))).front();
 
    renderer.setPipeline(renderer.stars);
-   renderer.renderPass.setBindGroup(0, bindGroup, 0, nullptr);
+   renderer.renderPass.setBindGroup(0, bindGroup.get(), 0, nullptr);
    renderer.renderPass.setVertexBuffer(0, pointBuffer.get(), 0, pointBuffer.sizeBytes());
    renderer.renderPass.setIndexBuffer(indexBuffer.get(), wgpu::IndexFormat::Uint16, 0, indexBuffer.sizeBytes());
    renderer.renderPass.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
