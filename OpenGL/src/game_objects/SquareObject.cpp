@@ -24,8 +24,8 @@ SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, i
          0, 2, 3  // Triangle #1 connects points #0, #2 and #3
       },
       wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index)),
-   vertexUniform(
-      BufferView<SquareObjectVertexUniform>::create(SquareObjectVertexUniform{CalculateMVP(position, 0, 1)})),
+   vertexUniform(BufferView<SquareObjectVertexUniform>::create(
+      SquareObjectVertexUniform{CalculateMVP(position, rotation, scale)})),
    fragmentUniform(
       BufferView<SquareObjectFragmentUniform>::create(SquareObjectFragmentUniform{glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)})),
    texture(Texture::create(texturePath)) {}
