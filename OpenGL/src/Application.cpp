@@ -51,6 +51,79 @@
 
 const float TICKS_PER_SECOND = 3.0f;
 
+// Called every frame
+void mainLoop(Application& application, Renderer& renderer) {
+   glfwPollEvents();
+   auto device = application.getDevice();
+
+   double lastFrameTime     = Input::currentTime;
+   Input::deltaTime         = World::timeSpeed * (glfwGetTime() - Input::realTimeLastFrame);
+   Input::currentTime       = Input::currentTime + Input::deltaTime;
+   Input::realTimeLastFrame = glfwGetTime();
+   Input::updateKeyStates(application.getWindow());
+
+   World::UpdateObjects();
+
+   if (!World::ticksPaused()) {
+      if (World::shouldTick) {
+         World::TickObjects();
+         Input::lastTick   = Input::currentTime;
+         World::shouldTick = false;
+      } else if (Input::lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime) {
+         World::TickObjects();
+         Input::lastTick = Input::lastTick + (1.0 / TICKS_PER_SECOND);
+      }
+   }
+
+   {
+      // Create a command encoder for the draw call
+      CommandEncoder encoder(device);
+
+      // Create the render pass
+      RenderPass renderPass(encoder);
+      renderer.renderPass = renderPass.get();
+
+      // Start the Dear ImGui frame
+      ImGui_ImplWGPU_NewFrame();
+      ImGui_ImplGlfw_NewFrame();
+      ImGui::NewFrame();
+
+      World::RenderObjects(renderer);
+      renderer.DrawDebug();
+
+      // Performance info
+      {
+         ImGui::PushFont(application.pixelify);
+         ImGui::Begin("Performance Info");
+         ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / application.getImGuiIO().Framerate,
+                     application.getImGuiIO().Framerate);
+         ImGui::End();
+         ImGui::PopFont();
+      }
+
+      ImGui::Render();
+      ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass.get());
+
+      // The render pass and command encoder will be ended and submitted in their destructors
+   }
+   renderer.FinishFrame();
+
+
+#ifndef __EMSCRIPTEN__
+   application.getSurface().present();
+#endif
+
+#if defined(WEBGPU_BACKEND_DAWN)
+   application.getDevice().tick();
+#elif defined(WEBGPU_BACKEND_WGPU)
+   application.getDevice().poll(false);
+#endif
+}
+
+// Setup stuff
+// ===========
+
+
 void setWindowIcon(GLFWwindow* window, const char* iconPath) {
    int            width, height, channels;
    unsigned char* pixels = stbi_load(iconPath, &width, &height, &channels, 4);
@@ -405,75 +478,6 @@ wgpu::TextureView Application::GetNextSurfaceTextureView() {
    wgpu::TextureView targetView   = texture.createView(viewDescriptor);
 
    return targetView;
-}
-
-// Draw a frame and handle events
-void mainLoop(Application& application, Renderer& renderer) {
-   glfwPollEvents();
-   auto device = application.getDevice();
-
-   double lastFrameTime     = Input::currentTime;
-   Input::deltaTime         = World::timeSpeed * (glfwGetTime() - Input::realTimeLastFrame);
-   Input::currentTime       = Input::currentTime + Input::deltaTime;
-   Input::realTimeLastFrame = glfwGetTime();
-   Input::updateKeyStates(application.getWindow());
-
-   World::UpdateObjects();
-
-   if (!World::ticksPaused()) {
-      if (World::shouldTick) {
-         World::TickObjects();
-         Input::lastTick   = Input::currentTime;
-         World::shouldTick = false;
-      } else if (Input::lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime) {
-         World::TickObjects();
-         Input::lastTick = Input::lastTick + (1.0 / TICKS_PER_SECOND);
-      }
-   }
-
-   {
-      // Create a command encoder for the draw call
-      CommandEncoder encoder(device);
-
-      // Create the render pass
-      RenderPass renderPass(encoder);
-      renderer.renderPass = renderPass.get();
-
-      // Start the Dear ImGui frame
-      ImGui_ImplWGPU_NewFrame();
-      ImGui_ImplGlfw_NewFrame();
-      ImGui::NewFrame();
-
-      World::RenderObjects(renderer);
-      renderer.DrawDebug();
-
-      // Performance info
-      {
-         ImGui::PushFont(application.pixelify);
-         ImGui::Begin("Performance Info");
-         ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / application.getImGuiIO().Framerate,
-                     application.getImGuiIO().Framerate);
-         ImGui::End();
-         ImGui::PopFont();
-      }
-
-      ImGui::Render();
-      ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass.get());
-
-      // The render pass and command encoder will be ended and submitted in their destructors
-   }
-   renderer.FinishFrame();
-
-
-#ifndef __EMSCRIPTEN__
-   application.getSurface().present();
-#endif
-
-#if defined(WEBGPU_BACKEND_DAWN)
-   application.getDevice().tick();
-#elif defined(WEBGPU_BACKEND_WGPU)
-   application.getDevice().poll(false);
-#endif
 }
 
 int main(void) {
