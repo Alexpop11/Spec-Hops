@@ -166,16 +166,7 @@ public:
 private:
    // Method to update data at a specific index
    void updateBuffer(const T& data, size_t index) {
-      if constexpr (Uniform) {
-         // Create a temporary buffer with padding
-         std::vector<uint8_t> paddedData(elementStride(), 0);
-         std::memcpy(paddedData.data(), &data, sizeof(T));
-         // Upload the padded data to the GPU buffer at the correct offset
-         queue_.writeBuffer(buffer_, index * elementStride(), paddedData.data(), elementStride());
-      } else {
-         // Upload data directly to the GPU buffer at the correct offset
-         queue_.writeBuffer(buffer_, index * elementStride(), &data, sizeof(T));
-      }
+      queue_.writeBuffer(buffer_, index * elementStride(), &data, sizeof(T));
    }
 
    // Method to resize the buffer

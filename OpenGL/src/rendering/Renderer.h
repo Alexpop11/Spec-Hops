@@ -4,6 +4,7 @@
 
 #include "RenderPipeline.h"
 #include "Texture.h"
+#include "CommandEncoder.h"
 
 #include "imgui.h"
 
@@ -41,6 +42,11 @@ public:
    static void DebugLine(glm::vec2 start, glm::vec2 end, glm::vec3 color);
    static void DebugLine(glm::vec2 start, glm::vec2 end, glm::vec4 color);
    void        DrawDebug();
+
+   void FinishFrame() {
+      CommandEncoder::DestroyDeadBuffers();
+      last_set_render_pipeline = -1;
+   }
 
 private:
    void DrawLine(Line line);

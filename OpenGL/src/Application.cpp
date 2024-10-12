@@ -459,7 +459,7 @@ void mainLoop(Application& application, Renderer& renderer) {
 
       // The render pass and command encoder will be ended and submitted in their destructors
    }
-   CommandEncoder::DestroyDeadBuffers();
+   renderer.FinishFrame();
 
 
 #ifndef __EMSCRIPTEN__

@@ -24,11 +24,17 @@ public:
 
    GLFWwindow*          getWindow() { return window; }
    wgpu::TextureFormat& getSurfaceFormat() { return surfaceFormat; }
-   wgpu::Device&        getDevice() { return device; }
-   wgpu::Surface&       getSurface() { return surface; }
-   wgpu::Queue&         getQueue() { return queue; }
-   ImGuiIO&             getImGuiIO() { return io; }
-   glm::vec2            MousePos();
+   wgpu::Device&        getDevice() {
+      if (!initialized) {
+         std::cout << "Trying to get the device before initialization is done!" << std::endl;
+         assert(false);
+      }
+      return device;
+   }
+   wgpu::Surface& getSurface() { return surface; }
+   wgpu::Queue&   getQueue() { return queue; }
+   ImGuiIO&       getImGuiIO() { return io; }
+   glm::vec2      MousePos();
 
    wgpu::TextureView GetNextSurfaceTextureView();
    void              onResize();
