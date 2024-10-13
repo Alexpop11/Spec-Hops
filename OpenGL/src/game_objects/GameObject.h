@@ -39,7 +39,7 @@ public:
    float        scale    = 1.0f;
 
    // Add coroutine
-   void addCoroutine(Generator<> coroutine) { coroutines.emplace_back(std::move(coroutine)); }
+   void addCoroutine(Generator coroutine) { coroutines.emplace_back(std::move(coroutine)); }
 
    // Run coroutines
    void progressCoroutines() {
@@ -66,7 +66,7 @@ public:
    }
 
    // Store active coroutines
-   std::vector<Generator<>> coroutines;
+   std::vector<Generator> coroutines;
 
 private:
    // Add any private members here if needed

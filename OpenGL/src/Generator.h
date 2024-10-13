@@ -7,7 +7,6 @@
 #include <exception>
 #include "Input.h"
 
-template <typename T = void>
 struct Generator {
    struct promise_type;
    using handle_type = std::coroutine_handle<promise_type>;
