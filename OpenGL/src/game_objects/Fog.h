@@ -8,12 +8,17 @@ public:
    Fog();
    virtual void render(Renderer& renderer) override;
    virtual void update() override;
-   virtual void setUpShader(Renderer& renderer) override;
 
-   glm::vec4 mainFogColor;
-   glm::vec4 tintFogColor;
+   glm::vec4 mainFogColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+   glm::vec4 tintFogColor = glm::vec4(0.1f, 0.1f, 0.1f, 0.0f);
 
 private:
-   virtual void renderPolyTree(Renderer& renderer, const Clipper2Lib::PolyTreeD& polytree, glm::vec4 color,
-                               glm::vec4 bandColor) const;
+   virtual void renderPolyTree(Renderer& renderer, const Clipper2Lib::PolyTreeD& polytree,
+                               const UniformBufferView<FogFragmentUniform>& fragmentUniform) const;
+
+
+private:
+   UniformBuffer<FogVertexUniform>       vertexUniform;
+   UniformBufferView<FogFragmentUniform> fragmentUniformWalls;
+   UniformBufferView<FogFragmentUniform> fragmentUniformOther;
 };

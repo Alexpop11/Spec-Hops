@@ -1,9 +1,11 @@
 // World.h
 #pragma once
 
+#include <filesystem>
 #include <functional>
+
 #include "game_objects/GameObject.h"
-#include "Renderer.h"
+#include "rendering/Renderer.h"
 
 class World {
 public:
@@ -14,7 +16,7 @@ public:
 
    static bool ticksPaused();
 
-   static std::vector<GameObject*>                 get_gameobjects() {
+   static std::vector<GameObject*> get_gameobjects() {
       // return a vector of all gameobjects and their gameobjects.children
       std::vector<GameObject*> allGameObjects;
       for (auto& gameobject : gameobjects) {
@@ -65,7 +67,7 @@ public:
       return where<T>([&](const T& obj) { return obj.tile_x == x && obj.tile_y == y; });
    }
 
-   static void LoadMap(const std::string& map_path);
+   static void LoadMap(const std::filesystem::path& map_path);
 
    static void UpdateObjects();
    static void TickObjects();

@@ -1,34 +1,34 @@
 #include "Background.h"
-#include <array>
+
+#include "../Application.h"
+#include "../Input.h"
 
 Background::Background(const std::string& name)
-   : GameObject(name, DrawPriority::Background, {0, 0}) {
-   shader = Shader::create(Renderer::ResPath() + "shaders/stars.shader");
-
-   std::array<float, 8> positions = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
-
-   std::array<uint32_t, 6> indices = {0, 1, 2, 2, 3, 0};
-
-   vb = VertexBuffer::create(positions);
-   VertexBufferLayout layout;
-   layout.Push<float>(2);
-   va = std::make_shared<VertexArray>(vb, layout);
-   ib = std::make_shared<IndexBuffer>(IndexBuffer(indices));
-}
-
-void Background::setUpShader(Renderer& renderer) {
-   GameObject::setUpShader(renderer);
-   auto [width, height] = renderer.WindowSize();
-   shader->SetUniform2f("u_Resolution", {(float)width, (float)height});
-}
+   : GameObject(name, DrawPriority::Background, {0, 0})
+   , pointBuffer(Buffer<glm::vec2>(
+        {
+           glm::vec2(-1, -1),
+           glm::vec2(+1, -1),
+           glm::vec2(+1, +1),
+           glm::vec2(-1, +1),
+        },
+        wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex))
+   , indexBuffer(IndexBuffer(
+        {
+           0, 1, 2, // Triangle #0 connects points #0, #1 and #2
+           0, 2, 3  // Triangle #1 connects points #0, #2 and #3
+        },
+        wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index))
+   , uniformBuffer(UniformBuffer<StarUniforms>({StarUniforms(0.0f, Application::get().windowSize())},
+                                               wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform)) {}
 
 void Background::render(Renderer& renderer) {
-   GameObject::render(renderer);
+   StarUniforms uniform(Input::currentTime, Application::get().windowSize());
+   uniformBuffer.upload({uniform});
+   BindGroup bindGroup =
+      renderer.stars.BindGroups(std::forward_as_tuple(std::forward_as_tuple(uniformBuffer, 0))).front();
 
-   // draw if va, ib, and shader are set:
-   if (va && ib && shader) {
-      renderer.Draw(*va, *ib, *shader);
-   }
+   renderer.Draw(renderer.stars, pointBuffer, indexBuffer, bindGroup, {});
 }
 
 void Background::update() {

@@ -3,27 +3,24 @@
 #include "Player.h"
 #include <vector>
 #include "clipper2/clipper.h"
-#include "GeometryUtils.h"
+#include "../GeometryUtils.h"
 #include "earcut.hpp"
 
 using namespace Clipper2Lib;
 using namespace GeometryUtils;
 
 Fog::Fog()
-   : GameObject("Fog of War", DrawPriority::Fog, {0, 0}) {
-   shader       = Shader::create(Renderer::ResPath() + "shaders/fog.shader");
-   mainFogColor = {0.1, 0.1, 0.1, 1};
-   tintFogColor = {0.1, 0.1, 0.1, 0};
-}
-
-void Fog::setUpShader(Renderer& renderer) {
-   GameObject::setUpShader(renderer);
-}
+   : GameObject("Fog of War", DrawPriority::Fog, {0, 0})
+   , vertexUniform(UniformBuffer<FogVertexUniform>({FogVertexUniform(CalculateMVP(position, rotation, scale))},
+                                                   wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform))
+   , fragmentUniformWalls(
+        UniformBufferView<FogFragmentUniform>::create(FogFragmentUniform(mainFogColor, tintFogColor, {0, 0})))
+   , fragmentUniformOther(
+        UniformBufferView<FogFragmentUniform>::create(FogFragmentUniform(mainFogColor, mainFogColor, {0, 0}))) {}
 
 void Fog::render(Renderer& renderer) {
-   
-   GameObject::render(renderer);
    bool showWalls = true;
+   vertexUniform.upload({FogVertexUniform(CalculateMVP(position, rotation, scale))});
 
    // Collect all tile bounds
    std::vector<std::vector<glm::vec2>> allBounds;
@@ -34,7 +31,8 @@ void Fog::render(Renderer& renderer) {
 
    // Get the player
    auto player = World::getFirst<Player>(); // Simplified retrieval of the first player
-   shader->SetUniform2f("uPlayerPosition", player->position);
+   fragmentUniformWalls.Update(FogFragmentUniform(mainFogColor, tintFogColor, player->position));
+   fragmentUniformOther.Update(FogFragmentUniform(mainFogColor, mainFogColor, player->position));
 
    // Compute the union of all tile bounds
    PolyTreeD combined;
@@ -62,7 +60,7 @@ void Fog::render(Renderer& renderer) {
    clipper.Execute(ClipType::Difference, FillRule::NonZero, invisibilityPaths);
 
    // Render the invisibility regions
-   renderPolyTree(renderer, invisibilityPaths, mainFogColor, mainFogColor);
+   renderPolyTree(renderer, invisibilityPaths, fragmentUniformOther);
 
    if (showWalls) {
       // Tint all the walls that are not visible
@@ -72,44 +70,40 @@ void Fog::render(Renderer& renderer) {
       PolyTreeD tintPaths;
       tint.Execute(ClipType::Difference, FillRule::NonZero, tintPaths);
 
-      renderPolyTree(renderer, tintPaths, mainFogColor, tintFogColor);
+      renderPolyTree(renderer, tintPaths, fragmentUniformWalls);
    }
 }
 
 void Fog::update() {}
 
-void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree, glm::vec4 color, glm::vec4 bandColor) const {
+void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree,
+                         const UniformBufferView<FogFragmentUniform>& fragmentUniform) const {
    for (auto& shadedRegion : polytree) {
       std::vector<PointD>              shaded       = shadedRegion->Polygon();
       std::vector<std::vector<PointD>> invisibility = {shaded};
       for (auto& holeRegion : *shadedRegion) {
          invisibility.push_back(holeRegion->Polygon());
-         renderPolyTree(renderer, *holeRegion, color, bandColor);
+         renderPolyTree(renderer, *holeRegion, fragmentUniform);
       }
 
       // Triangulate the invisibility regions
-      std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(invisibility);
+      std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(invisibility);
 
       // Collect vertices
-      std::vector<glm::vec2> vertices;
+      std::vector<FogVertex> vertices;
       for (const auto& shape : invisibility) {
          for (const auto& point : shape) {
-            vertices.emplace_back(point.x, point.y);
+            vertices.emplace_back(glm::vec2(point.x, point.y));
          }
       }
 
-      // Create buffers and draw
-      VertexBufferLayout layout;
-      layout.Push<float>(2);
-      auto vb = std::make_shared<VertexBuffer>(vertices);
-      auto va = std::make_shared<VertexArray>(vb, layout);
-      auto ib = std::make_shared<IndexBuffer>(indices);
-
-      shader->SetUniform4f("u_Color", color);
-      shader->SetUniform4f("u_BandColor", bandColor);
-
-      if (va && ib && shader) {
-         renderer.Draw(*va, *ib, *shader);
-      }
+      // make vertex buffer
+      auto vertexBuffer = Buffer<FogVertex>(vertices, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
+      // make index buffer
+      auto indexBuffer = IndexBuffer(indices, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
+      // make bind group
+      BindGroup bindGroup =
+         FogLayout::ToBindGroup(renderer.device, std::forward_as_tuple(vertexUniform, 0), fragmentUniform);
+      renderer.Draw(renderer.fog, vertexBuffer, indexBuffer, bindGroup, {(unsigned int)fragmentUniform.getOffset()});
    }
 }

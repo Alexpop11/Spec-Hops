@@ -1,10 +1,11 @@
+#include "Player.h"
 #include "Bomb.h"
 #include "../World.h"
 #include "Tile.h"
-#include "Player.h"
+#include "AudioEngine.h"
 
 Bomb::Bomb(const std::string& name, float x, float y)
-   : Entity(name, DrawPriority::Bomb, x, y, "textures/bomb.png") {
+   : Entity(name, DrawPriority::Bomb, x, y, "bomb.png") {
    ExplodeTick = 0;
 }
 

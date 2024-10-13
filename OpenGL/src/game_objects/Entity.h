@@ -1,7 +1,6 @@
 #pragma once
 #include "SquareObject.h"
 #include "../World.h"
-#include "Tile.h"
 
 
 class Entity : public SquareObject {

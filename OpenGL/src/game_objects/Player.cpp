@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "Player.h"
+#include "AudioEngine.h"
 #include "../Input.h"
 #include "Camera.h"
 #include "../World.h"
@@ -8,12 +9,12 @@
 #include "Bomb.h"
 
 Player::Player(const std::string& name, int tile_x, int tile_y)
-   : Character(name, tile_x, tile_y, "textures/alternate-player.png") {
+   : Character(name, tile_x, tile_y, "alternate-player.png") {
    drawPriority     = DrawPriority::Character;
    health           = 5;
    Camera::position = {tile_x, tile_y};
 
-   healthText = std::make_unique<Text>("Health", Renderer::jacquard12_big, glm::vec2{20, 20});
+   healthText = std::make_unique<Text>("Health", Application::get().jacquard12_big, glm::vec2{20, 20});
    // topText = std::make_unique<Text>("Hello!", Renderer::Pixelify, glm::vec2{1280,650});
 }
 
@@ -72,7 +73,7 @@ void Player::update() {
       health = 100000;
    }
 
-   if (!key_pressed_last_frame && key_pressed_this_frame || Input::keys_pressed_down[GLFW_KEY_LEFT_SHIFT]) {
+   if ((!key_pressed_last_frame && key_pressed_this_frame) || Input::keys_pressed_down[GLFW_KEY_LEFT_SHIFT]) {
       World::shouldTick = true;
    }
    key_pressed_last_frame = key_pressed_this_frame;
@@ -84,16 +85,17 @@ void Player::update() {
 
 void Player::render(Renderer& renderer) {
    Character::render(renderer);
+   auto mousePos = Renderer::MousePos();
    if (Input::left_mouse_pressed_down) {
       if (gunCooldown == 0) {
-         Renderer::DebugLine(position, renderer.MousePos(), {1, 0, 0, 1});
+         Renderer::DebugLine(position, mousePos, {1, 0, 0, 1});
          audio().Zap.play();
          // get what is at mouse position
-         for (auto& character : World::at<Character>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
+         for (auto& character : World::at<Character>(mousePos.x + 0.5, mousePos.y + 0.5)) {
             character->stunnedLength = 6;
             character->tintColor     = {1.0, 0.5, 0.0, 0.5};
          }
-         for (auto& bomb : World::at<Bomb>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
+         for (auto& bomb : World::at<Bomb>(mousePos.x + 0.5, mousePos.y + 0.5)) {
             bomb->explode();
          }
          gunCooldown = playerGunCooldown;
@@ -101,15 +103,15 @@ void Player::render(Renderer& renderer) {
    }
    if (Input::right_mouse_pressed) {
       if (hasSlomo) {
-         Renderer::DebugLine(position, renderer.MousePos(), {1, 0, 0, 1});
+         Renderer::DebugLine(position, mousePos, {1, 0, 0, 1});
          // get what is at mouse position
-         for (auto& character : World::at<Character>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
+         for (auto& character : World::at<Character>(mousePos.x + 0.5, mousePos.y + 0.5)) {
             character->tintColor = {1.0, 0.5, 0.0, 0.5};
          }
-         for (auto& bomb : World::at<Bomb>(renderer.MousePos().x + 0.5, renderer.MousePos().y + 0.5)) {
+         for (auto& bomb : World::at<Bomb>(mousePos.x + 0.5, mousePos.y + 0.5)) {
             bomb->tintColor = {1.0, 0.5, 0.0, 0.5};
          }
-         World::timeSpeed        = zeno(World::timeSpeed, 0.333, 0.08);
+         World::timeSpeed = zeno(World::timeSpeed, 0.333, 0.08);
          audio().Update(World::timeSpeed);
          World::settingTimeSpeed = true;
       }
@@ -190,7 +192,7 @@ void Player::tickUpdate() {
    }
    if (Input::keys_pressed[GLFW_KEY_SPACE]) {
       if (hasBomb && bombCoolDown <= 0) {
-         World::gameobjectstoadd.push_back(std::make_unique<Bomb>(Bomb("CoolBomb", tile_x, tile_y)));
+         World::gameobjectstoadd.push_back(std::make_unique<Bomb>("CoolBomb", tile_x, tile_y));
          audio().Bomb_Place.play();
          bombCoolDown = 3;
       }

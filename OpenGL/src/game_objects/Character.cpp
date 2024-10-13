@@ -1,7 +1,7 @@
 #include "Character.h"
 #include "Input.h"
 #include <cmath>
-#include <Renderer.h>
+#include "../rendering/Renderer.h"
 
 
 Character::Character(const std::string& name, int tile_x, int tile_y, std::string texturepath)

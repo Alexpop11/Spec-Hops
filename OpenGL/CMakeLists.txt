@@ -7,8 +7,21 @@ set(CMAKE_CXX_STANDARD 23)
 set(VENDOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
 # Add application code
-file(GLOB cpp_files "src/*.c" "src/*.cpp" "src/game_objects/*.cpp" "src/game_objects/enemies/*.cpp" "src/game_objects/ui/*.cpp" "${VENDOR_DIR}/imgui/*.cpp")
-file(GLOB header_files "src/*.h" "src/game_objects/*.h" "src/game_objects/enemies/*.h" "src/game_objects/ui/*.h")
+file(GLOB_RECURSE cpp_files 
+    "src/*.cpp"
+    "src/*.cxx"
+    "src/*.cc"
+    "${VENDOR_DIR}/imgui/*.cpp"
+)
+
+# Add header files
+file(GLOB_RECURSE header_files 
+    "src/*.h"
+    "src/*.hpp"
+    "src/*.hxx"
+)
+
+add_definitions(-DIMGUI_IMPL_WEBGPU_BACKEND_DAWN)
 
 # Add resource files
 file(GLOB_RECURSE res_files "res/*")
@@ -20,14 +33,16 @@ CPMAddPackage(
   VERSION 1.0
 )
 
+# Add WebGPU
+# Also adds Add GLFW
+FetchContent_Declare(
+  webgpu
+  GIT_REPOSITORY https://github.com/anchpop/WebGPU-distribution.git
+  GIT_TAG        7d29923aff711ae179ffdf933cc9ca31d6e400f0
+)
+FetchContent_MakeAvailable(webgpu)
 
-
-# Add GLFW
-add_subdirectory(${VENDOR_DIR}/glfw)
-
-# Add GLEW
-set(BUILD_UTILS OFF CACHE BOOL "" FORCE)
-add_subdirectory(${VENDOR_DIR}/glew/build/cmake)
+add_subdirectory(${VENDOR_DIR}/glfw3webgpu)
 
 # Add GLM
 add_subdirectory(${VENDOR_DIR}/glm)
@@ -61,8 +76,6 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT $
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${VENDOR_DIR}/glfw/include
-    ${VENDOR_DIR}/glew/include
     ${VENDOR_DIR}/glm
     ${VENDOR_DIR}/miniaudio
     ${VENDOR_DIR}/stb_image
@@ -72,12 +85,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    glfw
-    glew_s
     OpenGL::GL
     glm::glm
     xxHash::xxhash
     Clipper2
+    webgpu
+    glfw3webgpu
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/res_path.hpp.in

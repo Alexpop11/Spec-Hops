@@ -17,7 +17,7 @@ public:
    bool         pauseTicks() { return kicking.has_value(); }
 
    std::unique_ptr<Text> healthText;
-   // std::unique_ptr<Text> topText;
+    std::unique_ptr<Text> topText;
 
    virtual std::vector<GameObject*> children() override { return {healthText.get()}; }
 

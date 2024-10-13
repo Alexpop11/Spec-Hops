@@ -1,7 +1,6 @@
 #include "Entity.h"
 #include "Input.h"
-#include <cmath>
-#include <Renderer.h>
+#include "../AudioEngine.h"
 
 
 Entity::Entity(const std::string& name, DrawPriority drawPriority, int tile_x, int tile_y, std::string texturepath)

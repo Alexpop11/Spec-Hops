@@ -1,47 +1,48 @@
 #include "SquareObject.h"
+#include "../Input.h"
+#include "../rendering/Texture.h"
 
 SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, int tile_x, int tile_y,
                            std::string texturePath)
-   : GameObject(name, drawPriority, {tile_x, tile_y})
+   : GameObject(name, drawPriority,
+                {
+                   tile_x, tile_y
+})
    , tile_x(tile_x)
-   , tile_y(tile_y) {
-   texture = Texture::create(Renderer::ResPath() + texturePath);
-   shader  = Shader::create(Renderer::ResPath() + "shaders/shader.shader");
-
-   std::array<glm::vec2, 8> positions = {
-      glm::vec2(-0.5f, -0.5f), glm::vec2(0.0f, 0.0f), // 0
-      glm::vec2(0.5f, -0.5f),  glm::vec2(1.0f, 0.0f), // 1
-      glm::vec2(0.5f, 0.5f),   glm::vec2(1.0f, 1.0f), // 2
-      glm::vec2(-0.5f, 0.5f),  glm::vec2(0.0f, 1.0f)  // 3
-   };
-
-   std::array<uint32_t, 6> indices = {0, 1, 2, 2, 3, 0};
-
-   vb = VertexBuffer::create(positions);
-   VertexBufferLayout layout;
-   layout.Push<float>(2);
-   layout.Push<float>(2);
-   va = std::make_shared<VertexArray>(vb, layout);
-   ib = IndexBuffer::create(indices);
-}
-
-void SquareObject::setUpShader(Renderer& renderer) {
-   GameObject::setUpShader(renderer);
-   texture->Bind();
-   shader->SetUniform1i("u_Texture", 0);
-   shader->SetUniform4f("u_Color", tintColor);
-}
+   , tile_y(tile_y)
+   , pointBuffer(Buffer<SquareObjectVertex>::create(
+        {
+           SquareObjectVertex{glm::vec2(-0.5f, -0.5f), glm::vec2(0.0f, 0.0f)}, // 0
+           SquareObjectVertex{glm::vec2(0.5f, -0.5f), glm::vec2(1.0f, 0.0f)},  // 1
+           SquareObjectVertex{glm::vec2(0.5f, 0.5f), glm::vec2(1.0f, 1.0f)},   // 2
+           SquareObjectVertex{glm::vec2(-0.5f, 0.5f), glm::vec2(0.0f, 1.0f)},  // 3
+        },
+        wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex)),
+   indexBuffer(IndexBuffer::create(
+      {
+         0, 1, 2, // Triangle #0 connects points #0, #1 and #2
+         0, 2, 3  // Triangle #1 connects points #0, #2 and #3
+      },
+      wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index)),
+   vertexUniform(BufferView<SquareObjectVertexUniform>::create(
+      SquareObjectVertexUniform{CalculateMVP(position, rotation, scale)})),
+   fragmentUniform(
+      BufferView<SquareObjectFragmentUniform>::create(SquareObjectFragmentUniform{glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)})),
+   texture(Texture::create(texturePath)) {}
 
 void SquareObject::render(Renderer& renderer) {
-   GameObject::render(renderer);
-
-   // draw if va, ib, and shader are set:
-   if (va && ib && shader) {
-      renderer.Draw(*va, *ib, *shader);
-   }
+   this->vertexUniform.Update(SquareObjectVertexUniform{CalculateMVP(position, 0, 1)});
+   this->fragmentUniform.Update(SquareObjectFragmentUniform{tintColor});
+   BindGroup bindGroup =
+      SquareObjectLayout::ToBindGroup(renderer.device, vertexUniform, fragmentUniform, texture.get(), renderer.sampler);
+   renderer.Draw(renderer.squareObject, *pointBuffer, *indexBuffer, bindGroup,
+                 {
+                    (uint32_t)vertexUniform.getOffset(),
+                    (uint32_t)fragmentUniform.getOffset(),
+                 });
 }
 
 void SquareObject::update() {
-   position = zeno(position, glm::vec2(tile_x, tile_y), 0.05);
+   position    = zeno(position, glm::vec2(tile_x, tile_y), 0.05);
    tintColor.a = zeno(tintColor.a, 0.0, 0.3);
 }

@@ -3,7 +3,9 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <filesystem>
 #include "miniaudio.h"
+#include <filesystem>
 
 class Sound {
 private:
@@ -11,7 +13,7 @@ private:
    ma_sound   sound;
 
 public:
-   Sound(const std::string& filename, ma_engine* engine);
+   Sound(const std::filesystem::path& filename, ma_engine* engine);
    Sound(const Sound&)            = delete;
    Sound& operator=(const Sound&) = delete;
    Sound(Sound&& other) noexcept;
@@ -39,7 +41,7 @@ class AudioEngine {
 private:
    MiniAudioEngine engine;
 
-   Sound getSound(const std::string& name);
+   Sound getSound(const std::filesystem::path& name);
 
 public:
    AudioEngine();
