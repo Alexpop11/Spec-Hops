@@ -35,6 +35,7 @@
 #include "rendering/Texture.h"
 #include "rendering/CommandEncoder.h"
 #include "rendering/RenderPass.h"
+#include "AudioEngine.h"
 
 #include "glm/glm.hpp"
 
@@ -61,6 +62,12 @@ void mainLoop(Application& application, Renderer& renderer) {
    Input::currentTime       = Input::currentTime + Input::deltaTime;
    Input::realTimeLastFrame = glfwGetTime();
    Input::updateKeyStates(application.getWindow());
+   if (!World::settingTimeSpeed) {
+      World::timeSpeed = zeno(World::timeSpeed, 1.0, 0.4);
+      audio().Update(World::timeSpeed);
+   } else {
+      World::settingTimeSpeed = false;
+   }
 
    World::UpdateObjects();
 
@@ -487,6 +494,8 @@ int main(void) {
    World::LoadMap("SpaceShip.txt");
    World::gameobjects.push_back(std::make_unique<Fog>());
 
+   audio().Song.play();
+
    Input::currentTime       = glfwGetTime();
    Input::realTimeLastFrame = Input::currentTime;
    Input::lastTick          = Input::currentTime;
@@ -505,104 +514,4 @@ int main(void) {
    application.Terminate();
 
    return 0;
-
-
-   /*
-   // Initialize ImGui
-   IMGUI_CHECKVERSION();
-   ImGui::CreateContext();
-   ImGuiIO& io = ImGui::GetIO();
-   (void)io;
-   ImGui::StyleColorsDark();
-   const char* glsl_version = "#version 330";
-   ImGui_ImplGlfw_InitForOpenGL(window, true);
-   ImGui_ImplOpenGL3_Init(glsl_version);
-
-   Renderer renderer(window, &io);
-
-   World::LoadMap("maps/SpaceShip.txt");
-   World::gameobjects.push_back(std::make_unique<Fog>());
-
-   Input::currentTime       = glfwGetTime();
-   double realTimeLastFrame = Input::currentTime;
-   double lastTick          = Input::startTime;
-   audio().Song.play();
-
-   // -------------------
-   // Main rendering loop
-   // -------------------
-   while (!glfwWindowShouldClose(window)) {
-      double lastFrameTime = Input::currentTime;
-      Input::deltaTime     = World::timeSpeed * (glfwGetTime() - realTimeLastFrame);
-      Input::currentTime   = Input::currentTime + Input::deltaTime;
-      realTimeLastFrame    = glfwGetTime();
-      if (!World::settingTimeSpeed) {
-         World::timeSpeed = zeno(World::timeSpeed, 1.0, 0.4);
-         audio().Update(World::timeSpeed);
-
-      } else {
-         World::settingTimeSpeed = false;
-      }
-
-      // Set the viewport size
-      auto [width, height] = renderer.WindowSize();
-      glViewport(0, 0, (GLsizei)width, (GLsizei)height);
-
-      auto gameobjects = World::get_gameobjects();
-
-      renderer.Clear();
-      Input::updateKeyStates(window);
-
-      World::UpdateObjects();
-
-      if (!World::ticksPaused()) {
-         if (World::shouldTick) {
-            World::TickObjects();
-            lastTick          = Input::currentTime;
-            World::shouldTick = false;
-         } else if (lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime) {
-            World::TickObjects();
-            lastTick = lastTick + (1.0 / TICKS_PER_SECOND);
-         }
-      }
-
-      // Start the Dear ImGui frame
-      ImGui_ImplOpenGL3_NewFrame();
-      ImGui_ImplGlfw_NewFrame();
-      ImGui::NewFrame();
-
-      // Render all objects
-      World::RenderObjects(renderer);
-
-      // Render debug lines
-      renderer.DrawDebug();
-
-      // Performance info
-      {
-         ImGui::PushFont(renderer.jacquard12_small);
-         ImGui::Begin("Performance Info");
-         ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-         ImGui::End();
-         ImGui::PopFont();
-      }
-
-      // Render ImGui
-      ImGui::Render();
-      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-      // Swap front and back buffers
-      glfwSwapBuffers(window);
-
-      // Poll for and process events
-      glfwPollEvents();
-   }
-
-   // Cleanup ImGui
-   ImGui_ImplOpenGL3_Shutdown();
-   ImGui_ImplGlfw_Shutdown();
-   ImGui::DestroyContext();
-
-   glfwTerminate();
-   return 0;
-   */
 }

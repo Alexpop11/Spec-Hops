@@ -1,6 +1,7 @@
 #include "Background.h"
 
 #include "../Application.h"
+#include "../Input.h"
 
 Background::Background(const std::string& name)
    : GameObject(name, DrawPriority::Background, {0, 0})
@@ -22,7 +23,7 @@ Background::Background(const std::string& name)
                                                wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform)) {}
 
 void Background::render(Renderer& renderer) {
-   StarUniforms uniform(glfwGetTime(), Application::get().windowSize()); // TODO: use world time
+   StarUniforms uniform(Input::currentTime, Application::get().windowSize());
    uniformBuffer.upload({uniform});
    BindGroup bindGroup =
       renderer.stars.BindGroups(std::forward_as_tuple(std::forward_as_tuple(uniformBuffer, 0))).front();
