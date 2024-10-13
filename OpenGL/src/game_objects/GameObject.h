@@ -6,6 +6,7 @@
 #include <memory>
 #include "glm/glm.hpp"
 #include "../Generator.h"
+#include "../Input.h"
 
 #include "../rendering/Renderer.h"
 
@@ -46,11 +47,9 @@ public:
          auto& coroutine = *it;
 
          // Check if the coroutine is waiting for frames
-         auto& wait = coroutine.wait_for_frames();
-         if (auto wf = std::get_if<int>(&wait)) {
-            std::cout << "Waiting for " << *wf << " frames\n";
-            if (*wf > 0) {
-               (*wf)--;
+         auto& wait = coroutine.wait_until();
+         if (auto until = std::get_if<float>(&wait)) {
+            if (*until > Input::currentTime) {
                ++it;
                continue;
             }

@@ -5,6 +5,7 @@
 #include <memory>
 #include <variant>
 #include <exception>
+#include "Input.h"
 
 template <typename T = void>
 struct Generator {
@@ -12,7 +13,7 @@ struct Generator {
    using handle_type = std::coroutine_handle<promise_type>;
 
    struct promise_type {
-      std::variant<std::monostate, int> wait_for_frames; // For advanced waiting
+      std::variant<std::monostate, float> wait_until;
 
       Generator get_return_object() { return Generator{handle_type::from_promise(*this)}; }
 
@@ -20,8 +21,8 @@ struct Generator {
 
       std::suspend_always final_suspend() noexcept { return {}; }
 
-      std::suspend_always yield_value(int frames) { // For waiting frames
-         wait_for_frames = frames;
+      std::suspend_always yield_value(float for_seconds) {
+         wait_until = Input::currentTime + for_seconds;
          return {};
       }
 
@@ -64,5 +65,5 @@ struct Generator {
       return !coro.done();
    }
 
-   std::variant<std::monostate, int>& wait_for_frames() { return coro.promise().wait_for_frames; }
+   std::variant<std::monostate, float>& wait_until() { return coro.promise().wait_until; }
 };
