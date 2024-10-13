@@ -6,7 +6,7 @@ class Background : public GameObject {
 public:
    Background(const std::string& name);
 
-   virtual void render(Renderer& renderer) override;
+   virtual void render(Renderer& renderer, RenderPass& renderPass) override;
    virtual void update() override;
 
 private:

@@ -7,7 +7,7 @@
 class Text : public GameObject {
 public:
    Text(const std::string& text, ImFont* font, glm::vec2 position);
-   virtual void render(Renderer& renderer) override;
+   virtual void render(Renderer& renderer, RenderPass& renderPass) override;
    virtual void update() override;
 
    ImFont* font;

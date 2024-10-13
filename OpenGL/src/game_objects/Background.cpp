@@ -22,13 +22,13 @@ Background::Background(const std::string& name)
    , uniformBuffer(UniformBuffer<StarUniforms>({StarUniforms(0.0f, Application::get().windowSize())},
                                                wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform)) {}
 
-void Background::render(Renderer& renderer) {
+void Background::render(Renderer& renderer, RenderPass& renderPass) {
    StarUniforms uniform(Input::currentTime, Application::get().windowSize());
    uniformBuffer.upload({uniform});
    BindGroup bindGroup =
       renderer.stars.BindGroups(std::forward_as_tuple(std::forward_as_tuple(uniformBuffer, 0))).front();
 
-   renderer.Draw(renderer.stars, pointBuffer, indexBuffer, bindGroup, {});
+   renderPass.Draw(renderer.stars, pointBuffer, indexBuffer, bindGroup, {});
 }
 
 void Background::update() {

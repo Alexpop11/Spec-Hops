@@ -124,12 +124,12 @@ void World::TickObjects() {
    }
 }
 
-void World::RenderObjects(Renderer& renderer) {
+void World::RenderObjects(Renderer& renderer, RenderPass& renderPass) {
    auto objects = get_gameobjects();
    sortGameObjectsByPriority(objects);
 
    for (auto& gameobject : objects) {
-      gameobject->render(renderer);
+      gameobject->render(renderer, renderPass);
    }
 }
 

@@ -71,6 +71,6 @@ public:
 
    static void UpdateObjects();
    static void TickObjects();
-   static void RenderObjects(Renderer& renderer);
+   static void RenderObjects(Renderer& renderer, RenderPass& renderPass);
    static bool shouldTick;
 };

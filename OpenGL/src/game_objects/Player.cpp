@@ -84,8 +84,8 @@ void Player::update() {
    // When user clicks the mouse,
 }
 
-void Player::render(Renderer& renderer) {
-   Character::render(renderer);
+void Player::render(Renderer& renderer, RenderPass& renderPass) {
+   Character::render(renderer, renderPass);
    auto mousePos = Renderer::MousePos();
    if (Input::left_mouse_pressed_down) {
       if (gunCooldown == 0) {

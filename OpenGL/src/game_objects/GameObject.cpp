@@ -16,6 +16,6 @@ void GameObject::update() {}
 
 void GameObject::tickUpdate() {}
 
-void GameObject::render(Renderer& renderer) {
+void GameObject::render(Renderer& renderer, RenderPass& renderPass) {
    std::cout << "Rendering GameObject (you should not see this lol) " << name << std::endl;
 }

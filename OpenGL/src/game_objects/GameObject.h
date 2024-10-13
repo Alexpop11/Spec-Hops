@@ -9,6 +9,7 @@
 #include "../Input.h"
 
 #include "../rendering/Renderer.h"
+#include "../rendering/RenderPass.h"
 
 enum class DrawPriority {
    Background,
@@ -28,7 +29,7 @@ public:
 
    virtual std::vector<GameObject*> children() { return {}; }
 
-   virtual void render(Renderer& renderer);
+   virtual void render(Renderer& renderer, RenderPass& renderPass);
    virtual void update();
    virtual void tickUpdate();
 

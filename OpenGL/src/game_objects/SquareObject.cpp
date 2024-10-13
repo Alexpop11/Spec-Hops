@@ -30,16 +30,16 @@ SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, i
       BufferView<SquareObjectFragmentUniform>::create(SquareObjectFragmentUniform{glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)})),
    texture(Texture::create(texturePath)) {}
 
-void SquareObject::render(Renderer& renderer) {
+void SquareObject::render(Renderer& renderer, RenderPass& renderPass) {
    this->vertexUniform.Update(SquareObjectVertexUniform{CalculateMVP(position, 0, 1)});
    this->fragmentUniform.Update(SquareObjectFragmentUniform{tintColor});
    BindGroup bindGroup =
       SquareObjectLayout::ToBindGroup(renderer.device, vertexUniform, fragmentUniform, texture.get(), renderer.sampler);
-   renderer.Draw(renderer.squareObject, *pointBuffer, *indexBuffer, bindGroup,
-                 {
-                    (uint32_t)vertexUniform.getOffset(),
-                    (uint32_t)fragmentUniform.getOffset(),
-                 });
+   renderPass.Draw(renderer.squareObject, *pointBuffer, *indexBuffer, bindGroup,
+                   {
+                      (uint32_t)vertexUniform.getOffset(),
+                      (uint32_t)fragmentUniform.getOffset(),
+                   });
 }
 
 void SquareObject::update() {

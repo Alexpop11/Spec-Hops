@@ -18,7 +18,7 @@ Fog::Fog()
    , fragmentUniformOther(
         UniformBufferView<FogFragmentUniform>::create(FogFragmentUniform(mainFogColor, mainFogColor, {0, 0}))) {}
 
-void Fog::render(Renderer& renderer) {
+void Fog::render(Renderer& renderer, RenderPass& renderPass) {
    bool showWalls = true;
    vertexUniform.upload({FogVertexUniform(CalculateMVP(position, rotation, scale))});
 
@@ -60,7 +60,7 @@ void Fog::render(Renderer& renderer) {
    clipper.Execute(ClipType::Difference, FillRule::NonZero, invisibilityPaths);
 
    // Render the invisibility regions
-   renderPolyTree(renderer, invisibilityPaths, fragmentUniformOther);
+   renderPolyTree(renderer, renderPass, invisibilityPaths, fragmentUniformOther);
 
    if (showWalls) {
       // Tint all the walls that are not visible
@@ -70,20 +70,20 @@ void Fog::render(Renderer& renderer) {
       PolyTreeD tintPaths;
       tint.Execute(ClipType::Difference, FillRule::NonZero, tintPaths);
 
-      renderPolyTree(renderer, tintPaths, fragmentUniformWalls);
+      renderPolyTree(renderer, renderPass, tintPaths, fragmentUniformWalls);
    }
 }
 
 void Fog::update() {}
 
-void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree,
+void Fog::renderPolyTree(Renderer& renderer, RenderPass& renderPass, const PolyTreeD& polytree,
                          const UniformBufferView<FogFragmentUniform>& fragmentUniform) const {
    for (auto& shadedRegion : polytree) {
       std::vector<PointD>              shaded       = shadedRegion->Polygon();
       std::vector<std::vector<PointD>> invisibility = {shaded};
       for (auto& holeRegion : *shadedRegion) {
          invisibility.push_back(holeRegion->Polygon());
-         renderPolyTree(renderer, *holeRegion, fragmentUniform);
+         renderPolyTree(renderer, renderPass, *holeRegion, fragmentUniform);
       }
 
       // Triangulate the invisibility regions
@@ -104,6 +104,6 @@ void Fog::renderPolyTree(Renderer& renderer, const PolyTreeD& polytree,
       // make bind group
       BindGroup bindGroup =
          FogLayout::ToBindGroup(renderer.device, std::forward_as_tuple(vertexUniform, 0), fragmentUniform);
-      renderer.Draw(renderer.fog, vertexBuffer, indexBuffer, bindGroup, {(unsigned int)fragmentUniform.getOffset()});
+      renderPass.Draw(renderer.fog, vertexBuffer, indexBuffer, bindGroup, {(unsigned int)fragmentUniform.getOffset()});
    }
 }

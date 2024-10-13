@@ -58,7 +58,7 @@ glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegr
    return mvp;
 }
 
-void Renderer::DrawLine(Line line) {
+void Renderer::DrawLine(Line line, RenderPass& renderPass) {
    auto                               mvp = CalculateMVP({0, 0}, 0, 1);
    LineVertexUniform                  vertexUniform(line.start, line.end, 0.1f, mvp);
    LineFragmentUniform                fragmentUniform{line.color};
@@ -70,7 +70,7 @@ void Renderer::DrawLine(Line line) {
    BindGroup bindGroup = LineLayout::ToBindGroup(device, std::forward_as_tuple(vertexUniformBuffer, 0),
                                                  std::forward_as_tuple(fragmentUniformBuffer, 0));
 
-   Draw(this->line, linePoints, lineIndices, bindGroup, {});
+   renderPass.Draw(this->line, linePoints, lineIndices, bindGroup, {});
 }
 
 
@@ -88,9 +88,9 @@ void Renderer::DebugLine(glm::vec2 start, glm::vec2 end, glm::vec4 color) {
 }
 
 
-void Renderer::DrawDebug() {
+void Renderer::DrawDebug(RenderPass& renderPass) {
    for (const auto& line : GetDebugLines()) {
-      this->DrawLine(line);
+      this->DrawLine(line, renderPass);
    }
    GetDebugLines().clear();
 }

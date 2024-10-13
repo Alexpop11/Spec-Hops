@@ -13,7 +13,7 @@ public:
    virtual bool move(int new_x, int new_y) override;
    virtual void hurt() override;
    bool         second_step = false;
-   virtual void render(Renderer& renderer) override;
+   virtual void render(Renderer& renderer, RenderPass& renderPass) override;
    bool         pauseTicks() { return kicking.has_value(); }
 
    std::unique_ptr<Text> healthText;

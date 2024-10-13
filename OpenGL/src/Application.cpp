@@ -101,8 +101,8 @@ void mainLoop(Application& application, Renderer& renderer) {
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
 
-      World::RenderObjects(renderer);
-      renderer.DrawDebug();
+      World::RenderObjects(renderer, renderPass);
+      renderer.DrawDebug(renderPass);
 
       // Performance info
       {
