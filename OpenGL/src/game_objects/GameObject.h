@@ -5,6 +5,8 @@
 #include <optional>
 #include <memory>
 #include "glm/glm.hpp"
+#include "../Generator.h"
+#include "../Input.h"
 
 #include "../rendering/Renderer.h"
 
@@ -35,6 +37,36 @@ public:
    glm::vec2    position;
    float        rotation = 0;
    float        scale    = 1.0f;
+
+   // Add coroutine
+   void addCoroutine(Generator coroutine) { coroutines.emplace_back(std::move(coroutine)); }
+
+   // Run coroutines
+   void progressCoroutines() {
+      for (auto it = coroutines.begin(); it != coroutines.end();) {
+         auto& coroutine = *it;
+
+         // Check if the coroutine is waiting for frames
+         auto& wait = coroutine.wait_until();
+         if (auto until = std::get_if<float>(&wait)) {
+            if (*until > Input::currentTime) {
+               ++it;
+               continue;
+            }
+         }
+
+         // Progress the coroutine
+         if (!coroutine.move_next()) {
+            // Coroutine finished, remove it
+            it = coroutines.erase(it);
+         } else {
+            ++it;
+         }
+      }
+   }
+
+   // Store active coroutines
+   std::vector<Generator> coroutines;
 
 private:
    // Add any private members here if needed

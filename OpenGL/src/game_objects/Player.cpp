@@ -18,6 +18,7 @@ Player::Player(const std::string& name, int tile_x, int tile_y)
    // topText = std::make_unique<Text>("Hello!", Renderer::Pixelify, glm::vec2{1280,650});
 }
 
+
 bool Player::move(int new_x, int new_y) {
    if (Character::move(new_x, new_y)) {
       if (!second_step) {

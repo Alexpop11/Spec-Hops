@@ -97,7 +97,10 @@ void World::UpdateObjects() {
 
    for (auto& gameobject : objects) {
       gameobject->update();
+      gameobject->progressCoroutines();
    }
+
+   for (auto& gameobject : objects) {}
 
    // erase dead objects
    // ------------------
@@ -114,8 +117,10 @@ void World::TickObjects() {
    auto objects = get_gameobjects();
    sortGameObjectsByPriority(objects);
 
-   for (auto& gameobject : objects) {
-      gameobject->tickUpdate();
+   if (!ticksPaused()) {
+      for (auto& gameobject : objects) {
+         gameobject->tickUpdate();
+      }
    }
 }
 
