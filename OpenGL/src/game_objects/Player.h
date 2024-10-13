@@ -16,6 +16,8 @@ public:
    virtual void render(Renderer& renderer) override;
    bool         pauseTicks() { return kicking.has_value(); }
 
+   Generator<> autoMove();
+
    std::unique_ptr<Text> healthText;
     std::unique_ptr<Text> topText;
 

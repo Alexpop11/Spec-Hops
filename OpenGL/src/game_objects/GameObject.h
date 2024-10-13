@@ -37,9 +37,34 @@ public:
    float        rotation = 0;
    float        scale    = 1.0f;
 
-
    // Add coroutine
    void addCoroutine(Generator<> coroutine) { coroutines.emplace_back(std::move(coroutine)); }
+
+   // Run coroutines
+   void progressCoroutines() {
+      for (auto it = coroutines.begin(); it != coroutines.end();) {
+         auto& coroutine = *it;
+
+         // Check if the coroutine is waiting for frames
+         auto& wait = coroutine.wait_for_frames();
+         if (auto wf = std::get_if<int>(&wait)) {
+            std::cout << "Waiting for " << *wf << " frames\n";
+            if (*wf > 0) {
+               (*wf)--;
+               ++it;
+               continue;
+            }
+         }
+
+         // Progress the coroutine
+         if (!coroutine.move_next()) {
+            // Coroutine finished, remove it
+            it = coroutines.erase(it);
+         } else {
+            ++it;
+         }
+      }
+   }
 
    // Store active coroutines
    std::vector<Generator<>> coroutines;

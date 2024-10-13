@@ -16,7 +16,16 @@ Player::Player(const std::string& name, int tile_x, int tile_y)
 
    healthText = std::make_unique<Text>("Health", Application::get().jacquard12_big, glm::vec2{20, 20});
    // topText = std::make_unique<Text>("Hello!", Renderer::Pixelify, glm::vec2{1280,650});
+   addCoroutine(autoMove());
 }
+
+Generator<> Player::autoMove() {
+   while (true) {
+      move(tile_x + 1, tile_y);
+      co_yield 10;
+   }
+}
+
 
 bool Player::move(int new_x, int new_y) {
    if (Character::move(new_x, new_y)) {

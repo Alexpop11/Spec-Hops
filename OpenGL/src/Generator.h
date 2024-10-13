@@ -12,7 +12,6 @@ struct Generator {
    using handle_type = std::coroutine_handle<promise_type>;
 
    struct promise_type {
-      std::optional<T>                  current_value;
       std::variant<std::monostate, int> wait_for_frames; // For advanced waiting
 
       Generator get_return_object() { return Generator{handle_type::from_promise(*this)}; }
@@ -20,11 +19,6 @@ struct Generator {
       std::suspend_always initial_suspend() { return {}; }
 
       std::suspend_always final_suspend() noexcept { return {}; }
-
-      std::suspend_always yield_value(T value) {
-         current_value = value;
-         return {};
-      }
 
       std::suspend_always yield_value(int frames) { // For waiting frames
          wait_for_frames = frames;
@@ -70,7 +64,5 @@ struct Generator {
       return !coro.done();
    }
 
-   std::optional<T> current_value() const { return coro.promise().current_value; }
-
-   std::variant<std::monostate, int> wait_for_frames() const { return coro.promise().wait_for_frames; }
+   std::variant<std::monostate, int>& wait_for_frames() { return coro.promise().wait_for_frames; }
 };
