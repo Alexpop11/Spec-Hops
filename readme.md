@@ -1,4 +1,4 @@
-How to build with cmake
+How to build and run with cmake:
 
 ```
 // clone and cd into the repo
@@ -7,8 +7,7 @@ mkdir build
 cd build
 // install dependencies: cmake, ninja, opengl
 // detailed instructions are in .github/workflows/release.yaml
-cmake -GNinja ..
-ninja
+cmake -GNinja -DCMAKE_BUILD_TYPE=Release .. && ninja && ./OpenGL/SpaceBoom
 ```
 
 to run:

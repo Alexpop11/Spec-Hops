@@ -50,6 +50,12 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
 
+#ifdef __APPLE__
+   #include <mach-o/dyld.h>
+#elif defined(__linux__)
+   #include <unistd.h>
+#endif
+
 const float TICKS_PER_SECOND = 3.0f;
 
 // Called every frame
@@ -378,11 +384,41 @@ ImGuiIO& setUpImgui(wgpu::Device& device, GLFWwindow* window, wgpu::TextureForma
    return io;
 }
 
+std::filesystem::path getExecutablePath() {
+   namespace fs = std::filesystem;
+   fs::path exe_path;
+
+#ifdef __APPLE__
+   char     pathbuf[1024];
+   uint32_t size = sizeof(pathbuf);
+   if (_NSGetExecutablePath(pathbuf, &size) != 0) {
+      std::cerr << "Buffer too small; need size " << size << "\n";
+      return fs::current_path(); // Fallback to current path
+   }
+   exe_path = fs::weakly_canonical(fs::path(pathbuf));
+#elif defined(__linux__)
+   char    buf[1024];
+   ssize_t len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+   if (len != -1) {
+      buf[len] = '\0';
+      exe_path = fs::weakly_canonical(fs::path(buf));
+   } else {
+      std::cerr << "Failed to read /proc/self/exe\n";
+      return fs::current_path(); // Fallback to current path
+   }
+#else
+   // Fallback for other platforms
+   exe_path = fs::current_path();
+#endif
+
+   return exe_path;
+}
+
 std::filesystem::path getResPath() {
    namespace fs = std::filesystem;
 
    // Get the path of the executable
-   fs::path exe_path = fs::weakly_canonical(fs::path("/proc/self/exe"));
+   fs::path exe_path = getExecutablePath();
    fs::path exe_dir  = exe_path.parent_path();
 
    std::filesystem::path res_path;
