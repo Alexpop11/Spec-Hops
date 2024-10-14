@@ -26,13 +26,6 @@ add_definitions(-DIMGUI_IMPL_WEBGPU_BACKEND_DAWN)
 # Add resource files
 file(GLOB_RECURSE res_files "res/*")
 
-include(../cmake/CPM.cmake)
-CPMAddPackage(
-  NAME GroupSourcesByFolder.cmake
-  GITHUB_REPOSITORY TheLartians/GroupSourcesByFolder.cmake
-  VERSION 1.0
-)
-
 # Add WebGPU
 # Also adds Add GLFW
 FetchContent_Declare(
@@ -92,6 +85,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     webgpu
     glfw3webgpu
 )
+
+target_copy_webgpu_binaries(${PROJECT_NAME})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/res_path.hpp.in
                ${CMAKE_CURRENT_SOURCE_DIR}/src/res_path.hpp ESCAPE_QUOTES)
