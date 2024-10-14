@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(SpaceBoom)
+project(Spec-Hops)
 
 include(cmake/CPM.cmake)
 CPMAddPackage(

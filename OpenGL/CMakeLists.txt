@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(SpaceBoom)
+project(Spec-Hops)
 
 set(CMAKE_CXX_STANDARD 23)
 
