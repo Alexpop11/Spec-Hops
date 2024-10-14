@@ -41,19 +41,6 @@ FetchContent_Declare(
   GIT_TAG        7d29923aff711ae179ffdf933cc9ca31d6e400f0
 )
 FetchContent_MakeAvailable(webgpu)
-if (WIN32)
-    # Ensure webgpu_SOURCE_DIR is available
-    FetchContent_GetProperties(webgpu)
-    if(NOT webgpu_SOURCE_DIR)
-        message(FATAL_ERROR "webgpu source directory not found")
-    endif()
-
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${webgpu_SOURCE_DIR}/dist/webgpu_dawn.dll"
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    )
-endif()
 
 add_subdirectory(${VENDOR_DIR}/glfw3webgpu)
 
@@ -114,11 +101,3 @@ if(WIN32)
 endif()
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY PUBLIC_HEADER ${header_files})
-
-if(WIN32)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      $<TARGET_FILE:webgpu>
-      $<TARGET_FILE_DIR:${PROJECT_NAME}>
-  )
-endif()
