@@ -35,7 +35,6 @@ CPMAddPackage(
 
 # Add WebGPU
 # Also adds Add GLFW
-set(WEBGPU_SHARED_LIB OFF CACHE BOOL "Build WebGPU as a shared library")
 FetchContent_Declare(
   webgpu
   GIT_REPOSITORY https://github.com/anchpop/WebGPU-distribution.git
