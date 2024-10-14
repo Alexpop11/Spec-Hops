@@ -101,3 +101,11 @@ if(WIN32)
 endif()
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY PUBLIC_HEADER ${header_files})
+
+if(WIN32)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      $<TARGET_FILE:webgpu>
+      $<TARGET_FILE_DIR:${PROJECT_NAME}>
+  )
+endif()
