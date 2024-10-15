@@ -59,13 +59,13 @@ glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegr
 }
 
 void Renderer::DrawLine(Line line, RenderPass& renderPass) {
-   auto                               mvp = CalculateMVP({0, 0}, 0, 1);
-   LineVertexUniform                  vertexUniform(line.start, line.end, 0.1f, mvp);
-   LineFragmentUniform                fragmentUniform{line.color};
-   UniformBuffer<LineVertexUniform>   vertexUniformBuffer({vertexUniform},
-                                                          wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Uniform));
-   UniformBuffer<LineFragmentUniform> fragmentUniformBuffer({fragmentUniform},
-                                                            wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Uniform));
+   auto                             mvp = CalculateMVP({0, 0}, 0, 1);
+   LineVertexUniform                vertexUniform(line.start, line.end, 0.1f, mvp);
+   LineFragmentUniform              fragmentUniform{line.color};
+   UniformBuffer<LineVertexUniform> vertexUniformBuffer(
+      {vertexUniform}, wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Uniform));
+   UniformBuffer<LineFragmentUniform> fragmentUniformBuffer(
+      {fragmentUniform}, wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Uniform));
 
    BindGroup bindGroup = LineLayout::ToBindGroup(device, std::forward_as_tuple(vertexUniformBuffer, 0),
                                                  std::forward_as_tuple(fragmentUniformBuffer, 0));
@@ -98,14 +98,16 @@ void Renderer::DrawDebug(RenderPass& renderPass) {
 
 glm::vec2 Renderer::MousePos() {
    double x, y;
-   float  xscale, yscale;
 
    auto window = Application::get().getWindow();
    glfwGetCursorPos(window, &x, &y);
-   glfwGetWindowContentScale(window, &xscale, &yscale);
 
+#ifndef __EMSCRIPTEN__
+   float xscale, yscale;
+   glfwGetWindowContentScale(window, &xscale, &yscale);
    x *= xscale;
    y *= yscale;
+#endif
 
    return ScreenToWorldPosition({static_cast<float>(x), static_cast<float>(y)});
 }
