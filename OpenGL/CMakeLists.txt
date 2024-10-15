@@ -21,7 +21,12 @@ file(GLOB_RECURSE header_files
     "src/*.hxx"
 )
 
-add_definitions(-DIMGUI_IMPL_WEBGPU_BACKEND_DAWN)
+if (NOT EMSCRIPTEN)
+    add_definitions(-DIMGUI_IMPL_WEBGPU_BACKEND_DAWN)
+else()
+	add_library(glfw INTERFACE)
+	target_link_options(glfw INTERFACE -sUSE_GLFW=3)
+endif()
 
 # Add resource files
 file(GLOB_RECURSE res_files "res/*")
@@ -94,9 +99,9 @@ endif()
 set_property(TARGET ${PROJECT_NAME} PROPERTY PUBLIC_HEADER ${header_files})
 
 if (EMSCRIPTEN)
-	set_target_properties(App PROPERTIES SUFFIX ".html")
-	target_link_options(App PRIVATE
+	set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
+	target_link_options(${PROJECT_NAME} PRIVATE
 		-sASYNCIFY
-		--preload-file "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+		--preload-file "${CMAKE_CURRENT_SOURCE_DIR}/res"
 	)
 endif()

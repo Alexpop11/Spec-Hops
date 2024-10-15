@@ -14,7 +14,11 @@ Shader::Shader(wgpu::Device device, const std::filesystem::path& filePath)
    wgslDesc.code       = src.c_str();
    wgslDesc.chain.next = nullptr;
    // I changed this from ShaderModuleWGSLDescriptor to ShaderSourceWGSL
+#ifdef __EMSCRIPTEN__
+   wgslDesc.chain.sType = wgpu::SType::ShaderModuleWGSLDescriptor;
+#else
    wgslDesc.chain.sType = wgpu::SType::ShaderSourceWGSL;
+#endif
 
    wgpu::ShaderModuleDescriptor moduleDesc;
 #ifdef WEBGPU_BACKEND_WGPU

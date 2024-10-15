@@ -11,8 +11,9 @@ using namespace GeometryUtils;
 
 Fog::Fog()
    : GameObject("Fog of War", DrawPriority::Fog, {0, 0})
-   , vertexUniform(UniformBuffer<FogVertexUniform>({FogVertexUniform(CalculateMVP(position, rotation, scale))},
-                                                   wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform))
+   , vertexUniform(
+        UniformBuffer<FogVertexUniform>({FogVertexUniform(CalculateMVP(position, rotation, scale))},
+                                        wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Uniform)))
    , fragmentUniformWalls(
         UniformBufferView<FogFragmentUniform>::create(FogFragmentUniform(mainFogColor, tintFogColor, {0, 0})))
    , fragmentUniformOther(
@@ -98,9 +99,11 @@ void Fog::renderPolyTree(Renderer& renderer, RenderPass& renderPass, const PolyT
       }
 
       // make vertex buffer
-      auto vertexBuffer = Buffer<FogVertex>(vertices, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
+      auto vertexBuffer =
+         Buffer<FogVertex>(vertices, wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Vertex));
       // make index buffer
-      auto indexBuffer = IndexBuffer(indices, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
+      auto indexBuffer =
+         IndexBuffer(indices, wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index));
       // make bind group
       BindGroup bindGroup =
          FogLayout::ToBindGroup(renderer.device, std::forward_as_tuple(vertexUniform, 0), fragmentUniform);

@@ -19,13 +19,13 @@ Renderer::Renderer()
            LineVertex{1.0f, +0.5f},
            LineVertex{0.0f, +0.5f},
 },
-        wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex),
+        wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Vertex)),
    lineIndices(
       std::vector<uint16_t>{
          0, 1, 2, // Triangle #0 connects points #0, #1 and #2
          2, 3, 0  // Triangle #1 connects points #0, #2 and #3
       },
-      wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index) {}
+      wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index)) {}
 
 glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale) {
    glm::ivec2 windowSize = Application::get().windowSize();
@@ -63,9 +63,9 @@ void Renderer::DrawLine(Line line, RenderPass& renderPass) {
    LineVertexUniform                  vertexUniform(line.start, line.end, 0.1f, mvp);
    LineFragmentUniform                fragmentUniform{line.color};
    UniformBuffer<LineVertexUniform>   vertexUniformBuffer({vertexUniform},
-                                                          wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+                                                          wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Uniform));
    UniformBuffer<LineFragmentUniform> fragmentUniformBuffer({fragmentUniform},
-                                                            wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+                                                            wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Uniform));
 
    BindGroup bindGroup = LineLayout::ToBindGroup(device, std::forward_as_tuple(vertexUniformBuffer, 0),
                                                  std::forward_as_tuple(fragmentUniformBuffer, 0));

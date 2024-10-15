@@ -12,15 +12,16 @@ Background::Background(const std::string& name)
            glm::vec2(+1, +1),
            glm::vec2(-1, +1),
         },
-        wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex))
+        wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Vertex)))
    , indexBuffer(IndexBuffer(
         {
            0, 1, 2, // Triangle #0 connects points #0, #1 and #2
            0, 2, 3  // Triangle #1 connects points #0, #2 and #3
         },
-        wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index))
-   , uniformBuffer(UniformBuffer<StarUniforms>({StarUniforms(0.0f, Application::get().windowSize())},
-                                               wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform)) {}
+        wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index)))
+   , uniformBuffer(
+        UniformBuffer<StarUniforms>({StarUniforms(0.0f, Application::get().windowSize())},
+                                    wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Uniform))) {}
 
 void Background::render(Renderer& renderer, RenderPass& renderPass) {
    StarUniforms uniform(Input::currentTime, Application::get().windowSize());

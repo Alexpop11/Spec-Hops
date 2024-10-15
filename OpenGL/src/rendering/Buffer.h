@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cstring> // For std::memcpy
 #include <memory>  // For std::shared_ptr and std::weak_ptr
+#include "webgpu-utils.h"
 
 #include "Id.h"
 #include "../Application.h"
@@ -105,15 +106,15 @@ public:
          queue_.writeBuffer(buffer_, 0, paddedData.data(), capacityBytes());
       } else {
          // Calculate the padded size to ensure it's a multiple of 4 bytes
-         size_t dataSize = data.size() * sizeof(T);
+         size_t dataSize   = data.size() * sizeof(T);
          size_t paddedSize = ((dataSize + 3) / 4) * 4;
-         
+
          // Create a temporary buffer with padding
          std::vector<uint8_t> paddedData(paddedSize, 0);
-         
+
          // Copy the actual data
          std::memcpy(paddedData.data(), data.data(), dataSize);
-         
+
          // Upload the padded data to the GPU buffer
          queue_.writeBuffer(buffer_, 0, paddedData.data(), paddedSize);
       }
@@ -282,7 +283,9 @@ public:
 
    static BufferView<T, Uniform> create(const T& data) {
       static std::shared_ptr<Buffer<T, Uniform>> buffer = std::make_shared<Buffer<T, Uniform>>(
-         std::vector<T>{}, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
+         std::vector<T>{},
+         wgpu::bothBufferUsages(wgpu::bothBufferUsages(wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::CopyDst),
+                                wgpu::BufferUsage::Uniform));
       return buffer->Add(data);
    }
 

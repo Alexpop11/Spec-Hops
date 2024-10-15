@@ -17,13 +17,13 @@ SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, i
            SquareObjectVertex{glm::vec2(0.5f, 0.5f), glm::vec2(1.0f, 1.0f)},   // 2
            SquareObjectVertex{glm::vec2(-0.5f, 0.5f), glm::vec2(0.0f, 1.0f)},  // 3
         },
-        wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex)),
+        wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Vertex))),
    indexBuffer(IndexBuffer::create(
       {
          0, 1, 2, // Triangle #0 connects points #0, #1 and #2
          0, 2, 3  // Triangle #1 connects points #0, #2 and #3
       },
-      wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index)),
+      wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index))),
    vertexUniform(BufferView<SquareObjectVertexUniform>::create(
       SquareObjectVertexUniform{CalculateMVP(position, rotation, scale)})),
    fragmentUniform(

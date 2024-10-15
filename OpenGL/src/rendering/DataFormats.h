@@ -24,7 +24,7 @@ struct StarUniforms {
 
 using StarUniformBinding =
    BufferBinding<StarUniforms,                                                       // Type of the buffer
-                 wgpu::both(wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment), // Shader visibility
+                 wgpu::bothShaderStages(wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment), // Shader visibility
                  wgpu::BufferBindingType::Uniform                                    // Buffer binding type
                  >;
 // ============================================================

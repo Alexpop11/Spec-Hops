@@ -1,4 +1,8 @@
-How to build and run with cmake:
+## Build and run
+
+### Desktop builds
+
+Building is easiest with cmake:
 
 ```
 // clone and cd into the repo
@@ -13,8 +17,22 @@ cmake -GNinja -DCMAKE_BUILD_TYPE=Release .. && ninja && ./OpenGL/SpaceBoom
 to run:
 ```
 # from within the build directory
-./OpenGL/SpaceBoom
+./OpenGL/Spec-Hops
 ```
 
-to package:
-1. You need one folder called `res` with the contents of `OpenGL/res/*` and the built binary to sit next to one another.
+to package a desktop build:
+1. You need one folder called `res` with the contents of `OpenGL/res/*` and the built binary to sit next to one another. You also need the dawn dynamic library to be in there right next to the spec-hops binary. TODO: statically link dawn, which is apparently hard: https://github.com/eliemichel/WebGPU-distribution/issues/34
+2. TODO: Mac instructions
+3. TODO: Linux instructions 
+
+### Web builds
+
+```
+git submodule update --init --recursive
+mkdir build_emscripten && cd build_emscripten
+emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
+emmake make
+```
+
+
+

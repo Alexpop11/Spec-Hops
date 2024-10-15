@@ -11,7 +11,7 @@
 #undef STB_IMAGE_IMPLEMENTATION
 
 #ifdef __EMSCRIPTEN__
-#  include <emscripten.h>
+   #include <emscripten.h>
 #endif // __EMSCRIPTEN__
 
 #include "Application.h"
@@ -170,7 +170,9 @@ GLFWwindow* createWindow() {
    const GLFWvidmode* mode           = glfwGetVideoMode(primaryMonitor);
 
    // Create a fullscreen window
-   auto window = glfwCreateWindow(mode->width, mode->height, "Spec Hops", nullptr, nullptr);
+   std::cout << "Mode width: " << mode->width << " Mode height: " << mode->height << std::endl;
+   // create a window that is at least 648x480
+   auto window = glfwCreateWindow(std::max(mode->width, 648), std::max(mode->height, 480), "Spec Hops", nullptr, nullptr);
 
    return window;
 }
@@ -286,32 +288,6 @@ wgpu::TextureFormat preferredFormat(wgpu::Surface& surface, wgpu::Adapter& adapt
    return capabilities.formats[0];
 }
 
-Buffer<float> createPointBuffer(wgpu::Device& device, wgpu::Queue& queue) {
-   std::vector<float> pointData = {
-      // x,   y,
-      -1, -1, +1, -1, +1, +1, -1, +1,
-   };
-   return Buffer<float>(pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
-}
-
-Buffer<SquareObjectVertex> createSquareObjectPointBuffer(wgpu::Device& device, wgpu::Queue& queue) {
-   std::vector<SquareObjectVertex> pointData = {
-      SquareObjectVertex{glm::vec2(-0.5f, -0.5f), glm::vec2(0.0f, 0.0f)}, // 0
-      SquareObjectVertex{glm::vec2(0.5f,  -0.5f), glm::vec2(1.0f, 0.0f)}, // 1
-      SquareObjectVertex{glm::vec2(0.5f,  0.5f),  glm::vec2(1.0f, 1.0f)}, // 2
-      SquareObjectVertex{glm::vec2(-0.5f, 0.5f),  glm::vec2(0.0f, 1.0f)}, // 3
-   };
-   return Buffer<SquareObjectVertex>(pointData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
-}
-
-IndexBuffer createIndexBuffer(wgpu::Device& device, wgpu::Queue& queue) {
-   std::vector<uint16_t> indexData = {
-      0, 1, 2, // Triangle #0 connects points #0, #1 and #2
-      0, 2, 3  // Triangle #1 connects points #0, #2 and #3
-   };
-   return IndexBuffer(indexData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
-}
-
 /*
 UniformBuffer<SquareObjectVertexUniform> createSquareObjectVertexUniformBuffer(wgpu::Device& device,
                                                                                wgpu::Queue&  queue) {
@@ -346,6 +322,7 @@ void Application::configureSurface() {
 
    // Configuration of the textures created for the underlying swap chain
    auto windowSize = this->windowSize();
+   std::cout << "Window size: " << windowSize.x << " " << windowSize.y << std::endl;
 
    config.width  = windowSize.x;
    config.height = windowSize.y;
@@ -549,12 +526,13 @@ int main(void) {
    // Not emscripten-friendly
 
 #ifdef __EMSCRIPTEN__
-	// Equivalent of the main loop when using Emscripten:
-	auto callback = [](void *arg) {
-		Application* pApp = reinterpret_cast<Application*>(arg);
-		mainLoop(*application, renderer);
-	};
-	emscripten_set_main_loop_arg(callback, &app, 0, true);
+   // Equivalent of the main loop when using Emscripten:
+   auto callback = [](void* arg) {
+      Renderer* renderer    = reinterpret_cast<Renderer*>(arg);
+      Application&      application = Application::get();
+      mainLoop(application, *renderer);
+   };
+   emscripten_set_main_loop_arg(callback, &renderer, 0, true);
 #else
    // Equivalent of the main loop when using Emscripten:
    while (application.IsRunning()) {

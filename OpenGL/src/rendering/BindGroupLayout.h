@@ -240,8 +240,3 @@ private:
 };
 
 
-namespace wgpu {
-constexpr wgpu::ShaderStage both(wgpu::ShaderStage lhs, wgpu::ShaderStage rhs) {
-   return wgpu::ShaderStage(lhs.m_raw | rhs.m_raw);
-}
-} // namespace wgpu

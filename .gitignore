@@ -402,3 +402,5 @@ FodyWeavers.xsd
 build
 !OpenGL/vendor/glew/build
 res_path.hpp
+
+build_emscripten

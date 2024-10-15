@@ -97,27 +97,10 @@ public:
    };
 
    // Deleted copy constructor and assignment operator
-   RenderPipeline(const RenderPipeline&)            = delete;
-   RenderPipeline& operator=(const RenderPipeline&) = delete;
-
-   // Move constructor and assignment operator
-   RenderPipeline(RenderPipeline&& other) noexcept
-      : pipeline(other.pipeline)
-      , bindGroupLayouts(other.bindGroupLayouts) {
-      other.pipeline         = nullptr;
-      other.bindGroupLayouts = nullptr;
-   };
-   RenderPipeline& operator=(RenderPipeline&& other) noexcept {
-      if (this != &other) {
-         if (pipeline) {
-            pipeline.release();
-         }
-         pipeline         = other.pipeline;
-         bindGroupLayouts = other.bindGroupLayouts;
-         other.pipeline   = nullptr;
-      }
-      return *this;
-   };
+   RenderPipeline(const RenderPipeline&)             = delete;
+   RenderPipeline& operator=(const RenderPipeline&)  = delete;
+   RenderPipeline(RenderPipeline&& other)            = delete;
+   RenderPipeline& operator=(RenderPipeline&& other) = delete;
 
    template <typename... Ts>
    auto BindGroups(Ts&&... ts) {
