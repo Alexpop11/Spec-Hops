@@ -404,3 +404,4 @@ build
 res_path.hpp
 
 build_emscripten
+build_analysis

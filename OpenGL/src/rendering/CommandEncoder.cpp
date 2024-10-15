@@ -29,6 +29,7 @@ wgpu::CommandEncoder& CommandEncoder::get() {
 void CommandEncoder::DestroyDeadBuffers() {
    for (auto& buffer : dead_buffers) {
       buffer.destroy();
+      buffer.release();
    }
    dead_buffers.clear();
 }
