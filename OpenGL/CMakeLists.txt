@@ -101,6 +101,11 @@ if (EMSCRIPTEN)
 		--preload-file "${CMAKE_CURRENT_SOURCE_DIR}/res"
         --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/../web/template.html
 	)
+    # TODO: It would be cool to add  -fno-exceptions -fno-rtti
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -flto")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O3 -flto")
+
+
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/../web/static

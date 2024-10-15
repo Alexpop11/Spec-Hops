@@ -10,7 +10,8 @@ RenderPass::RenderPass(CommandEncoder& encoder) {
    targetView_ = application.GetNextSurfaceTextureView();
    if (!targetView_) {
       // Handle the error appropriately
-      throw std::runtime_error("Failed to get target texture view.");
+      // throw std::runtime_error("Failed to get target texture view.");
+      std::cout << "Failed to get target texture view." << std::endl;
    }
 
    // Set up the render pass descriptor
