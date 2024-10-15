@@ -38,14 +38,31 @@ void Player::update() {
 
    if (kicking) {
       if (auto kickedGuy = kicking->victim.lock()) {
-         if (glm::length(kickedGuy->position - position) < 1.5) {
-            kickedGuy->kick(kicking->intoWall, kicking->direction.x, kicking->direction.y);
+         if (kickTime) {
+            if (glfwGetTime() - *kickTime > 0.8) {
+               kickedGuy->kick(kicking->intoWall, kicking->direction.x, kicking->direction.y, false);
+               kickTime.reset();
+               kicking.reset();
+            }
+            else {
+                Renderer::DebugLine(position, kickedGuy->position, {1, 0, 0, 1});
+                if (Input::keys_pressed_down[GLFW_KEY_LEFT_SHIFT]) {
+                    kickedGuy->kick(kicking->intoWall, kicking->direction.x, kicking->direction.y, true);
+                    kicking.reset();
+               }
+            }
             World::timeSpeed = 0.1f;
             audio().Update(World::timeSpeed);
-            kicking.reset();
+         } else if (glm::length(kickedGuy->position - position) < 1.5) {
+            kickTime         = glfwGetTime();
+            World::timeSpeed = 0.1f;
+            audio().Update(World::timeSpeed);
          } else {
             std::cout << "kickedGuy->position - position " << glm::length(kickedGuy->position - position) << std::endl;
          }
+      } else {
+         kicking.reset();
+         kickTime.reset();
       }
    }
 

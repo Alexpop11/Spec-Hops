@@ -39,10 +39,10 @@ void Bomb::explode() {
    ShouldDestroy = true;
 }
 
-void Bomb::kick(bool hitWall, int dx, int dy) {
-   Entity::kick(hitWall, dx, dy);
+void Bomb::kick(bool hitWall, int dx, int dy, bool superKick) {
+   Entity::kick(hitWall, dx, dy, superKick);
 
-   if (hitWall) {
+   if (hitWall && superKick) {
       explode();
    }
 }

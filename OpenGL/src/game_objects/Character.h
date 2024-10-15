@@ -18,7 +18,7 @@ public:
    void                     die();
    int                      health = 1;
    virtual void             hurt();
-   virtual void             kick(bool hitWall, int dx, int dy) override;
+   virtual void             kick(bool hitWall, int dx, int dy, bool superKick) override;
    int                      stunnedLength = 0;
    std::optional<KickState> kicking;
 

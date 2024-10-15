@@ -15,6 +15,7 @@ public:
    bool         second_step = false;
    virtual void render(Renderer& renderer, RenderPass& renderPass) override;
    bool         pauseTicks() { return kicking.has_value(); }
+   std::optional<float> kickTime = 0;
 
    std::unique_ptr<Text> healthText;
    std::unique_ptr<Text> topText;
