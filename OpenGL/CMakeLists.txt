@@ -36,7 +36,7 @@ file(GLOB_RECURSE res_files "res/*")
 FetchContent_Declare(
   webgpu
   GIT_REPOSITORY https://github.com/anchpop/WebGPU-distribution.git
-  GIT_TAG        7d29923aff711ae179ffdf933cc9ca31d6e400f0
+  GIT_TAG        257f230bdad880339eef961b7ff5974a04e30dc5
 )
 FetchContent_MakeAvailable(webgpu)
 
@@ -44,9 +44,6 @@ add_subdirectory(${VENDOR_DIR}/glfw3webgpu)
 
 # Add GLM
 add_subdirectory(${VENDOR_DIR}/glm)
-
-# Add xxHash
-add_subdirectory(${VENDOR_DIR}/xxHash/cmake_unofficial ${VENDOR_DIR}/xxHash/build/ EXCLUDE_FROM_ALL)
 
 add_executable(${PROJECT_NAME} ${cpp_files} ${header_files} ${res_files})
 
@@ -81,7 +78,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     glm::glm
-    xxHash::xxhash
     Clipper2
     webgpu
     glfw3webgpu
@@ -103,5 +99,6 @@ if (EMSCRIPTEN)
 	target_link_options(${PROJECT_NAME} PRIVATE
 		-sASYNCIFY
 		--preload-file "${CMAKE_CURRENT_SOURCE_DIR}/res"
+        --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/../web/template.html
 	)
 endif()

@@ -11,7 +11,6 @@
 #include <filesystem>
 
 #include "../Application.h"
-#include "../WeakMemoizeConstructor.hpp"
 #include "Id.h"
 #include "TextureSampler.h"
 
@@ -198,7 +197,18 @@ public:
    int32_t  getBPP() const { return m_BPP; }
 
    // Declare the global memoized constructor
-   DECLARE_GLOBAL_MEMOIZED_CONSTRUCTOR(Texture)
+   static std::shared_ptr<Texture> create(const std::string& path) {
+      static std::unordered_map<std::string, std::shared_ptr<Texture>> cache;
+
+      auto it = cache.find(path);
+      if (it != cache.end()) {
+         return it->second;
+      }
+
+      auto texture = std::make_shared<Texture>(path);
+      cache[path] = texture;
+      return texture;
+   }
 
 private:
    wgpu::Device&     device_;

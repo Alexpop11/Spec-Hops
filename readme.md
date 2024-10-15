@@ -34,5 +34,10 @@ emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
 emmake make
 ```
 
+To run:
 
+```
+python -m http.server
+```
 
+Then check out http://localhost:8000, and navigate to OpenGL/Spec-Hops.html
