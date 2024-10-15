@@ -1,4 +1,4 @@
-name: Build Spec-Hops
+name: Build SpaceBoom
 
 on:
   pull_request:
@@ -14,15 +14,15 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            output_name: Spec-Hops-linux
+            output_name: SpaceBoom-linux
           - os: macos-latest
-            output_name: Spec-Hops-macos-intel
+            output_name: SpaceBoom-macos-intel
             arch: x86_64
           - os: macos-latest
-            output_name: Spec-Hops-macos-arm
+            output_name: SpaceBoom-macos-arm
             arch: arm64
           - os: windows-latest
-            output_name: Spec-Hops-windows.exe
+            output_name: SpaceBoom-windows.exe
 
     steps:
       - name: Checkout repository and submodules
@@ -74,25 +74,8 @@ jobs:
         if: github.event_name == 'release'
         run: |
           mkdir release
-          EXECUTABLE_PATH="build/OpenGL/"
-          EXECUTABLE_NAME="Spec-Hops"
-
-          if [ "${{ matrix.os }}" == 'windows-latest' ]; then
-            EXECUTABLE_PATH="${EXECUTABLE_PATH}Release/"
-            EXECUTABLE_NAME="${EXECUTABLE_NAME}.exe"
-          fi
-
-          cp "${EXECUTABLE_PATH}${EXECUTABLE_NAME}" "release/${{ matrix.output_name }}"
+          cp build/OpenGL/${{ matrix.os == 'windows-latest' && 'Release/' || '' }}SpaceBoom${{ matrix.os == 'windows-latest' && '.exe' || '' }} release/${{ matrix.output_name }}
           cp -r OpenGL/res release/res
-
-          # Copy dynamic libraries
-          if [ "${{ matrix.os }}" == 'windows-latest' ]; then
-            # Copy all .dll files from the build directory to release
-            find "${EXECUTABLE_PATH}" -name "*.dll" -exec cp {} release/ \;
-          else
-            # Copy all .so and .dylib files from the build directory to release
-            find "${EXECUTABLE_PATH}" -type f \( -name "*.so" -o -name "*.dylib" \) -exec cp {} release/ \;
-          fi
 
       - name: Set executable permissions (macOS)
         if: github.event_name == 'release' && matrix.os != 'windows-latest'
