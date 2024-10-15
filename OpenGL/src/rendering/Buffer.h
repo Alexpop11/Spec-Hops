@@ -7,11 +7,10 @@
 #include <cstring> // For std::memcpy
 #include <memory>  // For std::shared_ptr and std::weak_ptr
 #include "webgpu-utils.h"
+#include "DeadBuffers.h"
 
 #include "Id.h"
 #include "../Application.h"
-
-static std::vector<wgpu::Buffer> dead_buffers = {};
 
 template <typename T, bool Uniform>
 class BufferView;
@@ -80,7 +79,7 @@ public:
    // Destructor: Releases the buffer resource
    ~Buffer() {
       if (buffer_) {
-         dead_buffers.push_back(buffer_);
+         DeadBuffers::buffers.push_back(buffer_);
       }
    }
 
@@ -190,6 +189,7 @@ private:
 
    // Method to resize the buffer
    void expandBuffer() {
+      std::cout << "Expanding buffer" << std::endl;
       size_t newSize = capacityBytes() * 2;
       newSize        = std::max(newSize, elementStride()); // Ensure the buffer is at least 256 bytes
 
@@ -218,10 +218,12 @@ private:
       // Finish encoding and submit the commands
       wgpu::CommandBuffer commands = encoder.finish();
       queue_.submit(1, &commands);
+      encoder.release();
+      commands.release();
       generation++;
 
-      // Destroy the old buffer and replace it with the new buffer
-      dead_buffers.push_back(buffer_);
+      // Queue the old buffer for destruction
+      DeadBuffers::buffers.push_back(buffer_);
       buffer_ = newBuffer;
 
       // Update buffer capaticy now that it's been resized

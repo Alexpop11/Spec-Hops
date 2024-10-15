@@ -19,7 +19,7 @@ public:
 
    static Application& get();
 
-   bool                  initialized;
+   static bool           initialized;
    std::filesystem::path res_path;
 
    GLFWwindow*          getWindow() { return window; }
@@ -35,10 +35,10 @@ public:
    wgpu::Queue&   getQueue() { return queue; }
    ImGuiIO&       getImGuiIO() { return io; }
 
-   wgpu::TextureView GetNextSurfaceTextureView();
-   void              onResize();
-   void              configureSurface();
-   glm::ivec2        windowSize();
+   std::optional<std::tuple<wgpu::TextureView, wgpu::Texture, wgpu::SurfaceTexture>> GetNextSurfaceTextureView();
+   void                                                                              onResize();
+   void                                                                              configureSurface();
+   glm::ivec2                                                                        windowSize();
 
 private:
    GLFWwindow*                          window;
@@ -48,6 +48,7 @@ private:
    wgpu::Device                         device;
    std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
    wgpu::Queue                          queue;
+   wgpu::SurfaceTexture                 surfaceTexture;
    wgpu::TextureFormat                  surfaceFormat;
    ImGuiIO&                             io;
 

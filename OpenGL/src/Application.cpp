@@ -92,41 +92,46 @@ void mainLoop(Application& application, Renderer& renderer) {
       }
    }
 
-   auto targetView = application.GetNextSurfaceTextureView();
-   {
-      // Create a command encoder for the draw call
-      CommandEncoder encoder(device);
-
-      // Create the render pass
-      RenderPass renderPass(encoder, targetView);
-      renderer.renderPass = renderPass.get();
-
-      // Start the Dear ImGui frame
-      ImGui_ImplWGPU_NewFrame();
-      ImGui_ImplGlfw_NewFrame();
-      ImGui::NewFrame();
-
-      World::RenderObjects(renderer, renderPass);
-      renderer.DrawDebug(renderPass);
-
-      // Performance info
+   auto nextTexture = application.GetNextSurfaceTextureView();
+   if (nextTexture) {
+      auto [targetView, targetTexture, surfaceTexture] = *nextTexture;
       {
-         ImGui::PushFont(application.pixelify);
-         ImGui::Begin("Performance Info");
-         ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / application.getImGuiIO().Framerate,
-                     application.getImGuiIO().Framerate);
-         ImGui::End();
-         ImGui::PopFont();
+         // Create a command encoder for the draw call
+         CommandEncoder encoder(device);
+
+         // Create the render pass
+         RenderPass renderPass(encoder, targetView);
+         renderer.renderPass = renderPass.get();
+
+         // Start the Dear ImGui frame
+         ImGui_ImplWGPU_NewFrame();
+         ImGui_ImplGlfw_NewFrame();
+         ImGui::NewFrame();
+
+         World::RenderObjects(renderer, renderPass);
+         renderer.DrawDebug(renderPass);
+
+         // Performance info
+         {
+            ImGui::PushFont(application.pixelify);
+            ImGui::Begin("Performance Info");
+            ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / application.getImGuiIO().Framerate,
+                        application.getImGuiIO().Framerate);
+            ImGui::End();
+            ImGui::PopFont();
+         }
+
+         ImGui::Render();
+         ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass.get());
+
+         // The render pass and command encoder will be ended and submitted in their destructors
       }
-
-      ImGui::Render();
-      ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass.get());
-
-      // The render pass and command encoder will be ended and submitted in their destructors
+      renderer.FinishFrame();
+      targetView.release();
+      wgpuTextureRelease(surfaceTexture.texture);
+   } else {
+      std::cout << "No next texture, cannot render." << std::endl;
    }
-   renderer.FinishFrame();
-   targetView.release();
-
 
 #ifndef __EMSCRIPTEN__
    application.getSurface().present();
@@ -291,28 +296,6 @@ wgpu::TextureFormat preferredFormat(wgpu::Surface& surface, wgpu::Adapter& adapt
    return capabilities.formats[0];
 }
 
-/*
-UniformBuffer<SquareObjectVertexUniform> createSquareObjectVertexUniformBuffer(wgpu::Device& device,
-                                                                               wgpu::Queue&  queue) {
-   SquareObjectVertexUniform uniform{};
-   uniform.u_MVP = CalculateMVP({640, 480}, {0, 0}, 0, 1);
-
-
-   std::vector<SquareObjectVertexUniform> uniformData = {uniform};
-   return Buffer<SquareObjectVertexUniform, true>(uniformData, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
-}
-*/
-/*
-UniformBuffer<SquareObjectFragmentUniform> createSquareObjectFragmentUniformBuffer(wgpu::Device& device,
-                                                                                   wgpu::Queue&  queue) {
-   SquareObjectFragmentUniform uniform;
-   uniform.u_Color = {1.0f, 0.0f, 0.0f, 0.1f};
-   std::vector<SquareObjectFragmentUniform> uniformData = {uniform};
-   return Buffer<SquareObjectFragmentUniform, true>(uniformData,
-                                                    wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform);
-}
-*/
-
 glm::ivec2 Application::windowSize() {
    int width, height;
    glfwGetFramebufferSize(window, &width, &height);
@@ -426,6 +409,8 @@ ImFont* load_font(std::filesystem::path res_path, ImGuiIO* io, const std::string
    return font;
 }
 
+bool Application::initialized = false;
+
 // Initialize everything and return true if it went all right
 Application::Application()
    : res_path(getResPath())
@@ -456,6 +441,15 @@ Application::Application()
    std::string           icon_path_str = icon_path.string();
    setWindowIcon(window, icon_path_str.c_str());
 
+   adapter.release();
+   instance.release();
+
+   if (initialized) {
+      std::cout << "Application already initialized!" << std::endl;
+      assert(false);
+   } else {
+      std::cout << "Application initialized" << std::endl;
+   }
 
    initialized = true;
 }
@@ -485,11 +479,11 @@ Application& Application::get() {
 }
 
 
-wgpu::TextureView Application::GetNextSurfaceTextureView() {
-   wgpu::SurfaceTexture surfaceTexture;
+std::optional<std::tuple<wgpu::TextureView, wgpu::Texture, wgpu::SurfaceTexture>>
+Application::GetNextSurfaceTextureView() {
    surface.getCurrentTexture(&surfaceTexture);
    if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::Success) {
-      return nullptr;
+      return {};
    }
    wgpu::Texture texture = surfaceTexture.texture;
 
@@ -504,7 +498,7 @@ wgpu::TextureView Application::GetNextSurfaceTextureView() {
    viewDescriptor.aspect          = wgpu::TextureAspect::All;
    wgpu::TextureView targetView   = texture.createView(viewDescriptor);
 
-   return targetView;
+   return std::make_tuple(targetView, texture, surfaceTexture);
 }
 
 int main(void) {

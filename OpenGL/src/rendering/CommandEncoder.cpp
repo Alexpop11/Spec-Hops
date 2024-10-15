@@ -1,5 +1,5 @@
 #include "CommandEncoder.h"
-#include "Buffer.h"
+#include "DeadBuffers.h"
 #include "Application.h"
 #include <iostream>
 
@@ -30,9 +30,9 @@ wgpu::CommandEncoder& CommandEncoder::get() {
 }
 
 void CommandEncoder::DestroyDeadBuffers() {
-   for (auto& buffer : dead_buffers) {
+   for (auto& buffer : DeadBuffers::buffers) {
       buffer.destroy();
       buffer.release();
    }
-   dead_buffers.clear();
+   DeadBuffers::buffers.clear();
 }
