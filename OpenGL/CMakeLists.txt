@@ -101,4 +101,9 @@ if (EMSCRIPTEN)
 		--preload-file "${CMAKE_CURRENT_SOURCE_DIR}/res"
         --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/../web/template.html
 	)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/../web/static
+        ${CMAKE_CURRENT_BINARY_DIR}/static
+    )
 endif()
