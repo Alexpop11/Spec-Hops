@@ -10,6 +10,10 @@
 #include "stb_image.h"
 #undef STB_IMAGE_IMPLEMENTATION
 
+#ifdef __EMSCRIPTEN__
+#  include <emscripten.h>
+#endif // __EMSCRIPTEN__
+
 #include "Application.h"
 
 #include <GLFW/glfw3.h>
@@ -543,9 +547,20 @@ int main(void) {
    }
 
    // Not emscripten-friendly
+
+#ifdef __EMSCRIPTEN__
+	// Equivalent of the main loop when using Emscripten:
+	auto callback = [](void *arg) {
+		Application* pApp = reinterpret_cast<Application*>(arg);
+		mainLoop(*application, renderer);
+	};
+	emscripten_set_main_loop_arg(callback, &app, 0, true);
+#else
+   // Equivalent of the main loop when using Emscripten:
    while (application.IsRunning()) {
       mainLoop(application, renderer);
    }
+#endif
 
    application.Terminate();
 

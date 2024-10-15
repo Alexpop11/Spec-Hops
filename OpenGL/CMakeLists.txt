@@ -40,9 +40,6 @@ add_subdirectory(${VENDOR_DIR}/glfw3webgpu)
 # Add GLM
 add_subdirectory(${VENDOR_DIR}/glm)
 
-# Find OpenGL
-find_package(OpenGL REQUIRED)
-
 # Add xxHash
 add_subdirectory(${VENDOR_DIR}/xxHash/cmake_unofficial ${VENDOR_DIR}/xxHash/build/ EXCLUDE_FROM_ALL)
 
@@ -78,7 +75,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    OpenGL::GL
     glm::glm
     xxHash::xxhash
     Clipper2
@@ -96,3 +92,11 @@ if(WIN32)
 endif()
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY PUBLIC_HEADER ${header_files})
+
+if (EMSCRIPTEN)
+	set_target_properties(App PROPERTIES SUFFIX ".html")
+	target_link_options(App PRIVATE
+		-sASYNCIFY
+		--preload-file "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+	)
+endif()
