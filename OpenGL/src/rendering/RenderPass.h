@@ -10,7 +10,7 @@ class CommandEncoder;
 
 class RenderPass {
 public:
-   explicit RenderPass(CommandEncoder& encoder);
+   explicit RenderPass(CommandEncoder& encoder, wgpu::TextureView& targetView);
    ~RenderPass();
 
    wgpu::RenderPassEncoder& get();
@@ -65,7 +65,6 @@ public:
 
 private:
    wgpu::RenderPassEncoder renderPass_;
-   wgpu::TextureView       targetView_;
 
    int32_t               last_set_render_pipeline = -1;
    int32_t               last_set_bind_group      = -1;

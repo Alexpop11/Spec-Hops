@@ -3,20 +3,12 @@
 #include "Application.h"
 
 
-RenderPass::RenderPass(CommandEncoder& encoder) {
+RenderPass::RenderPass(CommandEncoder& encoder, wgpu::TextureView& targetView) {
    auto& application = Application::get();
-
-   // Get the next target texture view
-   targetView_ = application.GetNextSurfaceTextureView();
-   if (!targetView_) {
-      // Handle the error appropriately
-      // throw std::runtime_error("Failed to get target texture view.");
-      std::cout << "Failed to get target texture view." << std::endl;
-   }
 
    // Set up the render pass descriptor
    wgpu::RenderPassColorAttachment renderPassColorAttachment = {};
-   renderPassColorAttachment.view                            = targetView_;
+   renderPassColorAttachment.view                            = targetView;
    renderPassColorAttachment.resolveTarget                   = nullptr;
    renderPassColorAttachment.loadOp                          = wgpu::LoadOp::Clear;
    renderPassColorAttachment.storeOp                         = wgpu::StoreOp::Store;
@@ -36,7 +28,7 @@ RenderPass::RenderPass(CommandEncoder& encoder) {
 
 RenderPass::~RenderPass() {
    renderPass_.end();
-   // Resources will be automatically released when going out of scope
+   renderPass_.release();
 }
 
 wgpu::RenderPassEncoder& RenderPass::get() {

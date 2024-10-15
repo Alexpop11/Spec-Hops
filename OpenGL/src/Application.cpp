@@ -92,12 +92,13 @@ void mainLoop(Application& application, Renderer& renderer) {
       }
    }
 
+   auto targetView = application.GetNextSurfaceTextureView();
    {
       // Create a command encoder for the draw call
       CommandEncoder encoder(device);
 
       // Create the render pass
-      RenderPass renderPass(encoder);
+      RenderPass renderPass(encoder, targetView);
       renderer.renderPass = renderPass.get();
 
       // Start the Dear ImGui frame
@@ -124,6 +125,7 @@ void mainLoop(Application& application, Renderer& renderer) {
       // The render pass and command encoder will be ended and submitted in their destructors
    }
    renderer.FinishFrame();
+   targetView.release();
 
 
 #ifndef __EMSCRIPTEN__
@@ -172,7 +174,8 @@ GLFWwindow* createWindow() {
    // Create a fullscreen window
    std::cout << "Mode width: " << mode->width << " Mode height: " << mode->height << std::endl;
    // create a window that is at least 648x480
-   auto window = glfwCreateWindow(std::max(mode->width, 648), std::max(mode->height, 480), "Spec Hops", nullptr, nullptr);
+   auto window =
+      glfwCreateWindow(std::max(mode->width, 648), std::max(mode->height, 480), "Spec Hops", nullptr, nullptr);
 
    return window;
 }
@@ -528,8 +531,8 @@ int main(void) {
 #ifdef __EMSCRIPTEN__
    // Equivalent of the main loop when using Emscripten:
    auto callback = [](void* arg) {
-      Renderer* renderer    = reinterpret_cast<Renderer*>(arg);
-      Application&      application = Application::get();
+      Renderer*    renderer    = reinterpret_cast<Renderer*>(arg);
+      Application& application = Application::get();
       mainLoop(application, *renderer);
    };
    emscripten_set_main_loop_arg(callback, &renderer, 0, true);

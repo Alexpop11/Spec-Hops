@@ -20,6 +20,9 @@ CommandEncoder::~CommandEncoder() {
    auto  queue       = application.getQueue();
 
    queue.submit(1, &command);
+
+   encoder_.release();
+   command.release();
 }
 
 wgpu::CommandEncoder& CommandEncoder::get() {
