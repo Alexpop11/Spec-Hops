@@ -1,4 +1,4 @@
-name: Build SpaceBoom
+name: Build Spec-Hops
 
 on:
   pull_request:
@@ -14,15 +14,15 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            output_name: SpaceBoom-linux
+            output_name: Spec-Hops-linux
           - os: macos-latest
-            output_name: SpaceBoom-macos-intel
+            output_name: Spec-Hops-macos-intel
             arch: x86_64
           - os: macos-latest
-            output_name: SpaceBoom-macos-arm
+            output_name: Spec-Hops-macos-arm
             arch: arm64
           - os: windows-latest
-            output_name: SpaceBoom-windows.exe
+            output_name: Spec-Hops-windows.exe
 
     steps:
       - name: Checkout repository and submodules
@@ -74,7 +74,7 @@ jobs:
         if: github.event_name == 'release'
         run: |
           mkdir release
-          cp build/OpenGL/${{ matrix.os == 'windows-latest' && 'Release/' || '' }}SpaceBoom${{ matrix.os == 'windows-latest' && '.exe' || '' }} release/${{ matrix.output_name }}
+          cp build/OpenGL/${{ matrix.os == 'windows-latest' && 'Release/' || '' }}Spec-Hops${{ matrix.os == 'windows-latest' && '.exe' || '' }} release/${{ matrix.output_name }}
           cp -r OpenGL/res release/res
 
       - name: Set executable permissions (macOS)
@@ -102,3 +102,44 @@ jobs:
           asset_name: ${{ matrix.output_name }}.zip
           tag: ${{ github.ref }}
           overwrite: true
+
+  build-web:
+    name: Build for Web and Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v11
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libwayland-dev libxkbcommon-dev xorg-dev libglu1-mesa-dev
+          sudo apt-get install libxrandr-dev libxinerama-dev libxcursor-dev mesa-common-dev libx11-xcb-dev pkg-config nodejs npm
+
+      - name: Configure and Build with Emscripten
+        run: |
+          mkdir build_emscripten && cd build_emscripten
+          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
+          emmake make
+
+      - name: Prepare Web Build
+        run: |
+          mkdir web_build
+          cp build_emscripten/OpenGL/Spec-Hops.data web_build/
+          cp build_emscripten/OpenGL/Spec-Hops.js web_build/
+          cp build_emscripten/OpenGL/Spec-Hops.wasm web_build/
+          cp -r build_emscripten/OpenGL/static web_build/
+          cp build_emscripten/OpenGL/Spec-Hops.html web_build/index.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.event_name == 'release'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web_build
+          force_orphan: true
