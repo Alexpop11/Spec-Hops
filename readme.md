@@ -1,3 +1,7 @@
+## Play now in your browser!
+
+[Online demo](https://alexpop11.github.io/Spec-Hops/)
+
 ## Build and run
 
 ### Desktop builds
