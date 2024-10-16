@@ -1,0 +1,119 @@
+/* web/static/css/styles.css */
+
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Roboto', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+#logo {
+    display: block;
+    margin: 20px auto;
+    max-width: 300px;
+    height: auto;
+}
+
+hr {
+    width: 90%;
+    border: 0.5px solid #444;
+}
+
+.emscripten_border {
+    border: 1px solid #444;
+    padding: 15px;
+    background-color: #111;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    margin: 20px 0;
+}
+
+.spinner {
+    height: 50px;
+    width: 50px;
+    margin: 0px auto;
+    animation: rotation 0.8s linear infinite;
+    border-left: 10px solid rgb(0,150,240);
+    border-right: 10px solid rgb(0,150,240);
+    border-bottom: 10px solid rgb(0,150,240);
+    border-top: 10px solid rgb(100,0,200);
+    border-radius: 50%;
+    background-color: rgb(200,100,250);
+}
+
+@keyframes rotation {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.controls {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.controls label {
+    margin: 0 10px;
+    font-size: 1em;
+}
+
+.controls input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.controls input[type="button"] {
+    padding: 10px 20px;
+    background-color: #0066cc;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.controls input[type="button"]:hover {
+    background-color: #005bb5;
+}
+
+#status {
+    margin: 10px 0;
+    font-size: 1.2em;
+}
+
+canvas.emscripten {
+    border: 0;
+    background-color: #000;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.7);
+}
+
+progress#progress {
+    width: 80%;
+    height: 20px;
+    margin: 10px auto;
+    display: block;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+progress#progress::-webkit-progress-bar {
+    background-color: #333;
+}
+
+progress#progress::-webkit-progress-value {
+    background-color: #00aaff;
+}
+
+progress#progress::-moz-progress-bar {
+    background-color: #00aaff;
+}
