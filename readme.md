@@ -11,7 +11,7 @@ mkdir build
 cd build
 // install dependencies: cmake, ninja, opengl
 // detailed instructions are in .github/workflows/release.yaml
-cmake -GNinja -DCMAKE_BUILD_TYPE=Release .. && ninja && ./OpenGL/SpaceBoom
+cmake -GNinja -DCMAKE_BUILD_TYPE=Release .. && ninja && ./OpenGL/Spec-Hops
 ```
 
 to run:
