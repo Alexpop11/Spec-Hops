@@ -1,4 +1,4 @@
-![logo](./web/static/logo.png)
+![logo](./web/static/images/logo.png)
 
 ## Play now in your browser!
 
