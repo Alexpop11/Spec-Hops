@@ -26,11 +26,11 @@ void Turret::tickUpdate() {
       // Find nearby players without modifying the turret's state
       auto nearbyPlayers = World::where<Player>([&](const Player& player) -> bool {
          // Check horizontal proximity
-         if (std::abs(tile_x - player.tile_x) <= 10 && tile_y == player.tile_y) {
+         if (std::abs(getTile().x - player.getTile().x) <= 10 && getTile().y == player.getTile().y) {
             return true;
          }
          // Check vertical proximity
-         if (std::abs(tile_y - player.tile_y) <= 10 && tile_x == player.tile_x) {
+         if (std::abs(getTile().y - player.getTile().y) <= 10 && getTile().x == player.getTile().x) {
             return true;
          }
          return false;
@@ -43,8 +43,8 @@ void Turret::tickUpdate() {
          const Player& player = *playerPtr;
 
          // Check horizontal proximity
-         if (std::abs(tile_x - player.tile_x) <= 10 && tile_y == player.tile_y) {
-            aimDirection_x = (player.tile_x > tile_x) ? 1 : -1;
+         if (std::abs(getTile().x - player.getTile().x) <= 10 && getTile().y == player.getTile().y) {
+            aimDirection_x = (player.getTile().x > getTile().x) ? 1 : -1;
             aimDirection_y = 0;
             bulletsToShoot = 3;
             playerDetected = true;
@@ -52,8 +52,8 @@ void Turret::tickUpdate() {
          }
 
          // Check vertical proximity
-         if (std::abs(tile_y - player.tile_y) <= 10 && tile_x == player.tile_x) {
-            aimDirection_y = (player.tile_y > tile_y) ? 1 : -1;
+         if (std::abs(getTile().y - player.getTile().y) <= 10 && getTile().x == player.getTile().x) {
+            aimDirection_y = (player.getTile().y > getTile().y) ? 1 : -1;
             aimDirection_x = 0;
             bulletsToShoot = 3;
             playerDetected = true;
@@ -65,7 +65,7 @@ void Turret::tickUpdate() {
       if (bulletsToShoot >= 1) {
          audio().Bullet_Sound.play();
          World::gameobjectstoadd.push_back(std::make_unique<Bullet>(
-            "CoolBullet", tile_x + aimDirection_x, tile_y + aimDirection_y, aimDirection_x, aimDirection_y));
+            "CoolBullet", getTile().x + aimDirection_x, getTile().y + aimDirection_y, aimDirection_x, aimDirection_y));
          bulletsToShoot -= 1;
       } else {
          // Reset aim direction if no players are detected or no bullets left to shoot

@@ -11,7 +11,7 @@ Bullet::Bullet(const std::string& name, float x, float y, int direction_x, int d
 void Bullet::tickUpdate() {
 
    // Check if the bullet hits a wall
-   auto tiles = World::at<Tile>(tile_x, tile_y);
+   auto tiles = World::at<Tile>(getTile().x, getTile().y);
    for (auto tile : tiles) {
       if (tile->wall) {
          ShouldDestroy = true;
@@ -20,7 +20,7 @@ void Bullet::tickUpdate() {
    }
 
    // Assuming you have a way to check for characters at the new position
-   auto nearbyCharacters = World::at<Character>(tile_x, tile_y);
+   auto nearbyCharacters = World::at<Character>(getTile().x, getTile().y);
    if (!nearbyCharacters.empty()) {
       auto character = nearbyCharacters.front(); // Assuming we target the first found character
       character->hurt();
@@ -29,6 +29,5 @@ void Bullet::tickUpdate() {
    }
 
    // Move the bullet
-   tile_x += direction_x;
-   tile_y += direction_y;
+   setTile({getTile().x + direction_x, getTile().y + direction_y});
 }

@@ -8,6 +8,5 @@ Entity::Entity(const std::string& name, DrawPriority drawPriority, int tile_x, i
 
 void Entity::kick(bool hitWall, int dx, int dy) {
    audio().Impact.play();
-   tile_x += dx;
-   tile_y += dy;
+   setTile({getTile().x + dx, getTile().y + dy});
 }

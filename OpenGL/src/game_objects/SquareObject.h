@@ -10,10 +10,13 @@ public:
    virtual void render(Renderer& renderer, RenderPass& renderPass) override;
    virtual void update() override;
    glm::vec4    tintColor = glm::vec4(0.0f);
-   int          tile_x    = 0;
-   int          tile_y    = 0;
+
+   void       setTile(glm::ivec2 position) { tilePosition = position; }
+   glm::ivec2 getTile() const { return tilePosition; }
 
 private:
+   glm::ivec2 tilePosition;
+
    std::shared_ptr<Buffer<SquareObjectVertex>> pointBuffer;
    std::shared_ptr<IndexBuffer>                indexBuffer;
    BufferView<SquareObjectVertexUniform>       vertexUniform;

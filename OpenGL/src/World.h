@@ -9,10 +9,11 @@
 
 class World {
 public:
-   static float                                    timeSpeed;
-   static bool                                     settingTimeSpeed;
-   static std::vector<std::shared_ptr<GameObject>> gameobjects;
-   static std::vector<std::unique_ptr<GameObject>> gameobjectstoadd;
+   static float                                                                           timeSpeed;
+   static bool                                                                            settingTimeSpeed;
+   static std::vector<std::shared_ptr<GameObject>>                                        gameobjects;
+   static std::vector<std::unique_ptr<GameObject>>                                        gameobjectstoadd;
+   inline static std::unordered_map<glm::ivec2, std::vector<std::shared_ptr<GameObject>>> positions = {};
 
    static bool ticksPaused();
 
@@ -64,7 +65,7 @@ public:
 
    template <typename T>
    static std::vector<std::shared_ptr<T>> at(int x, int y) {
-      return where<T>([&](const T& obj) { return obj.tile_x == x && obj.tile_y == y; });
+      return where<T>([&](const T& obj) { return obj.getTile().x == x && obj.getTile().y == y; });
    }
 
    static void LoadMap(const std::filesystem::path& map_path);

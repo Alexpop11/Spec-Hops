@@ -19,6 +19,7 @@ float                                    World::timeSpeed        = 1.0f;
 bool                                     World::settingTimeSpeed = false;
 bool                                     World::shouldTick       = false;
 
+
 void World::LoadMap(const std::filesystem::path& map_path) {
    gameobjects.clear();
 

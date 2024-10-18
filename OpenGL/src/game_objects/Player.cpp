@@ -152,8 +152,8 @@ void Player::tickUpdate() {
       0; // For bunny hop mechanic. Resets to 0 here, and if the player is holding shift it increases temporarily.
 
    moved_last_tick = true;
-   int new_x       = tile_x;
-   int new_y       = tile_y;
+   int new_x       = getTile().x;
+   int new_y       = getTile().y;
 
    if (Input::keys_pressed[GLFW_KEY_LEFT_SHIFT] || Input::keys_pressed[GLFW_KEY_RIGHT_SHIFT]) {
       if (hasBunnyHop && bunnyHopCoolDown <= 0) {
@@ -193,13 +193,13 @@ void Player::tickUpdate() {
    }
    if (Input::keys_pressed[GLFW_KEY_SPACE]) {
       if (hasBomb && bombCoolDown <= 0) {
-         World::gameobjectstoadd.push_back(std::make_unique<Bomb>("CoolBomb", tile_x, tile_y));
+         World::gameobjectstoadd.push_back(std::make_unique<Bomb>("CoolBomb", getTile().x, getTile().y));
          audio().Bomb_Place.play();
          bombCoolDown = 3;
       }
    }
 
-   if (new_x != tile_x || new_y != tile_y) {
+   if (glm::ivec2(new_x, new_y) != getTile()) {
       move(new_x, new_y);
    }
 

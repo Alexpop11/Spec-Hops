@@ -22,14 +22,15 @@ void Character::tickUpdate() {
 }
 
 bool Character::move(int new_x, int new_y) {
+   auto tile = getTile();
    if (stunnedLength == 0) {
-      int dx    = new_x - tile_x;
-      int dy    = new_y - tile_y;
+      int dx    = new_x - tile.x;
+      int dy    = new_y - tile.y;
       int steps = std::max(std::abs(dx), std::abs(dy));
 
       for (int i = 1; i <= steps; ++i) {
-         int check_x = tile_x + (dx * i) / steps;
-         int check_y = tile_y + (dy * i) / steps;
+         int check_x = tile.x + (dx * i) / steps;
+         int check_y = tile.y + (dy * i) / steps;
 
          bool                    spot_occupied   = false;
          std::shared_ptr<Entity> other_character = nullptr;
@@ -65,8 +66,8 @@ bool Character::move(int new_x, int new_y) {
 
                // Check if enemy can be knocked back 3 tiles
                for (int k = 1; k <= knockback_distance; ++k) {
-                  int new_enemy_x = other_character->tile_x + knockback_dx * k;
-                  int new_enemy_y = other_character->tile_y + knockback_dy * k;
+                  int new_enemy_x = other_character->getTile().x + knockback_dx * k;
+                  int new_enemy_y = other_character->getTile().y + knockback_dy * k;
 
                   // Check for obstacles
                   bool obstacle = false;
@@ -99,9 +100,7 @@ bool Character::move(int new_x, int new_y) {
                   this->kicking     = kicking;
 
                   // Stop the player at the collision spot
-                  tile_x = check_x;
-                  tile_y = check_y;
-
+                  setTile({check_x, check_y});
                   return true; // Move succeeded with kick
                } else {
                   // Enemy can't be moved; treat as normal collision
@@ -114,16 +113,14 @@ bool Character::move(int new_x, int new_y) {
                bunnyHopCoolDown = 0;
             }
             if (i > 1) {
-               tile_x = tile_x + (dx * (i - 1)) / steps;
-               tile_y = tile_y + (dy * (i - 1)) / steps;
+               setTile({tile.x + (dx * (i - 1)) / steps, tile.y + (dy * (i - 1)) / steps});
             }
             return false;
          }
       }
 
       // Path is clear; move the character
-      tile_x = new_x;
-      tile_y = new_y;
+      setTile({new_x, new_y});
       return true;
    } else if (stunnedLength > 0) {
       stunnedLength--;

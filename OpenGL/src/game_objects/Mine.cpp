@@ -13,7 +13,7 @@ void Mine::tickUpdate() {
    // Explode the Mine
 
    auto nearbyCharacters = World::where<Character>([&](const Character& character) {
-      return (std::abs(tile_x - character.tile_x) + std::abs(tile_y - character.tile_y) < 3);
+      return (std::abs(getTile().x - character.getTile().x) + std::abs(getTile().y - character.getTile().y) < 3);
    });
    if (!nearbyCharacters.empty() || detectedCharacter) {
       detectedCharacter = true;

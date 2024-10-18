@@ -8,8 +8,7 @@ SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, i
                 {
                    tile_x, tile_y
 })
-   , tile_x(tile_x)
-   , tile_y(tile_y)
+   , tilePosition({tile_x, tile_y})
    , pointBuffer(Buffer<SquareObjectVertex>::create(
         {
            SquareObjectVertex{glm::vec2(-0.5f, -0.5f), glm::vec2(0.0f, 0.0f)}, // 0
@@ -43,6 +42,6 @@ void SquareObject::render(Renderer& renderer, RenderPass& renderPass) {
 }
 
 void SquareObject::update() {
-   position    = zeno(position, glm::vec2(tile_x, tile_y), 0.05);
+   position    = zeno(position, getTile(), 0.05);
    tintColor.a = zeno(tintColor.a, 0.0, 0.3);
 }
