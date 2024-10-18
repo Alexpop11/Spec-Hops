@@ -30,7 +30,7 @@ SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, i
    texture(Texture::create(texturePath)) {}
 
 void SquareObject::render(Renderer& renderer, RenderPass& renderPass) {
-   this->vertexUniform.Update(SquareObjectVertexUniform{CalculateMVP(position, 0, 1)});
+   this->vertexUniform.Update(SquareObjectVertexUniform{CalculateMVP(position, rotation, scale)});
    this->fragmentUniform.Update(SquareObjectFragmentUniform{tintColor});
    BindGroup bindGroup =
       SquareObjectLayout::ToBindGroup(renderer.device, vertexUniform, fragmentUniform, texture.get(), renderer.sampler);

@@ -23,7 +23,11 @@ public:
       for (auto& gameobject : gameobjects) {
          allGameObjects.push_back(gameobject.get());
          auto children = gameobject->children();
-         allGameObjects.insert(allGameObjects.end(), children.begin(), children.end());
+         for (auto& child : children) {
+            if (child) {
+               allGameObjects.push_back(child);
+            }
+         }
       }
       return allGameObjects;
    }

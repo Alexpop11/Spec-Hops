@@ -16,6 +16,7 @@ enum class DrawPriority {
    Floor,
    Bomb,
    Character,
+   CharacterAccent,
    Fog,
    UI,
 };
