@@ -12,6 +12,7 @@
 #include "game_objects/enemies/Bomber.h"
 #include "game_objects/enemies/Turret.h"
 #include "game_objects/Mine.h"
+#include "game_objects/Decal.h"
 
 std::vector<std::shared_ptr<GameObject>> World::gameobjects      = {};
 std::vector<std::unique_ptr<GameObject>> World::gameobjectstoadd = {};

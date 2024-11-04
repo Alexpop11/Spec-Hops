@@ -15,6 +15,7 @@ public:
    static std::vector<std::unique_ptr<GameObject>>                                        gameobjectstoadd;
    inline static std::unordered_map<glm::ivec2, std::vector<std::shared_ptr<GameObject>>> positions = {};
 
+
    static bool ticksPaused();
 
    static std::vector<GameObject*> get_gameobjects() {

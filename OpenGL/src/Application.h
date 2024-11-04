@@ -41,6 +41,11 @@ public:
    void                                                                              configureSurface();
    glm::ivec2                                                                        windowSize();
 
+
+   // settings (player can configure later?)
+   int currentDecals = 0;
+   int maxDecals     = 50;
+
 private:
    GLFWwindow*                          window;
    wgpu::Instance                       instance;

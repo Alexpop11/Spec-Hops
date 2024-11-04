@@ -3,6 +3,7 @@
 #include "../World.h"
 #include "Tile.h"
 #include "AudioEngine.h"
+#include "Decal.h"
 
 Bomb::Bomb(const std::string& name, float x, float y)
    : Entity(name, DrawPriority::Bomb, x, y, "bomb.png") {
@@ -37,6 +38,7 @@ void Bomb::explode() {
    }
 
    audio().Bomb_Sound.play();
+   World::gameobjectstoadd.push_back(std::make_unique<Decal>("ExplosionDecal", getTile().x, getTile().y, "explosion-decal.png"));
    ShouldDestroy = true;
 }
 
