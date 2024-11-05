@@ -5,10 +5,15 @@
 #include "AudioEngine.h""
 
 Decal::Decal(const std::string& name, float x, float y, const std::string& type)
-   : SquareObject(name, DrawPriority::Decal, x, y, type)
+   : SquareObject(name, DrawPriority::Decal, x, y, chooseTexture(type))
    , texturepath(chooseTexture(type)) {
-   rotation = std::vector<int>{0, 90, 180, 270}[rand() % 4];
-   scale    = std::vector<float>{0.85, 0.9, 0.95, 1, 1.05}[rand() % 5];
+   if (texturepath == "explosion-decal.png") {
+      scale    = std::vector<float>{0.85, 0.9, 0.95, 1, 1.05}[rand() % 5];
+   }
+   else if (texturepath == "crater-decal.png") {
+      scale = 3;
+   }
+   rotation  = std::vector<int>{0, 90, 180, 270}[rand() % 4];
    tintColor = {0.8, 0.5, 0.5, 0.9};
     
 }
@@ -27,6 +32,8 @@ Decal::Decal(const std::string& name, float x, float y, const std::string& type)
 std::string Decal::chooseTexture(const std::string& type) {
    if (type == "explosion") {
       return "explosion-decal.png";
+   } else if (type == "crater") {
+      return "crater-decal.png";
    }
    return "enemy.png"; // Fallback path if type doesn't match any condition
 }

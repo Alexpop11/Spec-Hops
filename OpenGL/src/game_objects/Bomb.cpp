@@ -38,7 +38,8 @@ void Bomb::explode() {
    }
 
    audio().Bomb_Sound.play();
-   World::gameobjectstoadd.push_back(std::make_unique<Decal>("ExplosionDecal", getTile().x, getTile().y, "explosion-decal.png"));
+   World::gameobjectstoadd.push_back(std::make_unique<Decal>("ExplosionDecal", getTile().x, getTile().y, "crater"));
+   World::gameobjectstoadd.push_back(std::make_unique<Decal>("ExplosionDecal", getTile().x, getTile().y, "explosion"));
    ShouldDestroy = true;
 }
 

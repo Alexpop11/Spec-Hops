@@ -1,13 +1,14 @@
 #include "Tile.h"
 
 Tile::Tile(const std::string& name, bool wall, bool unbreakable, float x, float y)
-   : SquareObject(name, DrawPriority::Floor, x, y, "alt-wall-bright.png")
+   : SquareObject(name, wall ? DrawPriority::Wall : DrawPriority::Floor, x, y, "alt-wall-bright.png")
    , wall(wall)
    , unbreakable(unbreakable)
    , wallTexture(Texture::create("alt-wall-bright.png"))
    , wallTextureUnbreakable(Texture::create("alt-wall-unbreakable.png"))
    , floorTexture(Texture::create(std::vector<std::string>{"2-alt-floor.png", "2-alt-floor-2.png"}[rand() % 2])) {
    setTexture();
+
 }
 
 Tile::Tile(const std::string& name, float x, float y)
