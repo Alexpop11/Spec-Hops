@@ -11,7 +11,7 @@ Decal::Decal(const std::string& name, float x, float y, const std::string& type)
       scale    = std::vector<float>{0.85, 0.9, 0.95, 1, 1.05}[rand() % 5];
    }
    else if (texturepath == "crater-decal.png") {
-      scale = 3;
+      scale = 5;
    }
    rotation  = std::vector<int>{0, 90, 180, 270}[rand() % 4];
    tintColor = {0.8, 0.5, 0.5, 0.9};
