@@ -137,3 +137,11 @@ using FogFragmentUniformBinding = BufferBinding<FogFragmentUniform,             
 using FogLayout = BindGroupLayout<FogVertexUniformBinding, FogFragmentUniformBinding>;
 using FogVertex = glm::vec2;
 // ============================================================
+
+// Cinders
+// ============================================================
+//struct Particle {
+//   glm::vec2 position;
+//   glm::vec2 velocity;
+//   glm::vec4 color;
+//};  

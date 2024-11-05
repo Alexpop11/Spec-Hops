@@ -2,6 +2,7 @@
 #include "Input.h"
 #include <cmath>
 #include "../rendering/Renderer.h"
+#include "decal.h"
 
 
 Character::Character(const std::string& name, int tile_x, int tile_y, std::string texturepath)
@@ -130,7 +131,7 @@ bool Character::move(int new_x, int new_y) {
 
 void Character::kick(bool hitWall, int dx, int dy) {
    Entity::kick(hitWall, dx, dy);
-
+   World::gameobjectstoadd.push_back(std::make_unique<Decal>("impactDecal", getTile().x, getTile().y, "impact"));
    stunnedLength = 9;
    tintColor     = {1.0, 0.5, 0.0, 0.5};
 }
