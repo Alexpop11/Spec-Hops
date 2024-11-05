@@ -18,6 +18,7 @@ void Tile::explode() {
    if (!unbreakable || !wall) {
       tintColor = {0.8, 0.5, 0.5, 0.9};
       wall      = false;
+      drawPriority = DrawPriority::Floor;
    }
 }
 
