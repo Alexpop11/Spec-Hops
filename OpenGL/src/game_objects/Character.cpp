@@ -2,7 +2,7 @@
 #include "Input.h"
 #include <cmath>
 #include "../rendering/Renderer.h"
-
+#include "Decal.h"
 
 Character::Character(const std::string& name, int tile_x, int tile_y, std::string texturepath)
    : Entity(name, DrawPriority::Character, tile_x, tile_y, texturepath) {}
