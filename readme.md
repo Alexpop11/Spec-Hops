@@ -46,4 +46,4 @@ To run:
 python -m http.server
 ```
 
-Then check out http://localhost:8000, and navigate to OpenGL/Spec-Hops.html
+Then check out http://localhost:8000/OpenGL/Spec-Hops.html 

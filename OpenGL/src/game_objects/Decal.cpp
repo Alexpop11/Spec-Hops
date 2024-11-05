@@ -2,31 +2,29 @@
 #include "Decal.h"
 #include "../World.h"
 #include "Tile.h"
-#include "AudioEngine.h""
+#include "AudioEngine.h"
 
 Decal::Decal(const std::string& name, float x, float y, const std::string& type)
    : SquareObject(name, DrawPriority::Decal, x, y, chooseTexture(type))
    , texturepath(chooseTexture(type)) {
    if (texturepath == "explosion-decal.png") {
-      scale    = std::vector<float>{0.85, 0.9, 0.95, 1, 1.05}[rand() % 5];
-   }
-   else if (texturepath == "crater-decal.png") {
+      scale = std::vector<float>{0.85, 0.9, 0.95, 1, 1.05}[rand() % 5];
+   } else if (texturepath == "crater-decal.png") {
       scale = 3;
    }
    rotation  = std::vector<int>{0, 90, 180, 270}[rand() % 4];
    tintColor = {0.8, 0.5, 0.5, 0.9};
-    
 }
 
-//std::string createDecal(std::string decalType, float x, float y) {
-//   if (decalType == "explosion") {
-//      World::gameobjectstoadd.push_back(std::make_unique<Decal>("ExplosionDecal", x, y, "explosion-decal.png"));
-//   }
-//}
+// std::string createDecal(std::string decalType, float x, float y) {
+//    if (decalType == "explosion") {
+//       World::gameobjectstoadd.push_back(std::make_unique<Decal>("ExplosionDecal", x, y, "explosion-decal.png"));
+//    }
+// }
 //
-//std::string createDecal(std::string decalType) {
-//   return createDecal(decalType, getTile().x, getTile().y);
-//}
+// std::string createDecal(std::string decalType) {
+//    return createDecal(decalType, getTile().x, getTile().y);
+// }
 
 
 std::string Decal::chooseTexture(const std::string& type) {

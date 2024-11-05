@@ -148,14 +148,17 @@ jobs:
           cp build_emscripten/OpenGL/Spec-Hops.html web_build/index.html
 
       - name: Setup Pages
+        if: github.event_name == 'release'
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
+        if: github.event_name == 'release'
         uses: actions/upload-pages-artifact@v3
         with:
           path: './web_build'
 
       - name: Deploy to GitHub Pages
         id: deployment
+        if: github.event_name == 'release'
         uses: actions/deploy-pages@v4
 
