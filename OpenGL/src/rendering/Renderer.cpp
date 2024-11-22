@@ -9,6 +9,8 @@ Renderer::Renderer()
         "stars.wgsl"))
    , squareObject(RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>(
         "square_object.wgsl"))
+   , particles(RenderPipeline<BindGroupLayouts<ParticleLayout>, VertexBufferLayout<glm::vec2, glm::vec2, glm::vec4>>(
+        "particles.wgsl"))
    , line(RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayout<LineVertex>>("line.wgsl"))
    , fog(RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayout<FogVertex>>("fog.wgsl"))
    , device(Application::get().getDevice())

@@ -9,8 +9,15 @@ public:
    Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position);
    virtual void render(Renderer& renderer, RenderPass& renderPass) override;
    virtual void update() override;
-   virtual void compute(Renderer& renderer, ComputePass& computePass) override;
-   glm::vec4    tintColor = glm::vec4(0.0f);
+
+   void addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color);
+
+private:
+   std::vector<Particle>                   particles;
+   Buffer<Particle>                        particleBuffer;
+   std::shared_ptr<Buffer<ParticleVertex>> pointBuffer;
+   std::shared_ptr<IndexBuffer>            indexBuffer;
+   UniformBuffer<ParticleVertexUniform>    vertexUniform;
 
 private:
 protected:

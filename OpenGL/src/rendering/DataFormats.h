@@ -23,9 +23,9 @@ struct StarUniforms {
 };
 
 using StarUniformBinding =
-   BufferBinding<StarUniforms,                                                       // Type of the buffer
+   BufferBinding<StarUniforms,                                                                   // Type of the buffer
                  wgpu::bothShaderStages(wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment), // Shader visibility
-                 wgpu::BufferBindingType::Uniform                                    // Buffer binding type
+                 wgpu::BufferBindingType::Uniform                                                // Buffer binding type
                  >;
 // ============================================================
 
@@ -138,10 +138,35 @@ using FogLayout = BindGroupLayout<FogVertexUniformBinding, FogFragmentUniformBin
 using FogVertex = glm::vec2;
 // ============================================================
 
-// Cinders
+// Particles
 // ============================================================
-//struct Particle {
-//   glm::vec2 position;
-//   glm::vec2 velocity;
-//   glm::vec4 color;
-//};  
+struct Particle {
+   glm::vec2 position;
+   glm::vec2 velocity;
+   glm::vec4 color;
+};
+
+struct ParticleVertex {
+   glm::vec2 position;
+
+   bool operator==(const ParticleVertex& other) const { return position == other.position; }
+};
+
+struct ParticleVertexUniform {
+   glm::mat4 u_MVP;
+
+   bool operator==(const ParticleVertexUniform& other) const { return u_MVP == other.u_MVP; }
+};
+
+namespace std {
+template <>
+struct hash<ParticleVertex> {
+   size_t operator()(const ParticleVertex& v) const {
+      size_t h1 = std::hash<glm::vec2>{}(v.position);
+      return h1;
+   }
+};
+} // namespace std
+
+using ParticleLayout =
+   BindGroupLayout<BufferBinding<ParticleVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform>>;
