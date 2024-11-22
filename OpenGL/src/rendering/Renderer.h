@@ -29,8 +29,7 @@ public:
    RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayout<FogVertex>>                           fog;
 
    TextureSampler sampler;
-
-   wgpu::RenderPassEncoder renderPass;
+   
    wgpu::Device            device;
 
    static glm::vec2 MousePos();

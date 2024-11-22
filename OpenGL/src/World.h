@@ -78,5 +78,6 @@ public:
    static void UpdateObjects();
    static void TickObjects();
    static void RenderObjects(Renderer& renderer, RenderPass& renderPass);
+   static void ComputeObjects(Renderer& renderer, ComputePass& computePass);
    static bool shouldTick;
 };

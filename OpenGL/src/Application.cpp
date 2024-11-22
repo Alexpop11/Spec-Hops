@@ -39,6 +39,7 @@
 #include "rendering/Texture.h"
 #include "rendering/CommandEncoder.h"
 #include "rendering/RenderPass.h"
+#include "rendering/ComputePass.h"
 #include "AudioEngine.h"
 
 #include "glm/glm.hpp"
@@ -99,32 +100,41 @@ void mainLoop(Application& application, Renderer& renderer) {
          // Create a command encoder for the draw call
          CommandEncoder encoder(device);
 
-         // Create the render pass
-         RenderPass renderPass(encoder, targetView);
-         renderer.renderPass = renderPass.get();
-
-         // Start the Dear ImGui frame
-         ImGui_ImplWGPU_NewFrame();
-         ImGui_ImplGlfw_NewFrame();
-         ImGui::NewFrame();
-
-         World::RenderObjects(renderer, renderPass);
-         renderer.DrawDebug(renderPass);
-
-         // Performance info
+         // Compute pass
          {
-            ImGui::PushFont(application.pixelify);
-            ImGui::Begin("Performance Info");
-            ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / application.getImGuiIO().Framerate,
-                        application.getImGuiIO().Framerate);
-            ImGui::End();
-            ImGui::PopFont();
+            ComputePass computePass(encoder, targetView);
+            World::ComputeObjects(renderer, computePass);
          }
 
-         ImGui::Render();
-         ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass.get());
+         // Render pass
+         {
+            RenderPass renderPass(encoder, targetView);
 
-         // The render pass and command encoder will be ended and submitted in their destructors
+            // Start the Dear ImGui frame
+            ImGui_ImplWGPU_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            World::RenderObjects(renderer, renderPass);
+            renderer.DrawDebug(renderPass);
+
+            // Performance info
+            {
+               ImGui::PushFont(application.pixelify);
+               ImGui::Begin("Performance Info");
+               ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / application.getImGuiIO().Framerate,
+                           application.getImGuiIO().Framerate);
+               ImGui::End();
+               ImGui::PopFont();
+            }
+
+            ImGui::Render();
+            ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass.get());
+
+            // The render pass will be ended and submitted in its destructor
+         }
+
+         // The command encoder will be ended and submitted in their destructors
       }
       renderer.FinishFrame();
       targetView.release();
@@ -508,11 +518,10 @@ int main(void) {
    World::LoadMap("SpaceShip.txt");
    World::gameobjects.push_back(std::make_unique<Fog>());
 
-   audio().Song.play();
-
    Input::currentTime       = glfwGetTime();
    Input::realTimeLastFrame = Input::currentTime;
    Input::lastTick          = Input::currentTime;
+
    // audio().Song.play();
 
    // Not Emscripten-friendly
