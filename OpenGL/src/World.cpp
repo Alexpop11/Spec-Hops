@@ -8,6 +8,7 @@
 #include "game_objects/Player.h"
 #include "game_objects/Background.h"
 #include "game_objects/Camera.h"
+#include "game_objects/Particles.h"
 #include "game_objects/Tile.h"
 #include "game_objects/enemies/Bomber.h"
 #include "game_objects/enemies/Turret.h"
@@ -53,6 +54,7 @@ void World::LoadMap(const std::filesystem::path& map_path) {
             if (c == 'p') { // player
                gameobjects.push_back(std::make_shared<Player>("Coolbox", (float)x, (float)y));
                gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
+               gameobjects.push_back(std::make_shared<Particles>("Floor", DrawPriority::Character, glm::vec2(x, y)));
             }
             if (c == 'f') { // floor
                gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
