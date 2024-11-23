@@ -23,8 +23,7 @@ Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::ve
          0, 2, 3  // Triangle #1 connects points #0, #2 and #3
       },
       wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index))),
-   vertexUniform(UniformBufferView<ParticleVertexUniform>::create(
-      ParticleVertexUniform{CalculateMVP(position, rotation, scale)})) {}
+   vertexUniform(UniformBufferView<ParticleVertexUniform>::create(ParticleVertexUniform{MVP()})) {}
 
 void Particles::render(Renderer& renderer, RenderPass& renderPass) {
    if (particles.empty())
@@ -32,7 +31,7 @@ void Particles::render(Renderer& renderer, RenderPass& renderPass) {
    // particleBuffer.upload(particles);
 
    // Update MVP matrix
-   this->vertexUniform.Update(ParticleVertexUniform{CalculateMVP(position, rotation, scale)});
+   this->vertexUniform.Update(ParticleVertexUniform{MVP()});
 
    // Create bind group and draw
    BindGroup bindGroup = ParticleLayout::ToBindGroup(renderer.device, vertexUniform);

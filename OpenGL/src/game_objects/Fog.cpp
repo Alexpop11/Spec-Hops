@@ -12,7 +12,7 @@ using namespace GeometryUtils;
 Fog::Fog()
    : GameObject("Fog of War", DrawPriority::Fog, {0, 0})
    , vertexUniform(
-        UniformBuffer<FogVertexUniform>({FogVertexUniform(CalculateMVP(position, rotation, scale))},
+        UniformBuffer<FogVertexUniform>({FogVertexUniform(MVP())},
                                         wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Uniform)))
    , fragmentUniformWalls(
         UniformBufferView<FogFragmentUniform>::create(FogFragmentUniform(mainFogColor, tintFogColor, {0, 0})))
@@ -21,7 +21,7 @@ Fog::Fog()
 
 void Fog::render(Renderer& renderer, RenderPass& renderPass) {
    bool showWalls = true;
-   vertexUniform.upload({FogVertexUniform(CalculateMVP(position, rotation, scale))});
+   vertexUniform.upload({FogVertexUniform(MVP())});
 
    // Collect all tile bounds
    std::vector<std::vector<glm::vec2>> allBounds;
