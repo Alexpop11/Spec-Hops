@@ -63,6 +63,16 @@ public:
       renderPass_.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
    }
 
+   template <typename Pipeline, typename Vertex>
+   void DrawInstanced(const Pipeline& pipeline, const Buffer<Vertex>& pointBuffer, const IndexBuffer& indexBuffer,
+                     BindGroup bindGroup, std::vector<uint32_t> offset, uint32_t instanceCount) {
+      setPipeline(pipeline);
+      setBindGroup(0, bindGroup, offset);
+      setVertexBuffer(pointBuffer);
+      setIndexBuffer(indexBuffer);
+      renderPass_.drawIndexed(indexBuffer.count(), instanceCount, 0, 0, 0);
+   }
+
 private:
    wgpu::RenderPassEncoder renderPass_;
 
