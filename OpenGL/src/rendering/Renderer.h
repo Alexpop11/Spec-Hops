@@ -23,11 +23,11 @@ class Renderer {
 public:
    Renderer();
 
-   RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>> stars;
-   RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>       squareObject;
-   RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayout<LineVertex>>                         line;
-   RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayout<FogVertex>>                           fog;
-   RenderPipeline<BindGroupLayouts<ParticleLayout>, VertexBufferLayout<glm::vec2>> particles;
+   RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayouts<VertexBufferLayout<glm::vec2>>> stars;
+   RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayouts<VertexBufferLayout<glm::vec2, glm::vec2>>> squareObject;
+   RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayouts<VertexBufferLayout<LineVertex>>> line;
+   RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayouts<VertexBufferLayout<FogVertex>>> fog;
+   RenderPipeline<BindGroupLayouts<ParticleLayout>, VertexBufferLayouts<VertexBufferLayout<glm::vec2>>> particles;
 
    TextureSampler sampler;
    

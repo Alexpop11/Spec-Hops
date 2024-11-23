@@ -11,7 +11,7 @@
 
 static int32_t created_render_pipelines = 0;
 
-template <typename BGLs, typename VBL>
+template <typename BGLs, typename VBLs>
 class RenderPipeline {
 public:
    RenderPipeline(std::filesystem::path   shaderPath,
@@ -23,10 +23,12 @@ public:
       Shader      shader(device, shaderPath);
 
       // Create vertex buffer layouts
-      auto vertexInfo = VBL::CreateLayout();
-
+      auto vertexInfos = VBLs::CreateLayouts();
+      
       std::vector<wgpu::VertexBufferLayout> wgpuVertexLayouts;
-      wgpuVertexLayouts.push_back(vertexInfo.layout);
+      for (const auto& info : vertexInfos) {
+         wgpuVertexLayouts.push_back(info.layout);
+      }
 
       wgpu::PipelineLayoutDescriptor layoutDesc{};
       layoutDesc.bindGroupLayoutCount = bindGroupLayouts.size();
