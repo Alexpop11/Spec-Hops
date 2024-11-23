@@ -18,18 +18,25 @@ public:
 
    static bool ticksPaused();
 
+   static void add_gameobject_recursive(GameObject* parent, GameObject* obj, std::vector<GameObject*>& allGameObjects) {
+      if (!obj) return;
+      
+      obj->parent = parent;  // Set parent (null for top-level objects)
+      allGameObjects.push_back(obj);
+      
+      auto children = obj->children();
+      for (auto& child : children) {
+         if (child) {
+            add_gameobject_recursive(obj, child, allGameObjects);
+         }
+      }
+   }
+
    static std::vector<GameObject*> get_gameobjects() {
-      // return a vector of all gameobjects and their gameobjects.children
+      // return a vector of all gameobjects and their gameobjects.children recursively
       std::vector<GameObject*> allGameObjects;
       for (auto& gameobject : gameobjects) {
-         allGameObjects.push_back(gameobject.get());
-         auto children = gameobject->children();
-         for (auto& child : children) {
-            if (child) {
-               child->parent = gameobject.get();
-               allGameObjects.push_back(child);
-            }
-         }
+         add_gameobject_recursive(nullptr, gameobject.get(), allGameObjects);
       }
       return allGameObjects;
    }
