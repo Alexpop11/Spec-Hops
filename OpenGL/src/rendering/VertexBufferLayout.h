@@ -26,7 +26,10 @@ struct VertexBufferInfo {
 template <typename... Layouts>
 struct VertexBufferLayouts {
     static std::vector<VertexBufferInfo> CreateLayouts() {
-        return {Layouts::CreateLayout()...};
+        std::vector<VertexBufferInfo> layouts;
+        layouts.reserve(sizeof...(Layouts));
+        (layouts.push_back(Layouts::CreateLayout()), ...);
+        return layouts;
     }
 };
 
