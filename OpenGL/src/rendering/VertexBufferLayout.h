@@ -3,6 +3,7 @@
 #include <webgpu/webgpu.hpp>
 #include <vector>
 #include <string>
+#include <tuple>
 #include "glm/glm.hpp"
 
 // Make a type like std::tuple<wgpu::VertexBufferLayout, std::vector<wgpu::VertexAttribute>>, but delete its copy and
@@ -19,6 +20,14 @@ struct VertexBufferInfo {
 
    VertexBufferInfo(VertexBufferInfo&& other) noexcept            = default;
    VertexBufferInfo& operator=(VertexBufferInfo&& other) noexcept = default;
+};
+
+// Compose multiple vertex buffer layouts
+template <typename... Layouts>
+struct VertexBufferLayouts {
+    static std::vector<VertexBufferInfo> CreateLayouts() {
+        return {Layouts::CreateLayout()...};
+    }
 };
 
 
@@ -46,6 +55,7 @@ constexpr std::size_t type_size() {
    return sizeof(T);
 }
 
+// Single vertex buffer layout
 template <typename... Types>
 struct VertexBufferLayout {
    static std::vector<wgpu::VertexAttribute> Attributes() {
