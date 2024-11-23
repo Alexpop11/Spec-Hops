@@ -5,13 +5,15 @@
 #include "../game_objects/Camera.h"
 
 Renderer::Renderer()
-   : stars(RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>>(
-        "stars.wgsl"))
-   , squareObject(RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>(
-        "square_object.wgsl"))
-   , line(RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayout<LineVertex>>("line.wgsl"))
-   , fog(RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayout<FogVertex>>("fog.wgsl"))
-   , particles(RenderPipeline<BindGroupLayouts<ParticleLayout>, VertexBufferLayout<glm::vec2>>("particles.wgsl"))
+   : stars(RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>,
+                          VertexBufferLayouts<VertexBufferLayout<glm::vec2>>>("stars.wgsl"))
+   , squareObject(RenderPipeline<BindGroupLayouts<SquareObjectLayout>,
+                                 VertexBufferLayouts<VertexBufferLayout<glm::vec2, glm::vec2>>>("square_object.wgsl"))
+   , line(
+        RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayouts<VertexBufferLayout<LineVertex>>>("line.wgsl"))
+   , fog(RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayouts<VertexBufferLayout<FogVertex>>>("fog.wgsl"))
+   , particles(RenderPipeline<BindGroupLayouts<ParticleLayout>, VertexBufferLayouts<VertexBufferLayout<glm::vec2>>>(
+        "particles.wgsl"))
    , device(Application::get().getDevice())
    , linePoints(
         std::vector<LineVertex>{
@@ -41,9 +43,9 @@ glm::mat4 CalculateView() {
 }
 
 glm::mat4 CalculateProjection() {
-   glm::ivec2 windowSize = Application::get().windowSize();
+   glm::ivec2 windowSize  = Application::get().windowSize();
    float      aspectRatio = static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
-   
+
    float orthoWidth = Camera::scale * aspectRatio;
    float left       = -orthoWidth / 2.0f;
    float right      = orthoWidth / 2.0f;
@@ -51,15 +53,15 @@ glm::mat4 CalculateProjection() {
    float top        = Camera::scale / 2.0f;
    float near       = -1.0f;
    float far        = 1.0f;
-   
+
    return glm::ortho(left, right, bottom, top, near, far);
 }
 
 glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale) {
    glm::mat4 projection = CalculateProjection();
-   glm::mat4 view = CalculateView();
-   glm::mat4 model = CalculateModel(objectPosition, objectRotationDegrees, objectScale);
-   
+   glm::mat4 view       = CalculateView();
+   glm::mat4 model      = CalculateModel(objectPosition, objectRotationDegrees, objectScale);
+
    return projection * view * model;
 }
 
