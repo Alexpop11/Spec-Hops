@@ -45,6 +45,9 @@ public:
    float         scale    = 1.0f;
    GameObject*   parent = nullptr;
 
+   // Get this object's local transform matrix
+   glm::mat4 getLocalTransform() const;
+   
    // Get the Model-View-Projection matrix for this object
    glm::mat4 MVP() const;
 

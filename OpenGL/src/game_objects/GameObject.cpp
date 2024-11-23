@@ -22,6 +22,21 @@ void GameObject::render(Renderer& renderer, RenderPass& renderPass) {
 
 void GameObject::compute(Renderer& renderer, ComputePass& computePass) {}
 
+glm::mat4 GameObject::getLocalTransform() const {
+    return CalculateModel(position, rotation, scale);
+}
+
 glm::mat4 GameObject::MVP() const {
-    return CalculateMVP(position, rotation, scale);
+    glm::mat4 localTransform = getLocalTransform();
+    
+    if (parent) {
+        // Get parent's transform and combine with local transform
+        glm::mat4 parentMVP = parent->MVP();
+        return parentMVP * localTransform;
+    }
+    
+    // No parent, just apply view and projection to local transform
+    glm::mat4 view = CalculateView();
+    glm::mat4 projection = CalculateProjection();
+    return projection * view * localTransform;
 }
