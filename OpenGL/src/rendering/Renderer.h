@@ -51,4 +51,7 @@ private:
 };
 
 
+glm::mat4 CalculateModel(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale);
+glm::mat4 CalculateView();
+glm::mat4 CalculateProjection();
 glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale);

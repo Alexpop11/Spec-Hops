@@ -28,35 +28,39 @@ Renderer::Renderer()
       },
       wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index)) {}
 
-glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale) {
-   glm::ivec2 windowSize = Application::get().windowSize();
-
-   // Calculate aspect ratio
-   float aspectRatio = static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
-
-   // Create orthographic projection matrix
-   float     orthoWidth = Camera::scale * aspectRatio;
-   float     left       = -orthoWidth / 2.0f;
-   float     right      = orthoWidth / 2.0f;
-   float     bottom     = -Camera::scale / 2.0f;
-   float     top        = Camera::scale / 2.0f;
-   float     near       = -1.0f;
-   float     far        = 1.0f;
-   glm::mat4 projection = glm::ortho(left, right, bottom, top, near, far);
-
-   // Create view matrix
-   glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-Camera::position, 0.0f));
-
-   // Create model matrix
+glm::mat4 CalculateModel(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale) {
    glm::mat4 model           = glm::translate(glm::mat4(1.0f), glm::vec3(objectPosition, 0.0f));
    float     rotationRadians = glm::radians(objectRotationDegrees);
    model                     = glm::rotate(model, rotationRadians, glm::vec3(0.0f, 0.0f, 1.0f));
    model                     = glm::scale(model, glm::vec3(objectScale, objectScale, 1.0f));
+   return model;
+}
 
-   // Combine matrices to form MVP
-   glm::mat4 mvp = projection * view * model;
+glm::mat4 CalculateView() {
+   return glm::translate(glm::mat4(1.0f), glm::vec3(-Camera::position, 0.0f));
+}
 
-   return mvp;
+glm::mat4 CalculateProjection() {
+   glm::ivec2 windowSize = Application::get().windowSize();
+   float      aspectRatio = static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
+   
+   float orthoWidth = Camera::scale * aspectRatio;
+   float left       = -orthoWidth / 2.0f;
+   float right      = orthoWidth / 2.0f;
+   float bottom     = -Camera::scale / 2.0f;
+   float top        = Camera::scale / 2.0f;
+   float near       = -1.0f;
+   float far        = 1.0f;
+   
+   return glm::ortho(left, right, bottom, top, near, far);
+}
+
+glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale) {
+   glm::mat4 projection = CalculateProjection();
+   glm::mat4 view = CalculateView();
+   glm::mat4 model = CalculateModel(objectPosition, objectRotationDegrees, objectScale);
+   
+   return projection * view * model;
 }
 
 void Renderer::DrawLine(Line line, RenderPass& renderPass) {
