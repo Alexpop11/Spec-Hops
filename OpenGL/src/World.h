@@ -26,6 +26,7 @@ public:
          auto children = gameobject->children();
          for (auto& child : children) {
             if (child) {
+               child->parent = gameobject.get();
                allGameObjects.push_back(child);
             }
          }

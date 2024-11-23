@@ -38,11 +38,12 @@ public:
    virtual void update();
    virtual void tickUpdate();
 
-   std::string  name;
-   DrawPriority drawPriority;
-   glm::vec2    position;
-   float        rotation = 0;
-   float        scale    = 1.0f;
+   std::string   name;
+   DrawPriority  drawPriority;
+   glm::vec2     position;
+   float         rotation = 0;
+   float         scale    = 1.0f;
+   GameObject*   parent = nullptr;
 
    // Add coroutine
    void addCoroutine(Generator coroutine) { coroutines.emplace_back(std::move(coroutine)); }
