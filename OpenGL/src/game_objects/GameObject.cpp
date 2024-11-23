@@ -21,3 +21,7 @@ void GameObject::render(Renderer& renderer, RenderPass& renderPass) {
 }
 
 void GameObject::compute(Renderer& renderer, ComputePass& computePass) {}
+
+glm::mat4 GameObject::MVP() const {
+    return CalculateMVP(position, rotation, scale);
+}

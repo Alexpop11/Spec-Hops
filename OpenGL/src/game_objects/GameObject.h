@@ -45,6 +45,9 @@ public:
    float         scale    = 1.0f;
    GameObject*   parent = nullptr;
 
+   // Get the Model-View-Projection matrix for this object
+   glm::mat4 MVP() const;
+
    // Add coroutine
    void addCoroutine(Generator coroutine) { coroutines.emplace_back(std::move(coroutine)); }
 
