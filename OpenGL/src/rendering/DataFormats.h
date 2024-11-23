@@ -168,5 +168,5 @@ struct hash<ParticleVertex> {
 };
 } // namespace std
 
-using ParticleLayout =
-   BindGroupLayout<BufferBinding<ParticleVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform>>;
+using ParticleLayout = BindGroupLayout<
+   BufferBinding<ParticleVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, true>>;

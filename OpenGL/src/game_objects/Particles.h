@@ -13,11 +13,11 @@ public:
    void addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color);
 
 private:
-   std::vector<Particle>                   particles;
-   Buffer<Particle>                        particleBuffer;
-   std::shared_ptr<Buffer<ParticleVertex>> pointBuffer;
-   std::shared_ptr<IndexBuffer>            indexBuffer;
-   UniformBuffer<ParticleVertexUniform>    vertexUniform;
+   std::vector<Particle>                    particles;
+   Buffer<Particle>                         particleBuffer;
+   std::shared_ptr<Buffer<ParticleVertex>>  pointBuffer;
+   std::shared_ptr<IndexBuffer>             indexBuffer;
+   UniformBufferView<ParticleVertexUniform> vertexUniform;
 
 private:
 protected:

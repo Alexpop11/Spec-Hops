@@ -11,10 +11,10 @@ Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::ve
                                                          wgpu::BufferUsage::CopySrc))),
    pointBuffer(Buffer<ParticleVertex>::create(
       {
-         ParticleVertex{glm::vec2(-0.5f, -0.5f)}, // 0
-         ParticleVertex{glm::vec2(0.5f, -0.5f)},  // 1
-         ParticleVertex{glm::vec2(0.5f, 0.5f)},   // 2
-         ParticleVertex{glm::vec2(-0.5f, 0.5f)},  // 3
+         ParticleVertex{glm::vec2(-0.5f, -0.5f) * (1.0f / 16.0f)}, // 0
+         ParticleVertex{glm::vec2(0.5f, -0.5f) * (1.0f / 16.0f)},  // 1
+         ParticleVertex{glm::vec2(0.5f, 0.5f) * (1.0f / 16.0f)},   // 2
+         ParticleVertex{glm::vec2(-0.5f, 0.5f) * (1.0f / 16.0f)},  // 3
       },
       wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Vertex))),
    indexBuffer(IndexBuffer::create(

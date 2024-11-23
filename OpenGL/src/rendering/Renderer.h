@@ -27,7 +27,7 @@ public:
    RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>       squareObject;
    RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayout<LineVertex>>                         line;
    RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayout<FogVertex>>                           fog;
-   RenderPipeline<BindGroupLayouts<ParticleLayout>, VertexBufferLayout<glm::vec2, glm::vec2, glm::vec4>> particles;
+   RenderPipeline<BindGroupLayouts<ParticleLayout>, VertexBufferLayout<glm::vec2>> particles;
 
    TextureSampler sampler;
    

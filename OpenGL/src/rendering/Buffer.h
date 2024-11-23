@@ -286,8 +286,7 @@ public:
    static BufferView<T, Uniform> create(const T& data) {
       static std::shared_ptr<Buffer<T, Uniform>> buffer = std::make_shared<Buffer<T, Uniform>>(
          std::vector<T>{},
-         wgpu::bothBufferUsages(wgpu::bothBufferUsages(wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::CopyDst),
-                                wgpu::BufferUsage::Uniform));
+         wgpu::bothBufferUsages(wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Uniform));
       return buffer->Add(data);
    }
 
