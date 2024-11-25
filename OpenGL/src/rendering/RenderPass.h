@@ -39,7 +39,7 @@ public:
    }
 
    template <typename T>
-   void setVertexBuffer(const Buffer<T>& buffer, uint32_t index) {
+   void setVertexBuffer(Buffer<T>& buffer, uint32_t index) {
       if (last_set_vertex_buffer != (int32_t)buffer.summed_id() || last_set_vertex_buffer_index != (int32_t)index) {
          renderPass_.setVertexBuffer(index, buffer.get(), 0, buffer.sizeBytes());
          last_set_vertex_buffer       = buffer.summed_id();
@@ -56,7 +56,7 @@ public:
 
    template <typename Pipeline, typename... Vertices>
    void DrawInstanced(const Pipeline& pipeline, const IndexBuffer& indexBuffer, BindGroup bindGroup,
-                      std::vector<uint32_t> offset, uint32_t instanceCount, const Buffer<Vertices>&... bufs) {
+                      std::vector<uint32_t> offset, uint32_t instanceCount, Buffer<Vertices>&... bufs) {
       setPipeline(pipeline);
       setBindGroup(0, bindGroup, offset);
 

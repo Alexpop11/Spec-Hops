@@ -46,6 +46,8 @@ public:
    int currentDecals = 0;
    int maxDecals     = 50;
 
+   wgpu::CommandEncoder* encoder;
+
 private:
    GLFWwindow*                          window;
    wgpu::Instance                       instance;

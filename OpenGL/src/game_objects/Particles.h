@@ -14,7 +14,8 @@ public:
 
 private:
    std::vector<Particle>                    particles;
-   Buffer<Particle>                         particleBuffer;
+   std::vector<BufferView<Particle, false>> particleViews;
+   std::shared_ptr<Buffer<Particle>>        particleBuffer;
    std::shared_ptr<Buffer<ParticleVertex>>  pointBuffer;
    std::shared_ptr<IndexBuffer>             indexBuffer;
    UniformBufferView<ParticleVertexUniform> vertexUniform;

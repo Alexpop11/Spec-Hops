@@ -1,15 +1,16 @@
 struct Particle {
-    @location(1) position: vec2<f32>,
+    @location(1) position: vec2<f32>,  // World space position
     @location(2) velocity: vec2<f32>,
     @location(3) color: vec4<f32>,
 };
 
 struct VertexInput {
-    @location(0) position: vec2<f32>,
+    @location(0) position: vec2<f32>,  // Local vertex position (relative to particle center)
 };
 
+// Separate matrices for clearer transform chain
 struct VertexUniforms {
-    u_MVP: mat4x4<f32>,
+    world_to_clip: mat4x4<f32>,    // View-Projection matrix only
 };
 
 @group(0) @binding(0)
@@ -27,7 +28,12 @@ struct FragmentOutput {
 @vertex
 fn vertex_main(vertex: VertexInput, particle: Particle) -> VertexOutput {
     var output: VertexOutput;
-    output.Position = vertexUniforms.u_MVP * vec4<f32>(vertex.position, 0.0, 1.0);
+    
+    // Transform the local vertex position to world space relative to particle position
+    let world_pos = vertex.position + particle.position;
+    
+    // Transform from world space to clip space using world_to_clip matrix
+    output.Position = vertexUniforms.world_to_clip * vec4<f32>(world_pos, 0.0, 1.0);
     output.color = particle.color;
     return output;
 }

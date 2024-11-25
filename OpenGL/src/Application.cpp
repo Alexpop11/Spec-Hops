@@ -80,18 +80,6 @@ void mainLoop(Application& application, Renderer& renderer) {
       World::settingTimeSpeed = false;
    }
 
-   World::UpdateObjects();
-
-   if (!World::ticksPaused()) {
-      if (World::shouldTick) {
-         World::TickObjects();
-         Input::lastTick   = Input::currentTime;
-         World::shouldTick = false;
-      } else if (Input::lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime) {
-         World::TickObjects();
-         Input::lastTick = Input::lastTick + (1.0 / TICKS_PER_SECOND);
-      }
-   }
 
    auto nextTexture = application.GetNextSurfaceTextureView();
    if (nextTexture) {
@@ -99,6 +87,23 @@ void mainLoop(Application& application, Renderer& renderer) {
       {
          // Create a command encoder for the draw call
          CommandEncoder encoder(device);
+         application.encoder = &encoder.get();
+
+         // CPU game logic
+         {
+            World::UpdateObjects();
+
+            if (!World::ticksPaused()) {
+               if (World::shouldTick) {
+                  World::TickObjects();
+                  Input::lastTick   = Input::currentTime;
+                  World::shouldTick = false;
+               } else if (Input::lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime) {
+                  World::TickObjects();
+                  Input::lastTick = Input::lastTick + (1.0 / TICKS_PER_SECOND);
+               }
+            }
+         }
 
          // Compute pass
          {
@@ -135,6 +140,7 @@ void mainLoop(Application& application, Renderer& renderer) {
          }
 
          // The command encoder will be ended and submitted in their destructors
+         application.encoder = nullptr;
       }
       renderer.FinishFrame();
       targetView.release();
@@ -515,8 +521,13 @@ int main(void) {
    Application& application = Application::get();
    Renderer     renderer    = Renderer();
 
-   World::LoadMap("SpaceShip.txt");
-   World::gameobjects.push_back(std::make_unique<Fog>());
+   {
+      CommandEncoder encoder(application.getDevice());
+      application.encoder = &encoder.get();
+      World::LoadMap("SpaceShip.txt");
+      World::gameobjects.push_back(std::make_unique<Fog>());
+      application.encoder = nullptr;
+   }
 
    Input::currentTime       = glfwGetTime();
    Input::realTimeLastFrame = Input::currentTime;

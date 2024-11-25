@@ -46,13 +46,15 @@ class Buffer : public std::enable_shared_from_this<Buffer<T, Uniform>> {
 public:
    // Friend declaration to allow BufferView access to private members
    friend class BufferView<T, Uniform>;
-   int32_t id;
-   int32_t generation; // Generation counter for BufferView invalidation
+   int32_t     id;
+   int32_t     generation; // Generation counter for BufferView invalidation
+   std::string name;
 
    // Constructor: Creates a buffer with specified usage and data
-   Buffer(const std::vector<T>& data, wgpu::BufferUsage usage)
+   Buffer(const std::vector<T>& data, wgpu::BufferUsage usage, std::string name = "Unnamed Buffer")
       : id(Id::get())
       , generation(0)
+      , name(name)
       , device_(Application::get().getDevice())
       , queue_(Application::get().getQueue())
       , usage_(usage) {
@@ -64,6 +66,7 @@ public:
       bufferDesc.usage                  = usage_;
       bufferDesc.mappedAtCreation       = false;
       bufferDesc.size                   = capacityBytes();
+      bufferDesc.label                  = name.c_str();
 
       // Create the buffer
       buffer_ = device_.createBuffer(bufferDesc);
@@ -130,6 +133,7 @@ public:
 
    // Add method: Allocates a new index and returns a BufferView
    BufferView<T, Uniform> Add(const T& data) {
+
       size_t allocatedIndex;
 
       // Reuse a deleted index if available
@@ -191,7 +195,7 @@ private:
    void expandBuffer() {
       std::cout << "Expanding buffer" << std::endl;
       size_t newSize = capacityBytes() * 2;
-      newSize        = std::max(newSize, elementStride()); // Ensure the buffer is at least 256 bytes
+      newSize        = std::max(newSize, elementStride()); // Ensure the buffer is at least the length of one element
 
       // Create a new buffer with the new size
       wgpu::BufferDescriptor newBufferDesc = {};
@@ -210,24 +214,25 @@ private:
       // Instead, maybe we should store the encoder in Application and reuse it within a frame, or accumulate a queue
       // of things to add and add them all once we call `flush`
       // (which would also minimize wasted copies when resizing multiple times within a frame)
-      wgpu::CommandEncoder encoder = device_.createCommandEncoder();
+      wgpu::CommandEncoder* encoder = Application::get().encoder;
+      if (!encoder) {
+         std::cerr << "No encoder found when trying to resize buffer " << name << std::endl;
+         assert(false);
+      }
 
       // Copy existing data from old buffer to new buffer
-      encoder.copyBufferToBuffer(buffer_, 0, newBuffer, 0, capacityBytes());
+      encoder->copyBufferToBuffer(buffer_, 0, newBuffer, 0, capacityBytes());
 
-      // Finish encoding and submit the commands
-      wgpu::CommandBuffer commands = encoder.finish();
-      queue_.submit(1, &commands);
-      encoder.release();
-      commands.release();
       generation++;
 
       // Queue the old buffer for destruction
       DeadBuffers::buffers.push_back(buffer_);
       buffer_ = newBuffer;
 
-      // Update buffer capaticy now that it's been resized
+      // Update buffer capacity now that it's been resized
       capacity_ = newSize / elementStride();
+
+      std::cout << "Buffer " << name << " resized - new capacity: " << capacityBytes() << " bytes" << std::endl;
    }
 
    // Method to free an index (called by BufferView destructor)
@@ -257,26 +262,54 @@ using IndexBuffer = Buffer<uint16_t, false>;
 template <typename T>
 using UniformBuffer = Buffer<T, true>;
 
-
 template <typename T, bool Uniform = true>
 class BufferView {
 public:
    // Constructor: Acquires an index from the Buffer
    BufferView(std::shared_ptr<Buffer<T, Uniform>> buffer, size_t index)
-      : buffer_(buffer)
-      , index_(index) {}
+      : buffer_(std::move(buffer))
+      , index_(index)
+      , valid_(true) {}
 
-   // Destructor: Frees the index back to the Buffer
-   ~BufferView() { buffer_->freeIndex(index_); }
+   // Destructor: Frees the index back to the Buffer if valid
+   ~BufferView() {
+      if (valid_ && buffer_) {
+         buffer_->freeIndex(index_);
+      }
+   }
 
    // Deleted copy constructor and assignment operator
-   BufferView(const BufferView&)             = delete;
-   BufferView& operator=(const BufferView&)  = delete;
-   BufferView(BufferView&& other)            = delete;
-   BufferView& operator=(BufferView&& other) = delete;
+   BufferView(const BufferView&)            = delete;
+   BufferView& operator=(const BufferView&) = delete;
+
+   // Move constructor
+   BufferView(BufferView&& other)
+      : buffer_(std::move(other.buffer_))
+      , index_(other.index_)
+      , valid_(other.valid_) {
+      other.valid_ = false; // Invalidate the moved-from object
+   }
+
+   // Move assignment
+   BufferView& operator=(BufferView&& other) {
+      if (this != &other) {
+         if (valid_ && buffer_) {
+            buffer_->freeIndex(index_); // Free the current index if valid
+         }
+         buffer_      = std::move(other.buffer_);
+         index_       = other.index_;
+         valid_       = other.valid_;
+         other.valid_ = false; // Invalidate the moved-from object
+      }
+      return *this;
+   }
 
    // Update method to modify the data at this index
-   void Update(const T& data) { buffer_->updateBuffer(data, index_); }
+   void Update(const T& data) {
+      if (valid_ && buffer_) {
+         buffer_->updateBuffer(data, index_);
+      }
+   }
 
    // Getter for the index
    std::shared_ptr<Buffer<T, Uniform>> getBuffer() const { return buffer_; }
@@ -293,7 +326,9 @@ public:
 private:
    std::shared_ptr<Buffer<T, Uniform>> buffer_;
    size_t                              index_;
+   bool                                valid_; // Added to manage ownership state
 };
+
 
 template <typename T>
 using UniformBufferView = BufferView<T, true>;
