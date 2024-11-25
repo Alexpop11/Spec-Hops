@@ -295,7 +295,7 @@ auto getUncapturedErrorCallbackHandle(wgpu::Device& device) {
 #ifdef _MSC_VER
       __debugbreak();
 #else
-      assert(false);
+      std::terminate();
 #endif
    });
 }

@@ -1,7 +1,7 @@
 struct Particle {
-    @location(0) position: vec2<f32>,
-    @location(1) velocity: vec2<f32>,
-    @location(2) color: vec4<f32>,
+    @location(1) position: vec2<f32>,
+    @location(2) velocity: vec2<f32>,
+    @location(3) color: vec4<f32>,
 };
 
 struct VertexInput {
@@ -25,7 +25,7 @@ struct FragmentOutput {
 };
 
 @vertex
-fn vertex_main(input: VertexInput) -> VertexOutput {
+fn vertex_main(input: VertexInput, particle: Particle) -> VertexOutput {
     var output: VertexOutput;
     output.Position = vertexUniforms.u_MVP * vec4<f32>(input.position, 0.0, 1.0);
     output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);

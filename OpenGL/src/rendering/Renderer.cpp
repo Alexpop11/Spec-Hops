@@ -12,7 +12,8 @@ Renderer::Renderer()
    , line(
         RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayouts<VertexBufferLayout<LineVertex>>>("line.wgsl"))
    , fog(RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayouts<VertexBufferLayout<FogVertex>>>("fog.wgsl"))
-   , particles(RenderPipeline<BindGroupLayouts<ParticleLayout>, VertexBufferLayouts<VertexBufferLayout<glm::vec2>>>(
+   , particles(RenderPipeline<BindGroupLayouts<ParticleLayout>,
+                              VertexBufferLayouts<VertexBufferLayout<glm::vec2>, InstanceBufferLayout<glm::vec2>>>(
         "particles.wgsl"))
    , device(Application::get().getDevice())
    , linePoints(

@@ -144,6 +144,8 @@ struct Particle {
    glm::vec2 position;
    glm::vec2 velocity;
    glm::vec4 color;
+
+   typedef InstanceBufferLayout<glm::vec2> Layout;
 };
 
 struct ParticleVertex {

@@ -24,7 +24,7 @@ public:
 
       // Create vertex buffer layouts
       auto vertexInfos = VBLs::CreateLayouts();
-      
+
       std::vector<wgpu::VertexBufferLayout> wgpuVertexLayouts;
       for (const auto& info : vertexInfos) {
          wgpuVertexLayouts.push_back(info.layout);
@@ -77,7 +77,7 @@ public:
 
       // Define pipeline descriptor
       wgpu::RenderPipelineDescriptor pipelineDesc     = {};
-      pipelineDesc.label                              = "Render Pipeline";
+      pipelineDesc.label                              = label.c_str();
       pipelineDesc.layout                             = layout;
       pipelineDesc.vertex                             = vertexState;
       pipelineDesc.fragment                           = &fragmentState;

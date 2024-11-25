@@ -35,7 +35,7 @@ void Particles::render(Renderer& renderer, RenderPass& renderPass) {
 
    // Create bind group and draw
    BindGroup bindGroup = ParticleLayout::ToBindGroup(renderer.device, vertexUniform);
-   renderPass.Draw(renderer.particles, *pointBuffer, *indexBuffer, bindGroup, {(uint32_t)vertexUniform.getOffset()});
+   //renderPass.Draw(renderer.particles, *pointBuffer, *indexBuffer, bindGroup, {(uint32_t)vertexUniform.getOffset()});
 }
 
 void Particles::update() {
