@@ -25,10 +25,10 @@ struct FragmentOutput {
 };
 
 @vertex
-fn vertex_main(input: VertexInput, particle: Particle) -> VertexOutput {
+fn vertex_main(vertex: VertexInput, particle: Particle) -> VertexOutput {
     var output: VertexOutput;
-    output.Position = vertexUniforms.u_MVP * vec4<f32>(input.position, 0.0, 1.0);
-    output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+    output.Position = vertexUniforms.u_MVP * vec4<f32>(vertex.position, 0.0, 1.0);
+    output.color = particle.color;
     return output;
 }
 

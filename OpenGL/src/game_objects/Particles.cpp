@@ -4,7 +4,8 @@
 Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position)
    : GameObject(name, drawPriority, position)
    , particles(std::vector<Particle>{
-        Particle{position, glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)}
+        Particle{position, glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f)},
+        Particle{position, glm::vec2(0.0f, 0.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)}
 }),
    particleBuffer(
       Buffer<Particle>(particles, wgpu::bothBufferUsages(wgpu::BufferUsage::Vertex, wgpu::BufferUsage::CopyDst,
@@ -35,7 +36,8 @@ void Particles::render(Renderer& renderer, RenderPass& renderPass) {
 
    // Create bind group and draw
    BindGroup bindGroup = ParticleLayout::ToBindGroup(renderer.device, vertexUniform);
-   //renderPass.Draw(renderer.particles, *pointBuffer, *indexBuffer, bindGroup, {(uint32_t)vertexUniform.getOffset()});
+   renderPass.DrawInstanced(renderer.particles, *indexBuffer, bindGroup, {(uint32_t)vertexUniform.getOffset()},
+                            particles.size(), *pointBuffer, particleBuffer);
 }
 
 void Particles::update() {
