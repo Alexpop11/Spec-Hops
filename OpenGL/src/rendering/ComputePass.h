@@ -37,9 +37,10 @@ public:
    }
 
    template <typename BGLs>
-   void dispatch(ComputePipeline<BGLs>& pipeline, BindGroup bindGroup, uint32_t x, uint32_t y = 1, uint32_t z = 1) {
+   void dispatch(ComputePipeline<BGLs>& pipeline, BindGroup bindGroup, std::vector<uint32_t> offsets, uint32_t x,
+                 uint32_t y = 1, uint32_t z = 1) {
       setPipeline(pipeline);
-      setBindGroup(0, bindGroup, {});
+      setBindGroup(0, bindGroup, offsets);
       computePass_.dispatchWorkgroups(x, y, z);
    }
 

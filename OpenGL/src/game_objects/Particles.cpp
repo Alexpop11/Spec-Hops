@@ -28,7 +28,8 @@ Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::ve
          0, 2, 3  // Triangle #1 connects points #0, #2 and #3
       },
       wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index))),
-   vertexUniform(UniformBufferView<ParticleVertexUniform>::create(ParticleVertexUniform{VP()})) {}
+   vertexUniform(UniformBufferView<ParticleVertexUniform>::create(ParticleVertexUniform{VP()})),
+   worldInfo(UniformBufferView<ParticleWorldInfo>::create(ParticleWorldInfo(0.0f, glm::vec2(0.0f)))) {}
 
 void Particles::render(Renderer& renderer, RenderPass& renderPass) {
    if (particles.empty())
@@ -46,9 +47,10 @@ void Particles::render(Renderer& renderer, RenderPass& renderPass) {
 }
 
 void Particles::compute(Renderer& renderer, ComputePass& computePass) {
-   worldInfo.Update(WorldInfo{Input::deltaTime, Input::mousePosition, 0.0f});
-   BindGroup bindGroup = ParticleComputeLayout::ToBindGroup(renderer.device, std::forward_as_tuple(*particleBuffer, 0, worldInfo));
-   computePass.dispatch(renderer.particlesCompute, bindGroup, particles.size());
+   worldInfo.Update(ParticleWorldInfo(Input::deltaTime, Renderer::MousePos()));
+   BindGroup bindGroup =
+      ParticleComputeLayout::ToBindGroup(renderer.device, std::forward_as_tuple(*particleBuffer, 0), worldInfo);
+   computePass.dispatch(renderer.particlesCompute, bindGroup, {(uint32_t)worldInfo.getOffset()}, particles.size());
 }
 
 void Particles::update() {

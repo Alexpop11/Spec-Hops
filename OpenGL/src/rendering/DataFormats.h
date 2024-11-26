@@ -171,7 +171,18 @@ struct hash<ParticleVertex> {
 };
 } // namespace std
 
+struct ParticleWorldInfo {
+   float     deltaTime; // at byte offset 0
+   float     _pad0;
+   glm::vec2 mousePos; // at byte offset 8
+
+   ParticleWorldInfo(float deltaTime, glm::vec2 mousePos)
+      : deltaTime(deltaTime)
+      , mousePos(mousePos) {}
+};
+
 using ParticleLayout = BindGroupLayout<
    BufferBinding<ParticleVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, true>>;
-using ParticleComputeLayout =
-   BindGroupLayout<BufferBinding<Particle, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage, false>>;
+using ParticleComputeLayout = BindGroupLayout<
+   BufferBinding<Particle, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage, false>,
+   BufferBinding<ParticleWorldInfo, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform, true>>;

@@ -1,7 +1,6 @@
 struct WorldInfo {
     deltaTime: f32,
     mousePos: vec2<f32>,
-    padding: f32, // Maintain 16-byte alignment
 }
 
 struct Particle {
