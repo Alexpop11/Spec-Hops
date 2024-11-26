@@ -15,7 +15,7 @@ struct Particle {
 const G: f32 = 30.0; // Gravitational constant (adjusted for scale)
 const MIN_DISTANCE_SQUARED: f32 = 1.0; // Prevent division by zero
 
-@compute @workgroup_size(32)
+@compute @workgroup_size(256)
 fn compute_main(@builtin(global_invocation_id) id: vec3<u32>) {
     let particle = &particleBuffer[id.x];
     
