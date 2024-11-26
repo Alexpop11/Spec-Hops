@@ -2,6 +2,7 @@
 
 #include <webgpu/webgpu.hpp>
 
+#include "ComputePipeline.h"
 #include "RenderPipeline.h"
 #include "RenderPass.h"
 #include "Texture.h"
@@ -33,7 +34,8 @@ public:
    RenderPipeline<
       BindGroupLayouts<ParticleLayout>,
       VertexBufferLayouts<VertexBufferLayout<glm::vec2>, InstanceBufferLayout<glm::vec2, glm::vec2, glm::vec4>>>
-      particles;
+                                                            particles;
+   ComputePipeline<BindGroupLayouts<ParticleComputeLayout>> particlesCompute;
 
    TextureSampler sampler;
 

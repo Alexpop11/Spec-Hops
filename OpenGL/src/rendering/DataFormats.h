@@ -25,7 +25,8 @@ struct StarUniforms {
 using StarUniformBinding =
    BufferBinding<StarUniforms,                                                                   // Type of the buffer
                  wgpu::bothShaderStages(wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment), // Shader visibility
-                 wgpu::BufferBindingType::Uniform                                                // Buffer binding type
+                 wgpu::BufferBindingType::Uniform,                                               // Buffer binding type
+                 false // Buffer is not dynamically offset
                  >;
 // ============================================================
 
@@ -172,3 +173,5 @@ struct hash<ParticleVertex> {
 
 using ParticleLayout = BindGroupLayout<
    BufferBinding<ParticleVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, true>>;
+using ParticleComputeLayout =
+   BindGroupLayout<BufferBinding<Particle, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage, false>>;

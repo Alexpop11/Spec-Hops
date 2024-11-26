@@ -19,7 +19,7 @@ template <typename Binding>
 struct GetToBind;
 
 // Helper struct for buffer bindings (e.g., Uniform or Storage buffers)
-template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType, bool DynamicOffset = false>
+template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType, bool DynamicOffset>
 struct BufferBinding {
    using Type                                             = T;
    static constexpr wgpu::ShaderStage       visibility    = Visibility;
@@ -238,5 +238,3 @@ private:
                         std::forward<Tuple>(tuple));
    }
 };
-
-

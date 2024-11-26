@@ -9,10 +9,11 @@ Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::ve
         Particle{position + glm::vec2(1.0f, 1.0f), glm::vec2(1.0f, 0.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f)},
         Particle{position + glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)}
 }),
-   particleBuffer(std::make_shared<Buffer<Particle>>(
-      particles,
-      wgpu::bothBufferUsages(wgpu::BufferUsage::Vertex, wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::CopySrc),
-      "Particles")),
+   particleBuffer(
+      std::make_shared<Buffer<Particle>>(particles,
+                                         wgpu::bothBufferUsages(wgpu::BufferUsage::Vertex, wgpu::BufferUsage::CopyDst,
+                                                                wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::Storage),
+                                         "Particles")),
    pointBuffer(Buffer<ParticleVertex>::create(
       {
          ParticleVertex{glm::vec2(-0.5f, -0.5f) * (1.0f / 16.0f)}, // 0
@@ -33,7 +34,7 @@ void Particles::render(Renderer& renderer, RenderPass& renderPass) {
    if (particles.empty())
       return;
 
-   particleBuffer->upload(particles);
+   // particleBuffer->upload(particles);
 
    // Update VP matrix
    this->vertexUniform.Update(ParticleVertexUniform{VP()});
@@ -42,6 +43,11 @@ void Particles::render(Renderer& renderer, RenderPass& renderPass) {
    BindGroup bindGroup = ParticleLayout::ToBindGroup(renderer.device, vertexUniform);
    renderPass.DrawInstanced(renderer.particles, *indexBuffer, bindGroup, {(uint32_t)vertexUniform.getOffset()},
                             particles.size(), *pointBuffer, *particleBuffer);
+}
+
+void Particles::compute(Renderer& renderer, ComputePass& computePass) {
+   BindGroup bindGroup = ParticleComputeLayout::ToBindGroup(renderer.device, std::forward_as_tuple(*particleBuffer, 0));
+   computePass.dispatch(renderer.particlesCompute, bindGroup, particles.size());
 }
 
 void Particles::update() {

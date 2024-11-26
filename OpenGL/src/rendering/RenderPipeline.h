@@ -8,15 +8,14 @@
 #include "VertexBufferLayout.h"
 #include "BindGroupLayout.h"
 #include "DataFormats.h"
-
-static int32_t created_render_pipelines = 0;
+#include "Id.h"
 
 template <typename BGLs, typename VBLs>
 class RenderPipeline {
 public:
    RenderPipeline(std::filesystem::path   shaderPath,
                   wgpu::PrimitiveTopology topology = wgpu::PrimitiveTopology::TriangleList)
-      : id(created_render_pipelines++)
+      : id(Id::get())
       , device(Application::get().getDevice())
       , bindGroupLayouts(BGLs::CreateLayouts(device)) {
       std::string label = shaderPath.stem().string();

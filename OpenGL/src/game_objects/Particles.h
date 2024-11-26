@@ -9,8 +9,8 @@ public:
    Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position);
    virtual void render(Renderer& renderer, RenderPass& renderPass) override;
    virtual void update() override;
-
-   void addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color);
+   virtual void compute(Renderer& renderer, ComputePass& computePass) override;
+   void         addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color);
 
 private:
    std::vector<Particle>                    particles;
