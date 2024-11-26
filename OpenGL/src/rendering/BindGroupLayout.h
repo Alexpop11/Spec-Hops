@@ -145,18 +145,19 @@ struct BindGroupLayout {
    }
 
    template <size_t I, typename Binding, typename Resource>
-   static std::array<int32_t, 2> getId(Resource& resource) {
+   static std::array<int32_t, 3> getId(Resource& resource) {
       if constexpr (Binding::bindingType == BindingType::Buffer) {
          if constexpr (!Binding::dynamicOffset) {
             // Assuming ToBind<T> is Buffer
-            return std::array<int32_t, 2>{std::get<0>(resource).summed_id(), (int32_t)std::get<1>(resource)};
+            return std::array<int32_t, 3>{std::get<0>(resource).summed_id(), (int32_t)std::get<1>(resource),
+                                          std::get<0>(resource).count()};
          } else if constexpr (Binding::dynamicOffset) {
-            return std::array<int32_t, 2>{resource.getBuffer()->summed_id(), -1};
+            return std::array<int32_t, 3>{resource.getBuffer()->summed_id(), -1, -1};
          }
       } else if constexpr (Binding::bindingType == BindingType::Sampler) {
-         return std::array<int32_t, 2>{resource.id, -1};
+         return std::array<int32_t, 3>{resource.id, -1, -1};
       } else if constexpr (Binding::bindingType == BindingType::Texture) {
-         return std::array<int32_t, 2>{resource->id, -1};
+         return std::array<int32_t, 3>{resource->id, -1, -1};
       }
    }
 
@@ -169,7 +170,7 @@ struct BindGroupLayout {
             // Assuming ToBind<T> is Buffer
             entry.buffer = std::get<0>(resource).get();
             entry.offset = std::get<1>(resource);
-            entry.size   = sizeof(typename Binding::Type);
+            entry.size   = sizeof(typename Binding::Type) * std::get<0>(resource).count();
          } else if constexpr (Binding::dynamicOffset) {
             entry.buffer = resource.getBuffer()->get();
             entry.offset = 0;
