@@ -74,7 +74,7 @@ concept BindingC = requires { typename ToBind<T>; };
 // Helper for caching
 // ------------------------------------------------------
 template <std::size_t N>
-using Ids = std::array<std::array<int32_t, 2>, N>;
+using Ids = std::array<std::array<int32_t, 3>, N>;
 template <std::size_t N>
 struct IdsHash {
    std::size_t operator()(const Ids<N>& ids) const {
@@ -149,8 +149,9 @@ struct BindGroupLayout {
       if constexpr (Binding::bindingType == BindingType::Buffer) {
          if constexpr (!Binding::dynamicOffset) {
             // Assuming ToBind<T> is Buffer
-            return std::array<int32_t, 3>{std::get<0>(resource).summed_id(), (int32_t)std::get<1>(resource),
-                                          std::get<0>(resource).count()};
+            return std::array<int32_t, 3>{std::get<0>(resource).summed_id(), 
+                                        static_cast<int32_t>(std::get<1>(resource)),
+                                        static_cast<int32_t>(std::get<0>(resource).count())};
          } else if constexpr (Binding::dynamicOffset) {
             return std::array<int32_t, 3>{resource.getBuffer()->summed_id(), -1, -1};
          }
@@ -159,6 +160,7 @@ struct BindGroupLayout {
       } else if constexpr (Binding::bindingType == BindingType::Texture) {
          return std::array<int32_t, 3>{resource->id, -1, -1};
       }
+      return std::array<int32_t, 3>{-1, -1, -1}; // Default case
    }
 
    template <size_t I, typename Binding, typename Resource>

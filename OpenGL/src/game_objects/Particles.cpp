@@ -6,7 +6,7 @@
 Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position)
    : GameObject(name, drawPriority, position)
    , particles(std::vector<Particle>{
-        Particle{position + glm::vec2(1.0f, 1.0f), glm::vec2(1.0f, 0.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f)},
+        Particle{position + glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f)},
         Particle{position + glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)}
 }),
    particleBuffer(
@@ -51,10 +51,6 @@ void Particles::compute(Renderer& renderer, ComputePass& computePass) {
 }
 
 void Particles::update() {
-   for (auto& particle : particles) {
-      particle.position += particle.velocity * Input::deltaTime;
-   }
-
    std::random_device rd;
    std::mt19937       gen(rd()); // Mersenne Twister generator
 
