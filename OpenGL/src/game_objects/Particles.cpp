@@ -58,7 +58,7 @@ void Particles::update() {
    std::mt19937       gen(rd()); // Mersenne Twister generator
 
    // Define distribution from 0 to 1
-   std::uniform_real_distribution<> vel_dist(-1.0, 1.0);
+   std::uniform_real_distribution<> vel_dist(-2.0, 2.0);
    std::uniform_real_distribution<> color_dist(0.0, 1.0);
 
    auto random_vel = glm::vec2(vel_dist(gen), vel_dist(gen)) * 2.0f;

@@ -12,7 +12,7 @@ struct Particle {
 @group(0) @binding(0) var<storage,read_write> particleBuffer: array<Particle>;
 @group(0) @binding(1) var<uniform> world: WorldInfo;
 
-const G: f32 = 1000.0; // Gravitational constant (adjusted for scale)
+const G: f32 = 30.0; // Gravitational constant (adjusted for scale)
 const MIN_DISTANCE_SQUARED: f32 = 1.0; // Prevent division by zero
 
 @compute @workgroup_size(32)
