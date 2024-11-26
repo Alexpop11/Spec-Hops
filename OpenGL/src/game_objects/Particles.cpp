@@ -46,7 +46,8 @@ void Particles::render(Renderer& renderer, RenderPass& renderPass) {
 }
 
 void Particles::compute(Renderer& renderer, ComputePass& computePass) {
-   BindGroup bindGroup = ParticleComputeLayout::ToBindGroup(renderer.device, std::forward_as_tuple(*particleBuffer, 0));
+   worldInfo.Update(WorldInfo{Input::deltaTime, Input::mousePosition, 0.0f});
+   BindGroup bindGroup = ParticleComputeLayout::ToBindGroup(renderer.device, std::forward_as_tuple(*particleBuffer, 0, worldInfo));
    computePass.dispatch(renderer.particlesCompute, bindGroup, particles.size());
 }
 

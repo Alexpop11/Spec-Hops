@@ -12,6 +12,12 @@ public:
    virtual void compute(Renderer& renderer, ComputePass& computePass) override;
    void         addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color);
 
+   struct WorldInfo {
+      float    deltaTime;
+      glm::vec2 mousePos;
+      float    padding;
+   };
+
 private:
    std::vector<Particle>                    particles;
    std::vector<BufferView<Particle, false>> particleViews;
@@ -19,6 +25,7 @@ private:
    std::shared_ptr<Buffer<ParticleVertex>>  pointBuffer;
    std::shared_ptr<IndexBuffer>             indexBuffer;
    UniformBufferView<ParticleVertexUniform> vertexUniform;
+   UniformBufferView<WorldInfo>             worldInfo;
 
 private:
 protected:
