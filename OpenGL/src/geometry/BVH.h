@@ -25,6 +25,33 @@ public:
 
     BVHNode() : isLeaf(true) {}
 
+    // Returns true if the given line segment intersects with any segment in the BVH
+    bool intersectsLine(const glm::vec2& start, const glm::vec2& end) const {
+        // Create AABB for the query line segment
+        AABB queryBounds(start, end);
+        
+        // Early exit if no overlap with node bounds
+        if (!bounds.intersects(queryBounds)) {
+            return false;
+        }
+
+        // Check segments in leaf node
+        if (isLeaf) {
+            for (const auto& segment : segments) {
+                if (auto intersection = GeometryUtils::LineSegmentIntersect(
+                    start, end, 
+                    segment.start, segment.end)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Recursively check children
+        return (left && left->intersectsLine(start, end)) || 
+               (right && right->intersectsLine(start, end));
+    }
+
     static std::unique_ptr<BVHNode> build(std::vector<LineSegment>& segments, int depth = 0) {
         auto node = std::make_unique<BVHNode>();
         
