@@ -20,29 +20,19 @@ Fog::Fog()
         UniformBufferView<FogFragmentUniform>::create(FogFragmentUniform(mainFogColor, mainFogColor, {0, 0}))) {}
 
 void Fog::render(Renderer& renderer, RenderPass& renderPass) {
-   bool showWalls = true;
    vertexUniform.upload({FogVertexUniform(MVP())});
-
-   // Collect all tile bounds
-   std::vector<std::vector<glm::vec2>> allBounds;
-   auto                                tiles = World::getAll<Tile>(); // Simplified retrieval of all tiles
-   for (auto tile : tiles) {
-      allBounds.push_back(tile->getBounds());
-   }
 
    // Get the player
    auto player = World::getFirst<Player>(); // Simplified retrieval of the first player
    fragmentUniformWalls.Update(FogFragmentUniform(mainFogColor, tintFogColor, player->position));
    fragmentUniformOther.Update(FogFragmentUniform(mainFogColor, mainFogColor, player->position));
 
-   auto geometry = SceneGeometry::computeSceneGeometry(allBounds, player->position, showWalls);
+   auto walls      = SceneGeometry::computeWallPaths();
+   auto visibility = SceneGeometry::computeVisibility(walls, player->position);
 
    // Render the invisibility regions
-   renderPolyTree(renderer, renderPass, *geometry.invisibilityPaths, fragmentUniformOther);
-
-   if (showWalls) {
-      renderPolyTree(renderer, renderPass, *geometry.wallPaths, fragmentUniformWalls);
-   }
+   renderPolyTree(renderer, renderPass, *visibility.invisibilityPaths, fragmentUniformOther);
+   renderPolyTree(renderer, renderPass, *walls.wallPaths, fragmentUniformWalls);
 }
 
 void Fog::update() {}

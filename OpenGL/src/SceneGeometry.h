@@ -6,6 +6,7 @@
 class SceneGeometry {
 public:
    struct WallResult {
+      std::vector<std::vector<glm::vec2>>     allBounds;
       Clipper2Lib::PathsD                     flattened;
       std::unique_ptr<Clipper2Lib::PolyTreeD> wallPaths;
    };
@@ -13,14 +14,11 @@ public:
    struct VisibilityResult {
       Clipper2Lib::PathD                      visibility;
       std::unique_ptr<Clipper2Lib::PolyTreeD> invisibilityPaths;
-      std::unique_ptr<Clipper2Lib::PolyTreeD> wallPaths;
    };
 
-   static WallResult computeWallPaths(const std::vector<std::vector<glm::vec2>>& allBounds,
-                                      const glm::vec2&                           playerPosition);
+   static WallResult computeWallPaths();
 
-   static VisibilityResult computeSceneGeometry(const std::vector<std::vector<glm::vec2>>& allBounds,
-                                                const glm::vec2& playerPosition, bool showWalls);
+   static VisibilityResult computeVisibility(SceneGeometry::WallResult& wallResult, const glm::vec2& playerPosition);
 
 private:
 };
