@@ -7,9 +7,8 @@ struct AABB {
     glm::vec2 max;
 
     AABB() : min(std::numeric_limits<float>::max()), max(-std::numeric_limits<float>::max()) {}
-    AABB(const glm::vec2& min, const glm::vec2& max) : min(min), max(max) {}
-
-    // Construct AABB from line segment
+    
+    // Construct AABB from line segment endpoints
     AABB(const glm::vec2& p1, const glm::vec2& p2) {
         min.x = std::min(p1.x, p2.x);
         min.y = std::min(p1.y, p2.y);
