@@ -13,6 +13,11 @@ float length2(const glm::vec2& a, const glm::vec2& b) {
    return glm::dot(temp, temp);
 }
 
+float length2(const glm::vec2& a) {
+   return glm::dot(a, a);
+}
+
+
 bool findPolygonUnion(const std::vector<std::vector<glm::vec2>>& polygons, PolyTreeD& output) {
    ClipperD clipper;
    for (const auto& polygon : polygons) {
@@ -207,21 +212,19 @@ Side pointSide(const glm::vec2& point, const glm::vec2& linePoint, const glm::ve
    }
 }
 
-PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles) {
-
+PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles, const BVHNode& bvh) {
    enum class PointType { Start, End, Middle };
 
-   // Struct to hold a point along with its angle and type
    struct TaggedPoint {
       PointD    point;
       double    angle;
       PointType end;
    };
 
+   std::vector<TaggedPoint> all_points;
+
    // Create a new vector of paths in which to store the lines the player can't see through
    std::vector<std::array<glm::vec2, 2>> obstructionLines;
-
-   std::vector<TaggedPoint> all_points;
 
    for (size_t i = 0; i < obstacles.size(); i++) {
       const auto&              polygon = obstacles[i];
@@ -278,7 +281,7 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
          }
       }
 
-      if (!isPointObstructed(position, {point.point.x, point.point.y}, obstructionLines)) {
+      if (!bvh.intersectsLine(position, {point.point.x, point.point.y})) {
          filtered_points.push_back(pointCopy);
       }
    }
@@ -295,7 +298,7 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
       std::optional<glm::vec2> extendedPoint;
       if (point.end != PointType::Middle) {
          glm::vec2 direction = glm::normalize(vertex - position);
-         extendedPoint       = RayIntersect(vertex, direction.x, direction.y, obstructionLines);
+         extendedPoint       = bvh.intersectRay(vertex, direction);
          if (extendedPoint && length2(*extendedPoint, vertex) < 0.1) {
             std::cout << "vertex super close to extended: " << length2(*extendedPoint, vertex) << std::endl;
          }

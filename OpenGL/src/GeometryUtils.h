@@ -6,6 +6,7 @@
 #include "clipper2/clipper.h"
 #include <glm/glm.hpp>
 #include "earcut.hpp"
+#include "geometry/BVH.h"
 
 namespace GeometryUtils {
 using namespace Clipper2Lib;
@@ -34,7 +35,7 @@ PathsD FlattenPolyPathD(const PolyPathD& polyPath);
  * @param obstacles The obstacles represented as PathsD (vector of paths).
  * @return PathD The visibility polygon as a vector of points.
  */
-PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles);
+PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles, const BVHNode& bvh);
 
 /**
  * @brief Computes the intersection point between a ray and a line segment.
@@ -61,6 +62,8 @@ std::optional<glm::vec2> RaySegmentIntersect(const glm::vec2& ray_origin, double
 std::optional<glm::vec2> LineSegmentIntersect(const glm::vec2& line1_start, const glm::vec2& line1_end,
                                               const glm::vec2& line2_start, const glm::vec2& line2_end);
 
+float length2(const glm::vec2& a, const glm::vec2& b);
+float length2(const glm::vec2& a);
 } // namespace GeometryUtils
 
 
