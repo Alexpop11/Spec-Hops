@@ -4,41 +4,80 @@
 using namespace Clipper2Lib;
 using namespace GeometryUtils;
 
-SceneGeometry::GeometryResult SceneGeometry::computeSceneGeometry(const std::vector<std::vector<glm::vec2>>& allBounds,
-                                                                  const glm::vec2& playerPosition, bool showWalls) {
-   GeometryResult result =
-      GeometryResult{std::make_unique<Clipper2Lib::PolyTreeD>(), std::make_unique<Clipper2Lib::PolyTreeD>()};
+SceneGeometry::WallResult SceneGeometry::computeWallPaths(
+   const std::vector<std::vector<glm::vec2>>& allBounds,
+   const glm::vec2& playerPosition) {
+   
+   WallResult result;
+   result.wallPaths = std::make_unique<PolyTreeD>();
 
    // Compute the union of all tile bounds
    PolyTreeD combined;
    findPolygonUnion(allBounds, combined);
-   auto flattened = FlattenPolyPathD(combined);
-
-   // Prepare the hull for clipping
-   ClipperD clipper;
-   PathsD   hullPaths;
-   for (auto& child : combined) {
-      hullPaths.push_back(child->Polygon());
-   }
-   clipper.AddSubject(hullPaths);
+   result.flattened = FlattenPolyPathD(combined);
 
    // Compute the visibility polygon
-   auto visibility = ComputeVisibilityPolygon(playerPosition, flattened);
+   result.visibility = ComputeVisibilityPolygon(playerPosition, result.flattened);
 
-   // Compute the areas occluded
+   // Tint all the walls that are not visible
+   ClipperD tint;
+   tint.AddSubject({result.flattened});
+   tint.AddClip({result.visibility});
+   tint.Execute(ClipType::Difference, FillRule::NonZero, *result.wallPaths);
+
+   return result;
+}
+
+std::unique_ptr<Clipper2Lib::PolyTreeD> SceneGeometry::computeInvisibilityPaths(
+   const PathsD& hullPaths,
+   const PathD& visibility,
+   const PathsD& flattened,
+   bool showWalls) {
+   
+   auto result = std::make_unique<PolyTreeD>();
+   
+   ClipperD clipper;
+   clipper.AddSubject(hullPaths);
    clipper.AddClip({visibility});
    if (showWalls) {
       clipper.AddClip({flattened});
    }
-   // Compute the difference to get invisibility regions
-   clipper.Execute(ClipType::Difference, FillRule::NonZero, *result.invisibilityPaths);
+   
+   clipper.Execute(ClipType::Difference, FillRule::NonZero, *result);
+   return result;
+}
+
+SceneGeometry::GeometryResult SceneGeometry::computeSceneGeometry(
+   const std::vector<std::vector<glm::vec2>>& allBounds,
+   const glm::vec2& playerPosition,
+   bool showWalls) {
+   
+   GeometryResult result{
+      std::make_unique<PolyTreeD>(),
+      std::make_unique<PolyTreeD>()
+   };
+
+   // First compute wall paths and visibility
+   auto wallResult = computeWallPaths(allBounds, playerPosition);
+   
+   // Prepare the hull for clipping
+   PathsD hullPaths;
+   PolyTreeD combined;
+   findPolygonUnion(allBounds, combined);
+   for (auto& child : combined) {
+      hullPaths.push_back(child->Polygon());
+   }
+
+   // Compute invisibility paths
+   result.invisibilityPaths = computeInvisibilityPaths(
+      hullPaths,
+      wallResult.visibility,
+      wallResult.flattened,
+      showWalls
+   );
 
    if (showWalls) {
-      // Tint all the walls that are not visible
-      ClipperD tint;
-      tint.AddSubject({flattened});
-      tint.AddClip({visibility});
-      tint.Execute(ClipType::Difference, FillRule::NonZero, *result.wallPaths);
+      result.wallPaths = std::move(wallResult.wallPaths);
    }
 
    return result;
