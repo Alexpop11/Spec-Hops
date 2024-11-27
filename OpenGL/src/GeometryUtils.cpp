@@ -106,28 +106,6 @@ float distancePointToLineSegment(const glm::vec2& point, const glm::vec2& lineSt
    return glm::distance(point, projection);
 }
 
-std::optional<glm::vec2> RayIntersect(const glm::vec2& ray_origin, double dx, double dy,
-                                      const std::vector<std::array<glm::vec2, 2>>& obstructionLines) {
-   float                    closest_distance = std::numeric_limits<float>::max();
-   std::optional<glm::vec2> closest_intersection;
-   for (const auto& line : obstructionLines) {
-      const auto& pa = line[0];
-      const auto& pb = line[1];
-
-      auto intersection_opt = RaySegmentIntersect(ray_origin, dx, dy, {pa.x, pa.y}, {pb.x, pb.y});
-      if (intersection_opt) {
-         auto current_distance = length2(*intersection_opt, ray_origin);
-         if (current_distance > 0.01) {
-            if (current_distance < closest_distance) {
-               closest_distance     = current_distance;
-               closest_intersection = intersection_opt;
-            }
-         }
-      }
-   }
-   return closest_intersection;
-}
-
 // Function to compute intersection between two line segments
 std::optional<glm::vec2> LineSegmentIntersect(const glm::vec2& line1_start, const glm::vec2& line1_end,
                                               const glm::vec2& line2_start, const glm::vec2& line2_end) {
@@ -163,31 +141,8 @@ std::optional<glm::vec2> LineSegmentIntersect(const glm::vec2& line1_start, cons
 }
 
 
-std::optional<glm::vec2> LineIntersect(const glm::vec2& line1_start, const glm::vec2& line1_end,
-                                       const std::vector<std::array<glm::vec2, 2>>& obstructionLines) {
-   float                    closest_distance = std::numeric_limits<float>::max();
-   std::optional<glm::vec2> closest_intersection;
-   for (const auto& line : obstructionLines) {
-      const auto& pa = line[0];
-      const auto& pb = line[1];
-
-      auto intersection_opt = LineSegmentIntersect(line1_start, line1_end, {pa.x, pa.y}, {pb.x, pb.y});
-      if (intersection_opt) {
-         auto current_distance = length2(*intersection_opt, line1_start);
-         if (current_distance > 0.01) {
-            if (current_distance < closest_distance) {
-               closest_distance     = current_distance;
-               closest_intersection = intersection_opt;
-            }
-         }
-      }
-   }
-   return closest_intersection;
-}
-
-bool isPointObstructed(const glm::vec2& position, const glm::vec2& point,
-                       const std::vector<std::array<glm::vec2, 2>>& obstructionLines) {
-   auto intersection_opt = LineIntersect(position, point, obstructionLines);
+bool isPointObstructed(const glm::vec2& position, const glm::vec2& point, const BVHNode& bvh) {
+   auto intersection_opt = bvh.intersectsLine(position, point);
    if (intersection_opt) {
       return length2(intersection_opt.value(), position) < length2(point, position);
    }
@@ -221,10 +176,10 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
       PointType end;
    };
 
-   std::vector<TaggedPoint> all_points;
-
    // Create a new vector of paths in which to store the lines the player can't see through
    std::vector<std::array<glm::vec2, 2>> obstructionLines;
+
+   std::vector<TaggedPoint> all_points;
 
    for (size_t i = 0; i < obstacles.size(); i++) {
       const auto&              polygon = obstacles[i];
@@ -281,7 +236,8 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
          }
       }
 
-      if (!bvh.intersectsLine(position, {point.point.x, point.point.y})) {
+      // if (!bvh.intersectsLine(position, {point.point.x, point.point.y})) {
+      if (!isPointObstructed(position, {point.point.x, point.point.y}, bvh)) {
          filtered_points.push_back(pointCopy);
       }
    }
@@ -299,7 +255,8 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
       if (point.end != PointType::Middle) {
          glm::vec2 direction = glm::normalize(vertex - position);
          extendedPoint       = bvh.intersectRay(vertex, direction);
-         if (extendedPoint && length2(*extendedPoint, vertex) < 0.1) {
+
+         if (extendedPoint.has_value() && length2(*extendedPoint, vertex) < 0.1) {
             std::cout << "vertex super close to extended: " << length2(*extendedPoint, vertex) << std::endl;
          }
       }

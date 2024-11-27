@@ -29,7 +29,7 @@ public:
       : isLeaf(true) {}
 
    // Returns true if the given line segment intersects with any segment in the BVH
-   bool intersectsLine(const glm::vec2& start, const glm::vec2& end) const;
+   std::optional<glm::vec2> intersectsLine(const glm::vec2& start, const glm::vec2& end) const;
 
    // Returns the first intersection point of a ray with any segment in the BVH
    std::optional<glm::vec2> intersectRay(const glm::vec2& origin, const glm::vec2& direction) const;

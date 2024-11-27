@@ -1,28 +1,47 @@
 #include "BVH.h"
 #include "../GeometryUtils.h"
 #include <algorithm>
+#include "../rendering/Renderer.h"
 
-bool BVHNode::intersectsLine(const glm::vec2& start, const glm::vec2& end) const {
+std::optional<glm::vec2> BVHNode::intersectsLine(const glm::vec2& start, const glm::vec2& end) const {
    // Create AABB for the query line segment
    AABB queryBounds(start, end);
 
    // Early exit if no overlap with node bounds
    if (!bounds.intersects(queryBounds)) {
-      return false;
+      return std::nullopt;
    }
 
    // Check segments in leaf node
    if (isLeaf) {
+      std::optional<glm::vec2> closest;
+      float                    closest_distance = std::numeric_limits<float>::max();
+      float                    minDist          = 0.01f;
+
       for (const auto& segment : segments) {
          if (auto intersection = GeometryUtils::LineSegmentIntersect(start, end, segment.start, segment.end)) {
-            return true;
+            auto current_distance = GeometryUtils::length2(*intersection - start);
+            if (current_distance > minDist && current_distance < closest_distance) {
+               closest          = intersection;
+               closest_distance = current_distance;
+            }
          }
       }
-      return false;
+      return closest;
    }
 
    // Recursively check children
-   return (left && left->intersectsLine(start, end)) || (right && right->intersectsLine(start, end));
+   auto leftHit  = left ? left->intersectsLine(start, end) : std::nullopt;
+   auto rightHit = right ? right->intersectsLine(start, end) : std::nullopt;
+
+   if (leftHit.has_value() && rightHit.has_value()) {
+      float leftDist  = GeometryUtils::length2(*leftHit - start);
+      float rightDist = GeometryUtils::length2(*rightHit - start);
+      auto  hit       = leftDist < rightDist ? leftHit : rightHit;
+      return hit;
+   }
+   auto hit = leftHit ? leftHit : rightHit;
+   return hit;
 }
 
 std::optional<glm::vec2> BVHNode::intersectRay(const glm::vec2& origin, const glm::vec2& direction) const {
@@ -43,17 +62,21 @@ std::optional<glm::vec2> BVHNode::intersectRay(const glm::vec2& origin, const gl
       return std::nullopt; // Ray doesn't intersect bounds
    }
 
+
+
    if (isLeaf) {
       std::optional<glm::vec2> closest;
-      float                    minDist = std::numeric_limits<float>::max();
+      float                    closest_distance = std::numeric_limits<float>::max();
+
+      float minDist = 0.01f;
 
       for (const auto& segment : segments) {
          if (auto hit =
                 GeometryUtils::RaySegmentIntersect(origin, direction.x, direction.y, segment.start, segment.end)) {
             float dist = GeometryUtils::length2(*hit - origin);
-            if (!closest || dist < minDist) {
-               closest = hit;
-               minDist = dist;
+            if (dist > minDist && dist < closest_distance) {
+               closest          = hit;
+               closest_distance = dist;
             }
          }
       }
@@ -65,12 +88,14 @@ std::optional<glm::vec2> BVHNode::intersectRay(const glm::vec2& origin, const gl
    auto rightHit = right ? right->intersectRay(origin, direction) : std::nullopt;
 
    // Return closest intersection
-   if (leftHit && rightHit) {
+   if (leftHit.has_value() && rightHit.has_value()) {
       float leftDist  = GeometryUtils::length2(*leftHit - origin);
       float rightDist = GeometryUtils::length2(*rightHit - origin);
-      return leftDist < rightDist ? leftHit : rightHit;
+      auto  hit       = leftDist < rightDist ? leftHit : rightHit;
+      return hit;
    }
-   return leftHit ? leftHit : rightHit;
+   auto hit = leftHit ? leftHit : rightHit;
+   return hit;
 }
 
 std::unique_ptr<BVHNode> BVHNode::build(std::vector<LineSegment>& segments, int depth) {
