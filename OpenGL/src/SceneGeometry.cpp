@@ -27,7 +27,6 @@ SceneGeometry::WallResult SceneGeometry::computeWallPaths() {
 
 SceneGeometry::VisibilityResult SceneGeometry::computeVisibility(SceneGeometry::WallResult& wallResult,
                                                                  const glm::vec2&           playerPosition) {
-
    SceneGeometry::VisibilityResult result{Clipper2Lib::PathD(), std::make_unique<PolyTreeD>()};
 
    // Compute the visibility polygon
