@@ -2,6 +2,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "clipper2/clipper.h"
+#include "geometry/BVH.h"
 
 class SceneGeometry {
 public:
@@ -9,6 +10,7 @@ public:
       std::vector<std::vector<glm::vec2>>     allBounds;
       Clipper2Lib::PathsD                     flattened;
       std::unique_ptr<Clipper2Lib::PolyTreeD> wallPaths;
+      std::unique_ptr<BVHNode>                bvh;
    };
 
    struct VisibilityResult {

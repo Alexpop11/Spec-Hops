@@ -21,6 +21,20 @@ SceneGeometry::WallResult SceneGeometry::computeWallPaths() {
    findPolygonUnion(allBounds, *result.wallPaths);
    result.flattened = FlattenPolyPathD(*result.wallPaths);
 
+   // Build BVH from flattened paths
+   std::vector<LineSegment> segments;
+   for (const auto& path : result.flattened) {
+       for (size_t i = 0; i < path.size(); i++) {
+           const auto& p1 = path[i];
+           const auto& p2 = path[(i + 1) % path.size()];
+           segments.emplace_back(
+               glm::vec2(p1.x, p1.y),
+               glm::vec2(p2.x, p2.y)
+           );
+       }
+   }
+   result.bvh = BVHNode::build(segments);
+
    return result;
 }
 
