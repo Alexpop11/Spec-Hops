@@ -32,6 +32,11 @@ SceneGeometry::WallResult SceneGeometry::computeWallPaths() {
    }
    result.bvh = BVHNode::build(segments);
 
+   // Debug visualization of the BVH structure
+   if (result.bvh) {
+      // result.bvh->debugDraw();
+   }
+
    return result;
 }
 

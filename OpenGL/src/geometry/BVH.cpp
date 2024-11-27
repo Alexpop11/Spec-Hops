@@ -44,6 +44,31 @@ std::optional<glm::vec2> BVHNode::intersectsLine(const glm::vec2& start, const g
    return hit;
 }
 
+void BVHNode::debugDraw(const glm::vec4& color) const {
+   // Draw this node's AABB
+   glm::vec2 topRight(bounds.max.x, bounds.min.y);
+   glm::vec2 bottomLeft(bounds.min.x, bounds.max.y);
+
+   Renderer::DebugLine(bounds.min, topRight, color);
+   Renderer::DebugLine(topRight, bounds.max, color);
+   Renderer::DebugLine(bounds.max, bottomLeft, color);
+   Renderer::DebugLine(bottomLeft, bounds.min, color);
+
+   // Recursively draw children with slightly different colors
+   if (!isLeaf) {
+      if (left) {
+         left->debugDraw(glm::vec4(color.r, color.g * 0.8f, color.b, color.a));
+      }
+      if (right) {
+         right->debugDraw(glm::vec4(color.r * 0.8f, color.g, color.b, color.a));
+      }
+   } else {
+      for (const auto& segment : segments) {
+         Renderer::DebugLine(segment.start, segment.end, color);
+      }
+   }
+}
+
 std::optional<glm::vec2> BVHNode::intersectRay(const glm::vec2& origin, const glm::vec2& direction) const {
    // Early exit if no overlap with node bounds
    if (auto intersection = GeometryUtils::RaySegmentIntersect(origin, direction.x, direction.y, bounds.min,
@@ -98,6 +123,9 @@ std::optional<glm::vec2> BVHNode::intersectRay(const glm::vec2& origin, const gl
    return hit;
 }
 
+// TODO: This is a naive BVH builder that does not attempt to optimize the tree.
+// The tree is actually pretty bad because the bounding volumes overlap lol.
+// It should probably use a SAH or some other more sophisticated method.
 std::unique_ptr<BVHNode> BVHNode::build(std::vector<LineSegment>& segments, int depth) {
    auto node = std::make_unique<BVHNode>();
 

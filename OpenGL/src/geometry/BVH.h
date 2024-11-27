@@ -36,4 +36,7 @@ public:
 
    // Builds a BVH from a vector of line segments
    static std::unique_ptr<BVHNode> build(std::vector<LineSegment>& segments, int depth = 0);
+
+   // Debug visualization of the BVH structure
+   void debugDraw(const glm::vec4& color = glm::vec4(1.0f, 1.0f, 1.0f, 0.3f)) const;
 };
