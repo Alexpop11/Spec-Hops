@@ -2,11 +2,8 @@
 #include <algorithm>
 #include <cmath>
 
-const float EPSILON = 1e-8f;
-
-bool BVHNode::is_leaf() const {
-   return left == std::numeric_limits<size_t>::max() && right == std::numeric_limits<size_t>::max();
-}
+const float  EPSILON       = 1e-8f;
+const size_t MAX_LEAF_SIZE = 1; // Adjust as needed
 
 float cross(const glm::vec2& v, const glm::vec2& w) {
    return v.x * w.y - v.y * w.x;
@@ -24,19 +21,46 @@ BVH BVH::build(std::vector<Segment> segments) {
    return bvh;
 }
 
+glm::vec4 BVH::getBoundingBoxOfNode(const BvhNode& node) const {
+   float min_x = node.leftBBox.x;
+   float min_y = node.leftBBox.y;
+   float max_x = node.leftBBox.z;
+   float max_y = node.leftBBox.w;
+
+   // Check if right child has a valid bounding box
+   if (node.rightBBox != glm::vec4(0.0f)) {
+      min_x = std::min(min_x, node.rightBBox.x);
+      min_y = std::min(min_y, node.rightBBox.y);
+      max_x = std::max(max_x, node.rightBBox.z);
+      max_y = std::max(max_y, node.rightBBox.w);
+   }
+
+   return glm::vec4(min_x, min_y, max_x, max_y);
+}
+
 size_t BVH::build_recursive(size_t segment_start, size_t segment_end) {
    // Calculate AABB for current node
    AABB aabb = compute_aabb(segment_start, segment_end);
 
    // Create leaf node if we have few enough segments
-   if (segment_end - segment_start <= 1) {
-      BVHNode node;
-      node.aabb          = aabb;
-      node.left          = std::numeric_limits<size_t>::max();
-      node.right         = std::numeric_limits<size_t>::max();
-      node.segment_start = segment_start;
-      node.segment_end   = segment_end;
-      size_t node_idx    = nodes.size();
+   if (segment_end - segment_start <= MAX_LEAF_SIZE) {
+      BvhNode node;
+
+      // Leaf node - set left child as line bucket
+      uint32_t leftType  = 1; // 1 indicates a line bucket
+      uint32_t leftCount = static_cast<uint32_t>(segment_end - segment_start);
+      node.setLeft(leftType, leftCount);
+      node.leftOffset = static_cast<uint32_t>(segment_start); // Index into segments array
+
+      // Set leftBBox
+      node.leftBBox = glm::vec4(aabb.min, aabb.max);
+
+      // No right child for leaf node
+      node.setRight(0, 0); // Right child is unused
+      node.rightOffset = 0;
+      node.rightBBox   = glm::vec4(0.0f); // Empty bounding box
+
+      size_t node_idx = nodes.size();
       nodes.push_back(node);
       return node_idx;
    }
@@ -44,24 +68,29 @@ size_t BVH::build_recursive(size_t segment_start, size_t segment_end) {
    // Partition segments
    size_t mid = partition_segments(segment_start, segment_end);
 
-   // Create internal node
-   BVHNode node;
-   node.aabb          = aabb;
-   node.left          = 0; // Will be set later
-   node.right         = 0;
-   node.segment_start = segment_start;
-   node.segment_end   = segment_end;
-   size_t node_idx    = nodes.size();
-   nodes.push_back(node);
-
    // Recursively build left and right children
-   size_t left  = build_recursive(segment_start, mid);
-   size_t right = build_recursive(mid, segment_end);
+   size_t leftChildIndex  = build_recursive(segment_start, mid);
+   size_t rightChildIndex = build_recursive(mid, segment_end);
 
-   // Update node with child indices
-   nodes[node_idx].left  = left;
-   nodes[node_idx].right = right;
+   // Compute bounding boxes of children
+   glm::vec4 leftChildBBox  = getBoundingBoxOfNode(nodes[leftChildIndex]);
+   glm::vec4 rightChildBBox = getBoundingBoxOfNode(nodes[rightChildIndex]);
 
+   // Create internal node
+   BvhNode node;
+
+   // Left child
+   node.setLeft(0, 0); // 0 indicates a node
+   node.leftOffset = static_cast<uint32_t>(leftChildIndex);
+   node.leftBBox   = leftChildBBox;
+
+   // Right child
+   node.setRight(0, 0); // 0 indicates a node
+   node.rightOffset = static_cast<uint32_t>(rightChildIndex);
+   node.rightBBox   = rightChildBBox;
+
+   size_t node_idx = nodes.size();
+   nodes.push_back(node);
    return node_idx;
 }
 
@@ -73,10 +102,10 @@ AABB BVH::compute_aabb(size_t segment_start, size_t segment_end) const {
 
    for (size_t i = segment_start; i < segment_end; ++i) {
       const Segment& segment = segments[i];
-      min_x                  = std::min(min_x, std::min(segment.start.x, segment.end.x));
-      min_y                  = std::min(min_y, std::min(segment.start.y, segment.end.y));
-      max_x                  = std::max(max_x, std::max(segment.start.x, segment.end.x));
-      max_y                  = std::max(max_y, std::max(segment.start.y, segment.end.y));
+      min_x                  = std::min({min_x, segment.start.x, segment.end.x});
+      min_y                  = std::min({min_y, segment.start.y, segment.end.y});
+      max_x                  = std::max({max_x, segment.start.x, segment.end.x});
+      max_y                  = std::max({max_y, segment.start.y, segment.end.y});
    }
 
    return AABB{
@@ -93,7 +122,7 @@ size_t BVH::partition_segments(size_t segment_start, size_t segment_end) {
    // Choose axis with the largest spread
    bool axis_vertical = height > width;
 
-   // Define a lambda to compute the centroid of a segment
+   // Lambda to compute the centroid of a segment
    auto centroid = [axis_vertical](const Segment& segment) {
       if (axis_vertical) {
          return (segment.start.y + segment.end.y) / 2.0f;
@@ -102,7 +131,7 @@ size_t BVH::partition_segments(size_t segment_start, size_t segment_end) {
       }
    };
 
-   // Get a mutable iterator range for the segments
+   // Get mutable iterator range for the segments
    auto segments_begin  = segments.begin() + segment_start;
    auto segments_end_it = segments.begin() + segment_end;
 
@@ -111,15 +140,14 @@ size_t BVH::partition_segments(size_t segment_start, size_t segment_end) {
              [centroid](const Segment& a, const Segment& b) { return centroid(a) < centroid(b); });
 
    // Return the midpoint index for splitting
-   size_t mid = (segment_start + segment_end) / 2;
-   return mid;
+   return (segment_start + segment_end) / 2;
 }
 
 std::optional<std::pair<glm::vec2, const Segment*>> BVH::ray_intersect(const Ray& ray) const {
    if (nodes.empty()) {
       return std::nullopt;
    }
-   auto result = ray_intersect_node(ray, 0, std::nullopt);
+   auto result = ray_intersect_node(ray, nodes.size() - 1, std::nullopt); // Start from root node
    if (result.has_value()) {
       auto [p, t, segment_ptr] = result.value();
       return std::make_optional(std::make_pair(p, segment_ptr));
@@ -131,61 +159,78 @@ std::optional<std::pair<glm::vec2, const Segment*>> BVH::ray_intersect(const Ray
 std::optional<std::tuple<glm::vec2, float, const Segment*>>
 BVH::ray_intersect_node(const Ray& ray, size_t node_idx,
                         std::optional<std::tuple<glm::vec2, float, const Segment*>> closest) const {
-   const BVHNode& node = nodes[node_idx];
+   const BvhNode& node = nodes[node_idx];
 
-   // First, check if the ray intersects the node's AABB
-   auto aabb_hit = intersect_ray_aabb(ray, node.aabb);
-   if (aabb_hit.has_value()) {
-      float tmin = aabb_hit->first;
-      if (closest.has_value()) {
-         float closest_t = std::get<1>(closest.value());
-         if (tmin > closest_t) {
-            // The node is further than the closest intersection found so far
-            return closest;
-         }
-      }
+   // Check intersection with left child bounding box
+   AABB leftAABB{glm::vec2(node.leftBBox.x, node.leftBBox.y), glm::vec2(node.leftBBox.z, node.leftBBox.w)};
+   auto left_aabb_hit = intersect_ray_aabb(ray, leftAABB);
 
-      if (node.is_leaf()) {
-         // Leaf node, check the segments
-         auto new_closest = closest;
-         for (size_t i = node.segment_start; i < node.segment_end; ++i) {
-            const Segment& segment      = segments[i];
+   if (left_aabb_hit.has_value()) {
+      uint32_t leftType = node.getLeftType();
+      if (leftType == 0) {
+         // Left child is a node
+         size_t childIdx = node.leftOffset;
+         closest         = ray_intersect_node(ray, childIdx, closest);
+      } else {
+         // Left child is a line bucket (leaf node)
+         uint32_t count  = node.getLeftCount();
+         uint32_t offset = node.leftOffset;
+         for (uint32_t i = 0; i < count; ++i) {
+            const Segment& segment      = segments[offset + i];
             auto           intersection = intersect_ray_segment(ray, segment);
             if (intersection.has_value()) {
                glm::vec2 p = intersection->first;
                float     t = intersection->second;
                if (t >= 0.0f) {
-                  if (new_closest.has_value()) {
-                     float closest_t = std::get<1>(new_closest.value());
-                     if (t < closest_t) {
-                        new_closest = std::make_optional(std::make_tuple(p, t, &segment));
-                     }
-                  } else {
-                     new_closest = std::make_optional(std::make_tuple(p, t, &segment));
+                  if (!closest.has_value() || t < std::get<1>(closest.value())) {
+                     closest = std::make_optional(std::make_tuple(p, t, &segment));
                   }
                }
             }
          }
-         return new_closest;
-      } else {
-         // Internal node, traverse children
-         auto left_result = ray_intersect_node(ray, node.left, closest);
-         auto new_closest = left_result.has_value() ? left_result : closest;
-
-         auto right_result = ray_intersect_node(ray, node.right, new_closest);
-         return right_result.has_value() ? right_result : left_result;
       }
-   } else {
-      // Ray does not intersect this node's AABB
-      return closest;
    }
+
+   // Check intersection with right child bounding box
+   if (node.rightBBox != glm::vec4(0.0f)) { // Check if right child exists
+      AABB rightAABB{glm::vec2(node.rightBBox.x, node.rightBBox.y), glm::vec2(node.rightBBox.z, node.rightBBox.w)};
+      auto right_aabb_hit = intersect_ray_aabb(ray, rightAABB);
+
+      if (right_aabb_hit.has_value()) {
+         uint32_t rightType = node.getRightType();
+         if (rightType == 0) {
+            // Right child is a node
+            size_t childIdx = node.rightOffset;
+            closest         = ray_intersect_node(ray, childIdx, closest);
+         } else {
+            // Right child is a line bucket (leaf node)
+            uint32_t count  = node.getRightCount();
+            uint32_t offset = node.rightOffset;
+            for (uint32_t i = 0; i < count; ++i) {
+               const Segment& segment      = segments[offset + i];
+               auto           intersection = intersect_ray_segment(ray, segment);
+               if (intersection.has_value()) {
+                  glm::vec2 p = intersection->first;
+                  float     t = intersection->second;
+                  if (t >= 0.0f) {
+                     if (!closest.has_value() || t < std::get<1>(closest.value())) {
+                        closest = std::make_optional(std::make_tuple(p, t, &segment));
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   return closest;
 }
 
 std::optional<std::pair<glm::vec2, const Segment*>> BVH::segment_intersect(const Segment& segment) const {
    if (nodes.empty()) {
       return std::nullopt;
    }
-   auto result = segment_intersect_node(segment, 0, std::nullopt);
+   auto result = segment_intersect_node(segment, nodes.size() - 1, std::nullopt); // Start from root node
    if (result.has_value()) {
       auto [p, t, segment_ptr] = result.value();
       return std::make_optional(std::make_pair(p, segment_ptr));
@@ -197,44 +242,67 @@ std::optional<std::pair<glm::vec2, const Segment*>> BVH::segment_intersect(const
 std::optional<std::tuple<glm::vec2, float, const Segment*>>
 BVH::segment_intersect_node(const Segment& segment, size_t node_idx,
                             std::optional<std::tuple<glm::vec2, float, const Segment*>> closest) const {
-   const BVHNode& node = nodes[node_idx];
+   const BvhNode& node = nodes[node_idx];
 
-   // First, check if the segment intersects the node's AABB
-   if (intersect_segment_aabb(segment, node.aabb)) {
-      if (node.is_leaf()) {
-         // Leaf node, check the segments
-         auto new_closest = closest;
-         for (size_t i = node.segment_start; i < node.segment_end; ++i) {
-            const Segment& other_segment = segments[i];
+   // Check intersection with left child bounding box
+   AABB leftAABB{glm::vec2(node.leftBBox.x, node.leftBBox.y), glm::vec2(node.leftBBox.z, node.leftBBox.w)};
+   if (intersect_segment_aabb(segment, leftAABB)) {
+      uint32_t leftType = node.getLeftType();
+      if (leftType == 0) {
+         // Left child is a node
+         size_t childIdx = node.leftOffset;
+         closest         = segment_intersect_node(segment, childIdx, closest);
+      } else {
+         // Left child is a line bucket (leaf node)
+         uint32_t count  = node.getLeftCount();
+         uint32_t offset = node.leftOffset;
+         for (uint32_t i = 0; i < count; ++i) {
+            const Segment& other_segment = segments[offset + i];
             auto           intersection  = intersect_segment_segment(segment, other_segment);
             if (intersection.has_value()) {
                glm::vec2 p = intersection->first;
                float     t = intersection->second;
                if (t >= 0.0f && t <= 1.0f) {
-                  if (new_closest.has_value()) {
-                     float closest_t = std::get<1>(new_closest.value());
-                     if (t < closest_t) {
-                        new_closest = std::make_optional(std::make_tuple(p, t, &other_segment));
-                     }
-                  } else {
-                     new_closest = std::make_optional(std::make_tuple(p, t, &other_segment));
+                  if (!closest.has_value() || t < std::get<1>(closest.value())) {
+                     closest = std::make_optional(std::make_tuple(p, t, &other_segment));
                   }
                }
             }
          }
-         return new_closest;
-      } else {
-         // Internal node, traverse children
-         auto left_result = segment_intersect_node(segment, node.left, closest);
-         auto new_closest = left_result.has_value() ? left_result : closest;
-
-         auto right_result = segment_intersect_node(segment, node.right, new_closest);
-         return right_result.has_value() ? right_result : left_result;
       }
-   } else {
-      // Segment does not intersect this node's AABB
-      return closest;
    }
+
+   // Check intersection with right child bounding box
+   if (node.rightBBox != glm::vec4(0.0f)) { // Check if right child exists
+      AABB rightAABB{glm::vec2(node.rightBBox.x, node.rightBBox.y), glm::vec2(node.rightBBox.z, node.rightBBox.w)};
+      if (intersect_segment_aabb(segment, rightAABB)) {
+         uint32_t rightType = node.getRightType();
+         if (rightType == 0) {
+            // Right child is a node
+            size_t childIdx = node.rightOffset;
+            closest         = segment_intersect_node(segment, childIdx, closest);
+         } else {
+            // Right child is a line bucket (leaf node)
+            uint32_t count  = node.getRightCount();
+            uint32_t offset = node.rightOffset;
+            for (uint32_t i = 0; i < count; ++i) {
+               const Segment& other_segment = segments[offset + i];
+               auto           intersection  = intersect_segment_segment(segment, other_segment);
+               if (intersection.has_value()) {
+                  glm::vec2 p = intersection->first;
+                  float     t = intersection->second;
+                  if (t >= 0.0f && t <= 1.0f) {
+                     if (!closest.has_value() || t < std::get<1>(closest.value())) {
+                        closest = std::make_optional(std::make_tuple(p, t, &other_segment));
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   return closest;
 }
 
 // Utility functions for intersection tests

@@ -1,11 +1,11 @@
-#ifndef BVH_H
-#define BVH_H
+#pragma once
 
 #include <glm/glm.hpp>
 #include <glm/vec2.hpp>
 #include <limits>
 #include <vector>
 #include <optional>
+#include <cstdint>
 
 struct Ray {
    glm::vec2 origin;
@@ -22,18 +22,29 @@ struct Segment {
    glm::vec2 end;
 };
 
-struct BVHNode {
-   AABB   aabb;
-   size_t left;
-   size_t right;
-   size_t segment_start;
-   size_t segment_end;
+struct BvhNode {
+   uint32_t leftTypeCount; // leftType :1, leftCount :31
+   uint32_t leftOffset;
 
-   bool is_leaf() const;
+   uint32_t rightTypeCount; // rightType :1, rightCount :31
+   uint32_t rightOffset;
+
+   glm::vec4 leftBBox; // (min.x, min.y, max.x, max.y)
+   glm::vec4 rightBBox;
+
+   // Helper methods for left child
+   uint32_t getLeftType() const { return leftTypeCount >> 31; }
+   uint32_t getLeftCount() const { return leftTypeCount & 0x7FFFFFFF; }
+   void     setLeft(uint32_t type, uint32_t count) { leftTypeCount = (type << 31) | (count & 0x7FFFFFFF); }
+
+   // Helper methods for right child
+   uint32_t getRightType() const { return rightTypeCount >> 31; }
+   uint32_t getRightCount() const { return rightTypeCount & 0x7FFFFFFF; }
+   void     setRight(uint32_t type, uint32_t count) { rightTypeCount = (type << 31) | (count & 0x7FFFFFFF); }
 };
 
 struct BVH {
-   std::vector<BVHNode> nodes;
+   std::vector<BvhNode> nodes;
    std::vector<Segment> segments;
 
    static BVH build(std::vector<Segment> segments);
@@ -43,6 +54,8 @@ struct BVH {
    AABB compute_aabb(size_t segment_start, size_t segment_end) const;
 
    size_t partition_segments(size_t segment_start, size_t segment_end);
+
+   glm::vec4 getBoundingBoxOfNode(const BvhNode& node) const;
 
    /// Find the closest intersection point between a ray and any segment in the BVH.
    std::optional<std::pair<glm::vec2, const Segment*>> ray_intersect(const Ray& ray) const;
@@ -79,5 +92,3 @@ std::optional<std::pair<float, float>> intersect_ray_aabb(const Ray& ray, const 
 
 /// Check if a segment intersects an AABB.
 bool intersect_segment_aabb(const Segment& segment, const AABB& aabb);
-
-#endif // BVH_H
