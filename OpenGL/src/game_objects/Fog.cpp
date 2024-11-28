@@ -3,8 +3,8 @@
 #include "Player.h"
 #include <vector>
 #include "clipper2/clipper.h"
-#include "../GeometryUtils.h"
-#include "../SceneGeometry.h"
+#include "../geometry/GeometryUtils.h"
+#include "../geometry/SceneGeometry.h"
 #include "earcut.hpp"
 
 using namespace Clipper2Lib;

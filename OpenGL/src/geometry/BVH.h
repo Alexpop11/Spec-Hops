@@ -8,55 +8,55 @@
 #include <optional>
 
 struct Ray {
-    glm::vec2 origin;
-    glm::vec2 direction;
+   glm::vec2 origin;
+   glm::vec2 direction;
 };
 
 struct AABB {
-    glm::vec2 min;
-    glm::vec2 max;
+   glm::vec2 min;
+   glm::vec2 max;
 };
 
 struct Segment {
-    glm::vec2 start;
-    glm::vec2 end;
+   glm::vec2 start;
+   glm::vec2 end;
 };
 
 struct BVHNode {
-    AABB aabb;
-    size_t left;
-    size_t right;
-    size_t segment_start;
-    size_t segment_end;
+   AABB   aabb;
+   size_t left;
+   size_t right;
+   size_t segment_start;
+   size_t segment_end;
 
-    bool is_leaf() const;
+   bool is_leaf() const;
 };
 
 struct BVH {
-    std::vector<BVHNode> nodes;
-    std::vector<Segment> segments;
+   std::vector<BVHNode> nodes;
+   std::vector<Segment> segments;
 
-    static BVH build(std::vector<Segment> segments);
+   static BVH build(std::vector<Segment> segments);
 
-    size_t build_recursive(size_t segment_start, size_t segment_end);
+   size_t build_recursive(size_t segment_start, size_t segment_end);
 
-    AABB compute_aabb(size_t segment_start, size_t segment_end) const;
+   AABB compute_aabb(size_t segment_start, size_t segment_end) const;
 
-    size_t partition_segments(size_t segment_start, size_t segment_end);
+   size_t partition_segments(size_t segment_start, size_t segment_end);
 
-    /// Find the closest intersection point between a ray and any segment in the BVH.
-    std::optional<std::pair<glm::vec2, const Segment*>> ray_intersect(const Ray& ray) const;
+   /// Find the closest intersection point between a ray and any segment in the BVH.
+   std::optional<std::pair<glm::vec2, const Segment*>> ray_intersect(const Ray& ray) const;
 
-    std::optional<std::tuple<glm::vec2, float, const Segment*>> ray_intersect_node(
-        const Ray& ray, size_t node_idx,
-        std::optional<std::tuple<glm::vec2, float, const Segment*>> closest) const;
+   std::optional<std::tuple<glm::vec2, float, const Segment*>>
+   ray_intersect_node(const Ray& ray, size_t node_idx,
+                      std::optional<std::tuple<glm::vec2, float, const Segment*>> closest) const;
 
-    /// Find the closest intersection point between a segment and any segment in the BVH.
-    std::optional<std::pair<glm::vec2, const Segment*>> segment_intersect(const Segment& segment) const;
+   /// Find the closest intersection point between a segment and any segment in the BVH.
+   std::optional<std::pair<glm::vec2, const Segment*>> segment_intersect(const Segment& segment) const;
 
-    std::optional<std::tuple<glm::vec2, float, const Segment*>> segment_intersect_node(
-        const Segment& segment, size_t node_idx,
-        std::optional<std::tuple<glm::vec2, float, const Segment*>> closest) const;
+   std::optional<std::tuple<glm::vec2, float, const Segment*>>
+   segment_intersect_node(const Segment& segment, size_t node_idx,
+                          std::optional<std::tuple<glm::vec2, float, const Segment*>> closest) const;
 };
 
 // Utility functions for intersection tests

@@ -2,7 +2,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "clipper2/clipper.h"
-#include "geometry/BVH.h"
+#include "BVH.h"
 
 class SceneGeometry {
 public:
