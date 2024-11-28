@@ -1,23 +1,19 @@
-// Define the WorldInfo struct
 struct WorldInfo {
     deltaTime : f32,
     mousePos  : vec2<f32>,
 };
 
-// Define the Particle struct
 struct Particle {
     position : vec2<f32>,  // World space position
     velocity : vec2<f32>,
     color    : vec4<f32>,
 };
 
-// Define the Segment struct (wall segments)
 struct Segment {
     start : vec2<f32>,
     end   : vec2<f32>,
 };
 
-// Define the BVH Node struct
 struct BvhNode {
     leftTypeCount : u32,    // leftType :1, leftCount :31
     leftOffset    : u32,
@@ -32,7 +28,6 @@ struct BvhNode {
     rightBBoxMax : vec2<f32>,
 };
 
-// Define the AABB struct
 struct AABB {
     min : vec2<f32>,
     max : vec2<f32>,
@@ -96,13 +91,11 @@ fn dot2D(a : vec2<f32>, b : vec2<f32>) -> f32 {
     return a.x * b.x + a.y * b.y;
 }
 
-// Ray structure for collision detection
 struct Ray {
     origin    : vec2<f32>,
     direction : vec2<f32>,
 };
 
-// Result of segment intersection
 struct SegmentIntersection {
     hit      : bool,
     position : vec2<f32>,
@@ -112,25 +105,12 @@ struct SegmentIntersection {
 // Buffer bindings
 @group(0) @binding(0) var<storage, read_write> particleBuffer : array<Particle>;
 @group(0) @binding(1) var<uniform> world : WorldInfo;
-
-// Wall segments and BVH
 @group(0) @binding(2) var<storage, read> segments : array<Segment>;
 @group(0) @binding(3) var<storage, read> bvhNodes : array<BvhNode>;
 
-// Uniforms to hold counts (since arrayLength() is not available for storage buffers in WGSL)
-struct Counts {
-    particleCount : u32,
-    bvhNodeCount  : u32,
-    segmentCount  : u32,
-};
-
-// @group(0) @binding(4) var<uniform> counts : Counts;
-
-
 // Constants
-const G : f32 = 30.0;                  // Gravitational constant (adjusted for scale)
+const G : f32 = 30.0; 
 const MIN_DISTANCE_SQUARED : f32 = 1.0; // Prevent division by zero
-const PARTICLE_RADIUS : f32 = 0.5;     // Particle radius for collision detection
 
 // Compute shader entry point
 @compute @workgroup_size(256)
@@ -145,12 +125,12 @@ fn compute_main(@builtin(global_invocation_id) id : vec3<u32>) {
 
     // Calculate gravitational force (F = G * m1 * m2 / r^2)
     // Since mass is uniform we can simplify
-    let force = 0.0;//normalize(toMouse) * G / distanceSquared;
+    let force = normalize(toMouse) * G / distanceSquared;
 
     // Update velocity (a = F/m, simplified since mass = 1)
     particleBuffer[index].velocity += force * world.deltaTime;
 
-    // Update position
+    // New position based on velocity
     let newPosition = particle.position + particleBuffer[index].velocity * world.deltaTime;
 
     // Check for collision with walls
@@ -159,12 +139,14 @@ fn compute_main(@builtin(global_invocation_id) id : vec3<u32>) {
     
     if (collision) {
         // Particle has collided with a wall
-        particleBuffer[index].color = vec4<f32>(1.0, 0.0, 0.0, 1.0); // Set color to red
+        // particleBuffer[index].color = vec4<f32>(1.0, 0.0, 0.0, 1.0); // Set color to red
         particleBuffer[index].velocity = vec2<f32>(0.0, 0.0);
     }
-
-    // Update particle position
-    particleBuffer[index].position = newPosition;
+    else 
+    {
+        // Update particle position
+        particleBuffer[index].position = newPosition;
+    }
 }
 
 fn collidesWithWalls(particlePosition : vec2<f32>, newPosition : vec2<f32>) -> bool {
@@ -178,8 +160,6 @@ fn collidesWithWalls(particlePosition : vec2<f32>, newPosition : vec2<f32>) -> b
     return false;
 }
 
-
-// Function to check if two segments intersect
 fn segmentsIntersect(s1 : Segment, s2 : Segment) -> bool {
     let p = s1.start;
     let r = s1.end - s1.start;
