@@ -53,12 +53,8 @@ void Particles::render(Renderer& renderer, RenderPass& renderPass) {
 
 void Particles::pre_compute() {
    auto walls = SceneGeometry::computeWallPaths();
-   segmentBuffer.upload(walls.bvh.segments);
    bvhBuffer.upload(walls.bvh.nodes);
-
-   for (auto& segment : walls.bvh.segments) {
-      Renderer::DebugLine(segment.start, segment.end, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-   }
+   segmentBuffer.upload(walls.bvh.segments);
 }
 
 void Particles::compute(Renderer& renderer, ComputePass& computePass) {

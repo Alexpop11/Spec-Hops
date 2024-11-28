@@ -407,3 +407,5 @@ build_emscripten
 build_analysis
 .aider*
 .env
+
+build_xcode

@@ -114,8 +114,8 @@ struct SegmentIntersection {
 @group(0) @binding(1) var<uniform> world : WorldInfo;
 
 // Wall segments and BVH
-@group(0) @binding(2) var<storage, read> bvhNodes : array<BvhNode>;
-@group(0) @binding(3) var<storage, read> segments : array<Segment>;
+@group(0) @binding(2) var<storage, read> segments : array<Segment>;
+@group(0) @binding(3) var<storage, read> bvhNodes : array<BvhNode>;
 
 // Uniforms to hold counts (since arrayLength() is not available for storage buffers in WGSL)
 struct Counts {
