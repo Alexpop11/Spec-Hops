@@ -146,6 +146,15 @@ void World::ComputeObjects(Renderer& renderer, ComputePass& computePass) {
    }
 }
 
+void World::PreComputeObjects() {
+   auto objects = get_gameobjects();
+   sortGameObjectsByPriority(objects);
+
+   for (auto& gameobject : objects) {
+      gameobject->pre_compute();
+   }
+}
+
 bool World::ticksPaused() {
    auto player = getFirst<Player>();
    return player->pauseTicks();

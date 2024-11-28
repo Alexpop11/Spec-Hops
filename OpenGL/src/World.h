@@ -19,11 +19,12 @@ public:
    static bool ticksPaused();
 
    static void add_gameobject_recursive(GameObject* parent, GameObject* obj, std::vector<GameObject*>& allGameObjects) {
-      if (!obj) return;
-      
-      obj->parent = parent;  // Set parent (null for top-level objects)
+      if (!obj)
+         return;
+
+      obj->parent = parent; // Set parent (null for top-level objects)
       allGameObjects.push_back(obj);
-      
+
       auto children = obj->children();
       for (auto& child : children) {
          if (child) {
@@ -87,5 +88,6 @@ public:
    static void TickObjects();
    static void RenderObjects(Renderer& renderer, RenderPass& renderPass);
    static void ComputeObjects(Renderer& renderer, ComputePass& computePass);
+   static void PreComputeObjects();
    static bool shouldTick;
 };

@@ -34,6 +34,7 @@ public:
    virtual std::vector<GameObject*> children() { return {}; }
 
    virtual void render(Renderer& renderer, RenderPass& renderPass);
+   virtual void pre_compute();
    virtual void compute(Renderer& renderer, ComputePass& computePass);
    virtual void update();
    virtual void tickUpdate();

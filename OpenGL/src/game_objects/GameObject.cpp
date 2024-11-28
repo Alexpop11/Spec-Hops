@@ -20,6 +20,7 @@ void GameObject::render(Renderer& renderer, RenderPass& renderPass) {
    std::cout << "Rendering GameObject (you should not see this lol) " << name << std::endl;
 }
 
+void GameObject::pre_compute() {}
 void GameObject::compute(Renderer& renderer, ComputePass& computePass) {}
 
 glm::mat4 GameObject::getLocalTransform() const {

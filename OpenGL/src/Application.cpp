@@ -105,6 +105,9 @@ void mainLoop(Application& application, Renderer& renderer) {
             }
          }
 
+         // Pre-compute pass
+         { World::PreComputeObjects(); }
+
          // Compute pass
          {
             ComputePass computePass(encoder, targetView);

@@ -95,7 +95,11 @@ public:
 
    // Method to upload data to the buffer
    void upload(const std::vector<T>& data) {
-      assert(data.size() <= count_ && "Data size exceeds buffer capacity.");
+      if (data.size() > count_) {
+         expandBuffer(data.size() * elementStride());
+      }
+
+      count_ = data.size();
 
       if constexpr (Uniform) {
          // Create a temporary buffer with padding
@@ -192,10 +196,11 @@ private:
    }
 
    // Method to resize the buffer
-   void expandBuffer() {
+   void expandBuffer() { expandBuffer(capacityBytes() * 2); }
+
+   void expandBuffer(size_t newSize) {
       std::cout << "Expanding buffer" << std::endl;
-      size_t newSize = capacityBytes() * 2;
-      newSize        = std::max(newSize, elementStride()); // Ensure the buffer is at least the length of one element
+      newSize = std::max(newSize, elementStride()); // Ensure the buffer is at least the length of one element
 
       // Create a new buffer with the new size
       wgpu::BufferDescriptor newBufferDesc = {};

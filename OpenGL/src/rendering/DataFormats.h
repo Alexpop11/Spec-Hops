@@ -3,6 +3,7 @@
 #include <webgpu/webgpu.hpp>
 #include "VertexBufferLayout.h"
 #include "BindGroupLayout.h"
+#include "../geometry/BVH.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/hash.hpp"
@@ -183,6 +184,8 @@ struct ParticleWorldInfo {
 
 using ParticleLayout = BindGroupLayout<
    BufferBinding<ParticleVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, true>>;
-using ParticleComputeLayout = BindGroupLayout<
-   BufferBinding<Particle, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage, false>,
-   BufferBinding<ParticleWorldInfo, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform, true>>;
+using ParticleComputeLayout =
+   BindGroupLayout<BufferBinding<Particle, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage, false>,
+                   BufferBinding<ParticleWorldInfo, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform, true>,
+                   BufferBinding<Segment, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage, false>,
+                   BufferBinding<BvhNode, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage, false>>;

@@ -1,5 +1,6 @@
 #include "Particles.h"
 #include "../Input.h"
+#include "../geometry/SceneGeometry.h"
 
 #include <random>
 
@@ -28,14 +29,18 @@ Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::ve
          0, 2, 3  // Triangle #1 connects points #0, #2 and #3
       },
       wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index))),
+   segmentBuffer(Buffer<Segment>(
+      {}, wgpu::bothBufferUsages(wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Storage),
+      "segments")),
+   bvhBuffer(Buffer<BvhNode>(
+      {}, wgpu::bothBufferUsages(wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Storage),
+      "bvh")),
    vertexUniform(UniformBufferView<ParticleVertexUniform>::create(ParticleVertexUniform{VP()})),
    worldInfo(UniformBufferView<ParticleWorldInfo>::create(ParticleWorldInfo(0.0f, glm::vec2(0.0f)))) {}
 
 void Particles::render(Renderer& renderer, RenderPass& renderPass) {
    if (particles.empty())
       return;
-
-   // particleBuffer->upload(particles);
 
    // Update VP matrix
    this->vertexUniform.Update(ParticleVertexUniform{VP()});
@@ -46,10 +51,21 @@ void Particles::render(Renderer& renderer, RenderPass& renderPass) {
                             particles.size(), *pointBuffer, *particleBuffer);
 }
 
+void Particles::pre_compute() {
+   auto walls = SceneGeometry::computeWallPaths();
+   segmentBuffer.upload(walls.bvh.segments);
+   bvhBuffer.upload(walls.bvh.nodes);
+
+   for (auto& segment : walls.bvh.segments) {
+      Renderer::DebugLine(segment.start, segment.end, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+   }
+}
+
 void Particles::compute(Renderer& renderer, ComputePass& computePass) {
    worldInfo.Update(ParticleWorldInfo(Input::deltaTime, Renderer::MousePos()));
    BindGroup bindGroup =
-      ParticleComputeLayout::ToBindGroup(renderer.device, std::forward_as_tuple(*particleBuffer, 0), worldInfo);
+      ParticleComputeLayout::ToBindGroup(renderer.device, std::forward_as_tuple(*particleBuffer, 0), worldInfo,
+                                         std::forward_as_tuple(segmentBuffer, 0), std::forward_as_tuple(bvhBuffer, 0));
    computePass.dispatch(renderer.particlesCompute, bindGroup, {(uint32_t)worldInfo.getOffset()}, particles.size());
 }
 
@@ -58,7 +74,7 @@ void Particles::update() {
    std::mt19937       gen(rd()); // Mersenne Twister generator
 
    // Define distribution from 0 to 1
-   std::uniform_real_distribution<> vel_dist(-2.0, 2.0);
+   std::uniform_real_distribution<> vel_dist(-0.5, 0.5);
    std::uniform_real_distribution<> color_dist(0.0, 1.0);
 
    auto random_vel = glm::vec2(vel_dist(gen), vel_dist(gen)) * 2.0f;
