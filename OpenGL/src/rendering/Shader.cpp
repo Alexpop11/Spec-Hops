@@ -4,7 +4,8 @@
 Shader::Shader(wgpu::Device device, const std::filesystem::path& filePath)
    : filePath(filePath) {
    // Read the shader source code from the file
-   std::string src = ReadFile(Application::get().res_path / "shaders" / filePath);
+   auto fullPath = Application::get().res_path / "shaders" / filePath;
+   std::string src = ReadFile(fullPath);
    if (src.empty()) {
       std::cerr << "Shader source is empty. Failed to load shader from: " << filePath << std::endl;
       return;
@@ -59,21 +60,48 @@ Shader& Shader::operator=(Shader&& other) noexcept {
    return *this;
 }
 
+std::string Shader::ProcessIncludes(const std::string& source, const std::filesystem::path& shaderPath) const {
+    std::istringstream stream(source);
+    std::ostringstream result;
+    std::string line;
+
+    while (std::getline(stream, line)) {
+        if (line.find("#include") == 0) {
+            size_t firstQuote = line.find('<');
+            size_t lastQuote = line.find('>');
+            if (firstQuote != std::string::npos && lastQuote != std::string::npos) {
+                std::string filename = line.substr(firstQuote + 1, lastQuote - firstQuote - 1);
+                auto includePath = shaderPath.parent_path() / filename;
+                
+                // Read the included file
+                std::string includeContent = ReadFile(includePath);
+                if (!includeContent.empty()) {
+                    result << includeContent << '\n';
+                }
+            }
+        } else {
+            result << line << '\n';
+        }
+    }
+    return result.str();
+}
+
 std::string Shader::ReadFile(const std::filesystem::path& path) const {
-   if (!std::filesystem::exists(path)) {
-      std::cerr << "Shader file does not exist: " << path << std::endl;
-      return "";
-   }
+    if (!std::filesystem::exists(path)) {
+        std::cerr << "Shader file does not exist: " << path << std::endl;
+        return "";
+    }
 
-   std::ifstream fileStream(path, std::ios::in | std::ios::binary);
-   if (!fileStream) {
-      std::cerr << "Failed to open shader file: " << path << std::endl;
-      return "";
-   }
+    std::ifstream fileStream(path, std::ios::in | std::ios::binary);
+    if (!fileStream) {
+        std::cerr << "Failed to open shader file: " << path << std::endl;
+        return "";
+    }
 
-   std::ostringstream contents;
-   contents << fileStream.rdbuf();
-   fileStream.close();
+    std::ostringstream contents;
+    contents << fileStream.rdbuf();
+    fileStream.close();
 
-   return contents.str();
+    // Process includes in the file content
+    return ProcessIncludes(contents.str(), path);
 }

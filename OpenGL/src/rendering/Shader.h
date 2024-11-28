@@ -29,4 +29,5 @@ private:
 
    // Helper function to read file contents
    std::string ReadFile(const std::filesystem::path& path) const;
+   std::string ProcessIncludes(const std::string& source, const std::filesystem::path& shaderPath) const;
 };
