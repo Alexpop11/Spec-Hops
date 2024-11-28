@@ -10,7 +10,7 @@ public:
       std::vector<std::vector<glm::vec2>>     allBounds;
       Clipper2Lib::PathsD                     flattened;
       std::unique_ptr<Clipper2Lib::PolyTreeD> wallPaths;
-      std::unique_ptr<BVHNode>                bvh;
+      BVH                                     bvh;
    };
 
    struct VisibilityResult {

@@ -22,7 +22,7 @@ SceneGeometry::WallResult SceneGeometry::computeWallPaths() {
    result.flattened = FlattenPolyPathD(*result.wallPaths);
 
    // Build BVH from flattened paths
-   std::vector<LineSegment> segments;
+   std::vector<Segment> segments;
    for (const auto& path : result.flattened) {
       for (size_t i = 0; i < path.size(); i++) {
          const auto& p1 = path[i];
@@ -30,12 +30,9 @@ SceneGeometry::WallResult SceneGeometry::computeWallPaths() {
          segments.emplace_back(glm::vec2(p1.x, p1.y), glm::vec2(p2.x, p2.y));
       }
    }
-   result.bvh = BVHNode::build(segments);
+   result.bvh = BVH::build(segments);
 
    // Debug visualization of the BVH structure
-   if (result.bvh) {
-      // result.bvh->debugDraw();
-   }
 
    return result;
 }
@@ -46,7 +43,7 @@ SceneGeometry::VisibilityResult SceneGeometry::computeVisibility(SceneGeometry::
    SceneGeometry::VisibilityResult result{Clipper2Lib::PathD(), std::make_unique<PolyTreeD>()};
 
    // Compute the visibility polygon
-   result.visibility = ComputeVisibilityPolygon(playerPosition, wallResult.flattened, *wallResult.bvh);
+   result.visibility = ComputeVisibilityPolygon(playerPosition, wallResult.flattened, wallResult.bvh);
 
    // Prepare the hull for clipping
    PathsD    hullPaths;

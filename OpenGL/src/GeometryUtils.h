@@ -35,7 +35,7 @@ PathsD FlattenPolyPathD(const PolyPathD& polyPath);
  * @param obstacles The obstacles represented as PathsD (vector of paths).
  * @return PathD The visibility polygon as a vector of points.
  */
-PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles, const BVHNode& bvh);
+PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles, const BVH& bvh);
 
 /**
  * @brief Computes the intersection point between a ray and a line segment.
