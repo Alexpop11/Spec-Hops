@@ -5,7 +5,7 @@ Turret::Turret(const std::string& name, float x, float y)
    : Character(name, x, y, "turret_base.png") {
    drawPriority = DrawPriority::Character;
    health       = 1;
-   turretHead   = std::make_unique<TurretHead>("Turret Head", x, y);
+   turretHead   = std::make_unique<TurretHead>("Turret Head", 0, 0);
 }
 
 void Turret::update() {
@@ -14,7 +14,6 @@ void Turret::update() {
    if (health <= 0) {
       ShouldDestroy = true;
    }
-   turretHead->position = position;
    if (aimDirection_x != 0) {
       turretHead->rotation = zeno(turretHead->rotation, aimDirection_x > 0 ? 0 : 180, 0.05);
    } else if (aimDirection_y != 0) {

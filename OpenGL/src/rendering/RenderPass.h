@@ -39,10 +39,11 @@ public:
    }
 
    template <typename T>
-   void setVertexBuffer(const Buffer<T>& buffer) {
-      if (last_set_vertex_buffer != (int32_t)buffer.summed_id()) {
-         renderPass_.setVertexBuffer(0, buffer.get(), 0, buffer.sizeBytes());
-         last_set_vertex_buffer = buffer.summed_id();
+   void setVertexBuffer(Buffer<T>& buffer, uint32_t index) {
+      if (last_set_vertex_buffer != (int32_t)buffer.summed_id() || last_set_vertex_buffer_index != (int32_t)index) {
+         renderPass_.setVertexBuffer(index, buffer.get(), 0, buffer.sizeBytes());
+         last_set_vertex_buffer       = buffer.summed_id();
+         last_set_vertex_buffer_index = index;
       }
    }
 
@@ -53,14 +54,24 @@ public:
       }
    }
 
-   template <typename Pipeline, typename Vertex>
-   void Draw(const Pipeline& pipeline, const Buffer<Vertex>& pointBuffer, const IndexBuffer& indexBuffer,
-             BindGroup bindGroup, std::vector<uint32_t> offset) {
+   template <typename Pipeline, typename... Vertices>
+   void DrawInstanced(const Pipeline& pipeline, const IndexBuffer& indexBuffer, BindGroup bindGroup,
+                      std::vector<uint32_t> offset, uint32_t instanceCount, Buffer<Vertices>&... bufs) {
       setPipeline(pipeline);
       setBindGroup(0, bindGroup, offset);
-      setVertexBuffer(pointBuffer);
+
+      size_t bufferIndex = 0;
+      // Apply setBuffer to each vertex buffer
+      (setVertexBuffer(bufs, bufferIndex++), ...);
+
       setIndexBuffer(indexBuffer);
-      renderPass_.drawIndexed(indexBuffer.count(), 1, 0, 0, 0);
+      renderPass_.drawIndexed(indexBuffer.count(), instanceCount, 0, 0, 0);
+   }
+
+   template <typename Pipeline, typename Vertex>
+   void Draw(const Pipeline& pipeline, Buffer<Vertex>& pointBuffer, const IndexBuffer& indexBuffer, BindGroup bindGroup,
+             std::vector<uint32_t> offset) {
+      DrawInstanced(pipeline, indexBuffer, bindGroup, offset, 1, pointBuffer);
    }
 
 private:
@@ -70,6 +81,7 @@ private:
    int32_t               last_set_bind_group      = -1;
    int32_t               last_set_bind_group_id   = -1;
    std::vector<uint32_t> last_set_bind_group_offset;
-   int32_t               last_set_vertex_buffer = -1;
-   int32_t               last_set_index_buffer  = -1;
+   int32_t               last_set_vertex_buffer       = -1;
+   int32_t               last_set_vertex_buffer_index = -1;
+   int32_t               last_set_index_buffer        = -1;
 };

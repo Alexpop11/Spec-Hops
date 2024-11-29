@@ -23,14 +23,13 @@ SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, i
          0, 2, 3  // Triangle #1 connects points #0, #2 and #3
       },
       wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index))),
-   vertexUniform(BufferView<SquareObjectVertexUniform>::create(
-      SquareObjectVertexUniform{CalculateMVP(position, rotation, scale)})),
-   fragmentUniform(
-      BufferView<SquareObjectFragmentUniform>::create(SquareObjectFragmentUniform{glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)})),
+   vertexUniform(UniformBufferView<SquareObjectVertexUniform>::create(SquareObjectVertexUniform{MVP()})),
+   fragmentUniform(UniformBufferView<SquareObjectFragmentUniform>::create(
+      SquareObjectFragmentUniform{glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)})),
    texture(Texture::create(texturePath)) {}
 
 void SquareObject::render(Renderer& renderer, RenderPass& renderPass) {
-   this->vertexUniform.Update(SquareObjectVertexUniform{CalculateMVP(position, rotation, scale)});
+   this->vertexUniform.Update(SquareObjectVertexUniform{MVP()});
    this->fragmentUniform.Update(SquareObjectFragmentUniform{tintColor});
    BindGroup bindGroup =
       SquareObjectLayout::ToBindGroup(renderer.device, vertexUniform, fragmentUniform, texture.get(), renderer.sampler);

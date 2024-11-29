@@ -10,6 +10,7 @@
 
 #include "../rendering/Renderer.h"
 #include "../rendering/RenderPass.h"
+#include "../rendering/ComputePass.h"
 
 enum class DrawPriority {
    Background,
@@ -33,6 +34,8 @@ public:
    virtual std::vector<GameObject*> children() { return {}; }
 
    virtual void render(Renderer& renderer, RenderPass& renderPass);
+   virtual void pre_compute();
+   virtual void compute(Renderer& renderer, ComputePass& computePass);
    virtual void update();
    virtual void tickUpdate();
 
@@ -41,6 +44,16 @@ public:
    glm::vec2    position;
    float        rotation = 0;
    float        scale    = 1.0f;
+   GameObject*  parent   = nullptr;
+
+   // Get this object's local transform matrix
+   glm::mat4 getLocalTransform() const;
+
+   // Get the Model-View-Projection matrix for this object
+   glm::mat4 MVP() const;
+
+   // Get the View-Projection matrix for this object
+   glm::mat4 VP() const;
 
    // Add coroutine
    void addCoroutine(Generator coroutine) { coroutines.emplace_back(std::move(coroutine)); }

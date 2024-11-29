@@ -19,7 +19,7 @@ template <typename Binding>
 struct GetToBind;
 
 // Helper struct for buffer bindings (e.g., Uniform or Storage buffers)
-template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType, bool DynamicOffset = false>
+template <typename T, wgpu::ShaderStage Visibility, wgpu::BufferBindingType BufferType, bool DynamicOffset>
 struct BufferBinding {
    using Type                                             = T;
    static constexpr wgpu::ShaderStage       visibility    = Visibility;
@@ -74,7 +74,7 @@ concept BindingC = requires { typename ToBind<T>; };
 // Helper for caching
 // ------------------------------------------------------
 template <std::size_t N>
-using Ids = std::array<std::array<int32_t, 2>, N>;
+using Ids = std::array<std::array<int32_t, 3>, N>;
 template <std::size_t N>
 struct IdsHash {
    std::size_t operator()(const Ids<N>& ids) const {
@@ -145,19 +145,22 @@ struct BindGroupLayout {
    }
 
    template <size_t I, typename Binding, typename Resource>
-   static std::array<int32_t, 2> getId(Resource& resource) {
+   static std::array<int32_t, 3> getId(Resource& resource) {
       if constexpr (Binding::bindingType == BindingType::Buffer) {
          if constexpr (!Binding::dynamicOffset) {
             // Assuming ToBind<T> is Buffer
-            return std::array<int32_t, 2>{std::get<0>(resource).summed_id(), (int32_t)std::get<1>(resource)};
+            return std::array<int32_t, 3>{std::get<0>(resource).summed_id(), 
+                                        static_cast<int32_t>(std::get<1>(resource)),
+                                        static_cast<int32_t>(std::get<0>(resource).count())};
          } else if constexpr (Binding::dynamicOffset) {
-            return std::array<int32_t, 2>{resource.getBuffer()->summed_id(), -1};
+            return std::array<int32_t, 3>{resource.getBuffer()->summed_id(), -1, -1};
          }
       } else if constexpr (Binding::bindingType == BindingType::Sampler) {
-         return std::array<int32_t, 2>{resource.id, -1};
+         return std::array<int32_t, 3>{resource.id, -1, -1};
       } else if constexpr (Binding::bindingType == BindingType::Texture) {
-         return std::array<int32_t, 2>{resource->id, -1};
+         return std::array<int32_t, 3>{resource->id, -1, -1};
       }
+      return std::array<int32_t, 3>{-1, -1, -1}; // Default case
    }
 
    template <size_t I, typename Binding, typename Resource>
@@ -169,7 +172,7 @@ struct BindGroupLayout {
             // Assuming ToBind<T> is Buffer
             entry.buffer = std::get<0>(resource).get();
             entry.offset = std::get<1>(resource);
-            entry.size   = sizeof(typename Binding::Type);
+            entry.size   = sizeof(typename Binding::Type) * std::get<0>(resource).count();
          } else if constexpr (Binding::dynamicOffset) {
             entry.buffer = resource.getBuffer()->get();
             entry.offset = 0;
@@ -238,5 +241,3 @@ private:
                         std::forward<Tuple>(tuple));
    }
 };
-
-

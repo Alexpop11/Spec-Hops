@@ -47,3 +47,7 @@ python -m http.server
 ```
 
 Then check out http://localhost:8000/OpenGL/Spec-Hops.html 
+
+## Thanks
+
+1. [This page from Alister Chowdhury](https://alister-chowdhury.github.io/posts/20230620-raytracing-in-2d/) which Andre wish he'd found earlier.

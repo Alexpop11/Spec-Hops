@@ -3,6 +3,7 @@
 #include <webgpu/webgpu.hpp>
 #include <vector>
 #include <string>
+#include <tuple>
 #include "glm/glm.hpp"
 
 // Make a type like std::tuple<wgpu::VertexBufferLayout, std::vector<wgpu::VertexAttribute>>, but delete its copy and
@@ -19,6 +20,28 @@ struct VertexBufferInfo {
 
    VertexBufferInfo(VertexBufferInfo&& other) noexcept            = default;
    VertexBufferInfo& operator=(VertexBufferInfo&& other) noexcept = default;
+};
+
+// Compose multiple vertex buffer layouts
+template <typename... Layouts>
+struct VertexBufferLayouts {
+   static std::vector<VertexBufferInfo> CreateLayouts() {
+      std::vector<VertexBufferInfo> layouts;
+      layouts.reserve(sizeof...(Layouts));
+      (layouts.push_back(Layouts::CreateLayout()), ...);
+
+      // Each VBLayoutEntry must have a unique location
+      // But each VBLayout as returned by CreateLayout starts at 0
+      // So we need to renumber the locations
+      std::size_t location = 0;
+      for (auto& layout : layouts) {
+         for (auto& attribute : *layout.attributes) {
+            attribute.shaderLocation = location++;
+         }
+      }
+
+      return layouts;
+   }
 };
 
 
@@ -46,6 +69,7 @@ constexpr std::size_t type_size() {
    return sizeof(T);
 }
 
+// Single vertex buffer layout
 template <typename... Types>
 struct VertexBufferLayout {
    static std::vector<wgpu::VertexAttribute> Attributes() {
@@ -78,5 +102,15 @@ private:
       attribute.offset         = offset;
       offset += type_size<T>();
       return attribute;
+   }
+};
+
+
+template <typename... Types>
+struct InstanceBufferLayout {
+   static VertexBufferInfo CreateLayout() {
+      auto info            = VertexBufferLayout<Types...>::CreateLayout();
+      info.layout.stepMode = wgpu::VertexStepMode::Instance;
+      return info;
    }
 };

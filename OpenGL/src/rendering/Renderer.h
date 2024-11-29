@@ -2,6 +2,7 @@
 
 #include <webgpu/webgpu.hpp>
 
+#include "ComputePipeline.h"
 #include "RenderPipeline.h"
 #include "RenderPass.h"
 #include "Texture.h"
@@ -23,15 +24,22 @@ class Renderer {
 public:
    Renderer();
 
-   RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>, VertexBufferLayout<glm::vec2>> stars;
-   RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayout<glm::vec2, glm::vec2>>       squareObject;
-   RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayout<LineVertex>>                         line;
-   RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayout<FogVertex>>                           fog;
+   RenderPipeline<BindGroupLayouts<BindGroupLayout<StarUniformBinding>>,
+                  VertexBufferLayouts<VertexBufferLayout<glm::vec2>>>
+      stars;
+   RenderPipeline<BindGroupLayouts<SquareObjectLayout>, VertexBufferLayouts<VertexBufferLayout<glm::vec2, glm::vec2>>>
+                                                                                                     squareObject;
+   RenderPipeline<BindGroupLayouts<LineLayout>, VertexBufferLayouts<VertexBufferLayout<LineVertex>>> line;
+   RenderPipeline<BindGroupLayouts<FogLayout>, VertexBufferLayouts<VertexBufferLayout<FogVertex>>>   fog;
+   RenderPipeline<
+      BindGroupLayouts<ParticleLayout>,
+      VertexBufferLayouts<VertexBufferLayout<glm::vec2>, InstanceBufferLayout<glm::vec2, glm::vec2, glm::vec4>>>
+                                                            particles;
+   ComputePipeline<BindGroupLayouts<ParticleComputeLayout>> particlesCompute;
 
    TextureSampler sampler;
 
-   wgpu::RenderPassEncoder renderPass;
-   wgpu::Device            device;
+   wgpu::Device device;
 
    static glm::vec2 MousePos();
    static glm::vec2 ScreenToWorldPosition(const glm::vec2& screenPos);
@@ -51,4 +59,7 @@ private:
 };
 
 
+glm::mat4 CalculateModel(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale);
+glm::mat4 CalculateView();
+glm::mat4 CalculateProjection();
 glm::mat4 CalculateMVP(const glm::vec2& objectPosition, float objectRotationDegrees, float objectScale);

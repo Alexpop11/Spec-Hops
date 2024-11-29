@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstdlib>
 #include "earcut.hpp"
+#include "rendering/Renderer.h"
 
 namespace GeometryUtils {
 
@@ -12,6 +13,11 @@ float length2(const glm::vec2& a, const glm::vec2& b) {
    glm::vec2 temp = a - b;
    return glm::dot(temp, temp);
 }
+
+float length2(const glm::vec2& a) {
+   return glm::dot(a, a);
+}
+
 
 bool findPolygonUnion(const std::vector<std::vector<glm::vec2>>& polygons, PolyTreeD& output) {
    ClipperD clipper;
@@ -101,28 +107,6 @@ float distancePointToLineSegment(const glm::vec2& point, const glm::vec2& lineSt
    return glm::distance(point, projection);
 }
 
-std::optional<glm::vec2> RayIntersect(const glm::vec2& ray_origin, double dx, double dy,
-                                      const std::vector<std::array<glm::vec2, 2>>& obstructionLines) {
-   float                    closest_distance = std::numeric_limits<float>::max();
-   std::optional<glm::vec2> closest_intersection;
-   for (const auto& line : obstructionLines) {
-      const auto& pa = line[0];
-      const auto& pb = line[1];
-
-      auto intersection_opt = RaySegmentIntersect(ray_origin, dx, dy, {pa.x, pa.y}, {pb.x, pb.y});
-      if (intersection_opt) {
-         auto current_distance = length2(*intersection_opt, ray_origin);
-         if (current_distance > 0.01) {
-            if (current_distance < closest_distance) {
-               closest_distance     = current_distance;
-               closest_intersection = intersection_opt;
-            }
-         }
-      }
-   }
-   return closest_intersection;
-}
-
 // Function to compute intersection between two line segments
 std::optional<glm::vec2> LineSegmentIntersect(const glm::vec2& line1_start, const glm::vec2& line1_end,
                                               const glm::vec2& line2_start, const glm::vec2& line2_end) {
@@ -158,35 +142,29 @@ std::optional<glm::vec2> LineSegmentIntersect(const glm::vec2& line1_start, cons
 }
 
 
-std::optional<glm::vec2> LineIntersect(const glm::vec2& line1_start, const glm::vec2& line1_end,
-                                       const std::vector<std::array<glm::vec2, 2>>& obstructionLines) {
-   float                    closest_distance = std::numeric_limits<float>::max();
-   std::optional<glm::vec2> closest_intersection;
-   for (const auto& line : obstructionLines) {
-      const auto& pa = line[0];
-      const auto& pb = line[1];
+bool isPointObstructed(const glm::vec2& position, const glm::vec2& point, const BVH& bvh) {
+   // shrink the segment a bit so it doesn't intersect with itself
+   auto segment_direction = glm::normalize(point - position);
+   auto segment_start     = position + 0.01f * segment_direction;
+   auto segment_end       = point - 0.01f * segment_direction;
+   auto intersection_opt  = bvh.segment_intersect(Segment{segment_start, segment_end});
 
-      auto intersection_opt = LineSegmentIntersect(line1_start, line1_end, {pa.x, pa.y}, {pb.x, pb.y});
-      if (intersection_opt) {
-         auto current_distance = length2(*intersection_opt, line1_start);
-         if (current_distance > 0.01) {
-            if (current_distance < closest_distance) {
-               closest_distance     = current_distance;
-               closest_intersection = intersection_opt;
-            }
-         }
-      }
-   }
-   return closest_intersection;
-}
-
-bool isPointObstructed(const glm::vec2& position, const glm::vec2& point,
-                       const std::vector<std::array<glm::vec2, 2>>& obstructionLines) {
-   auto intersection_opt = LineIntersect(position, point, obstructionLines);
    if (intersection_opt) {
-      return length2(intersection_opt.value(), position) < length2(point, position);
+      auto [intersection, segment] = intersection_opt.value();
+      return length2(intersection, position) < length2(point, position);
    }
    return false;
+}
+
+std::optional<glm::vec2> continue_ray(const glm::vec2& origin, const glm::vec2& direction, const BVH& bvh) {
+   // advance the starting point of the ray a tiny bit so it doesn't intersect with the ray's own origin
+   auto advanced_origin = origin + 0.01f * direction;
+
+   auto intersection_opt = bvh.ray_intersect(Ray{advanced_origin, direction});
+   if (intersection_opt) {
+      return intersection_opt.value().first;
+   }
+   return std::nullopt;
 }
 
 bool adjacentInVectorCircular(size_t a, size_t b, size_t size) {
@@ -207,12 +185,9 @@ Side pointSide(const glm::vec2& point, const glm::vec2& linePoint, const glm::ve
    }
 }
 
-PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles) {
-   bool cull_frontfaces = false;
-
+PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacles, const BVH& bvh) {
    enum class PointType { Start, End, Middle };
 
-   // Struct to hold a point along with its angle and type
    struct TaggedPoint {
       PointD    point;
       double    angle;
@@ -245,24 +220,16 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
 
          if (prevSide == Side::RIGHT && nextSide == Side::RIGHT) {
             tagged_points.push_back(TaggedPoint{pt, angle, PointType::Start});
-            if (cull_frontfaces) {
-               obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
-            }
+            obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
          } else if (prevSide == Side::LEFT && nextSide == Side::LEFT) {
             tagged_points.push_back(TaggedPoint{pt, angle, PointType::End});
-            if (!cull_frontfaces) {
-               obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
-            }
+            obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
          } else if (prevSide == Side::LEFT && nextSide == Side::RIGHT) {
-            if (cull_frontfaces) {
-               tagged_points.push_back(TaggedPoint{pt, angle, PointType::Middle});
-               obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
-            }
+            tagged_points.push_back(TaggedPoint{pt, angle, PointType::Middle});
+            obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
          } else {
-            if (!cull_frontfaces) {
-               tagged_points.push_back(TaggedPoint{pt, angle, PointType::Middle});
-               obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
-            }
+            tagged_points.push_back(TaggedPoint{pt, angle, PointType::Middle});
+            obstructionLines.push_back(std::array<glm::vec2, 2>{vertex, next});
          }
       }
 
@@ -287,7 +254,7 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
          }
       }
 
-      if (!isPointObstructed(position, {point.point.x, point.point.y}, obstructionLines)) {
+      if (!isPointObstructed(position, {point.point.x, point.point.y}, bvh)) {
          filtered_points.push_back(pointCopy);
       }
    }
@@ -304,8 +271,9 @@ PathD ComputeVisibilityPolygon(const glm::vec2& position, const PathsD& obstacle
       std::optional<glm::vec2> extendedPoint;
       if (point.end != PointType::Middle) {
          glm::vec2 direction = glm::normalize(vertex - position);
-         extendedPoint       = RayIntersect(vertex, direction.x, direction.y, obstructionLines);
-         if (extendedPoint && length2(*extendedPoint, vertex) < 0.1) {
+         extendedPoint       = continue_ray(vertex, direction, bvh);
+
+         if (extendedPoint.has_value() && length2(*extendedPoint, vertex) < 0.1) {
             std::cout << "vertex super close to extended: " << length2(*extendedPoint, vertex) << std::endl;
          }
       }

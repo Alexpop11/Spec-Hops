@@ -3,6 +3,7 @@
 #include <webgpu/webgpu.hpp>
 #include "VertexBufferLayout.h"
 #include "BindGroupLayout.h"
+#include "../geometry/BVH.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/hash.hpp"
@@ -23,9 +24,10 @@ struct StarUniforms {
 };
 
 using StarUniformBinding =
-   BufferBinding<StarUniforms,                                                       // Type of the buffer
+   BufferBinding<StarUniforms,                                                                   // Type of the buffer
                  wgpu::bothShaderStages(wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment), // Shader visibility
-                 wgpu::BufferBindingType::Uniform                                    // Buffer binding type
+                 wgpu::BufferBindingType::Uniform,                                               // Buffer binding type
+                 false // Buffer is not dynamically offset
                  >;
 // ============================================================
 
@@ -138,10 +140,52 @@ using FogLayout = BindGroupLayout<FogVertexUniformBinding, FogFragmentUniformBin
 using FogVertex = glm::vec2;
 // ============================================================
 
-// Cinders
+// Particles
 // ============================================================
-//struct Particle {
-//   glm::vec2 position;
-//   glm::vec2 velocity;
-//   glm::vec4 color;
-//};  
+struct Particle {
+   glm::vec2 position;
+   glm::vec2 velocity;
+   glm::vec4 color;
+
+   typedef InstanceBufferLayout<glm::vec2> Layout;
+};
+
+struct ParticleVertex {
+   glm::vec2 position;
+
+   bool operator==(const ParticleVertex& other) const { return position == other.position; }
+};
+
+struct ParticleVertexUniform {
+   glm::mat4 u_MVP;
+
+   bool operator==(const ParticleVertexUniform& other) const { return u_MVP == other.u_MVP; }
+};
+
+namespace std {
+template <>
+struct hash<ParticleVertex> {
+   size_t operator()(const ParticleVertex& v) const {
+      size_t h1 = std::hash<glm::vec2>{}(v.position);
+      return h1;
+   }
+};
+} // namespace std
+
+struct ParticleWorldInfo {
+   float     deltaTime; // at byte offset 0
+   float     _pad0;
+   glm::vec2 mousePos; // at byte offset 8
+
+   ParticleWorldInfo(float deltaTime, glm::vec2 mousePos)
+      : deltaTime(deltaTime)
+      , mousePos(mousePos) {}
+};
+
+using ParticleLayout = BindGroupLayout<
+   BufferBinding<ParticleVertexUniform, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, true>>;
+using ParticleComputeLayout =
+   BindGroupLayout<BufferBinding<Particle, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage, false>,
+                   BufferBinding<ParticleWorldInfo, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform, true>,
+                   BufferBinding<Segment, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage, false>,
+                   BufferBinding<BvhNode, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage, false>>;

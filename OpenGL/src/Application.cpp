@@ -39,6 +39,7 @@
 #include "rendering/Texture.h"
 #include "rendering/CommandEncoder.h"
 #include "rendering/RenderPass.h"
+#include "rendering/ComputePass.h"
 #include "AudioEngine.h"
 
 #include "glm/glm.hpp"
@@ -79,18 +80,6 @@ void mainLoop(Application& application, Renderer& renderer) {
       World::settingTimeSpeed = false;
    }
 
-   World::UpdateObjects();
-
-   if (!World::ticksPaused()) {
-      if (World::shouldTick) {
-         World::TickObjects();
-         Input::lastTick   = Input::currentTime;
-         World::shouldTick = false;
-      } else if (Input::lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime) {
-         World::TickObjects();
-         Input::lastTick = Input::lastTick + (1.0 / TICKS_PER_SECOND);
-      }
-   }
 
    auto nextTexture = application.GetNextSurfaceTextureView();
    if (nextTexture) {
@@ -98,33 +87,63 @@ void mainLoop(Application& application, Renderer& renderer) {
       {
          // Create a command encoder for the draw call
          CommandEncoder encoder(device);
+         application.encoder = &encoder.get();
 
-         // Create the render pass
-         RenderPass renderPass(encoder, targetView);
-         renderer.renderPass = renderPass.get();
-
-         // Start the Dear ImGui frame
-         ImGui_ImplWGPU_NewFrame();
-         ImGui_ImplGlfw_NewFrame();
-         ImGui::NewFrame();
-
-         World::RenderObjects(renderer, renderPass);
-         renderer.DrawDebug(renderPass);
-
-         // Performance info
+         // CPU game logic
          {
-            ImGui::PushFont(application.pixelify);
-            ImGui::Begin("Performance Info");
-            ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / application.getImGuiIO().Framerate,
-                        application.getImGuiIO().Framerate);
-            ImGui::End();
-            ImGui::PopFont();
+            World::UpdateObjects();
+
+            if (!World::ticksPaused()) {
+               if (World::shouldTick) {
+                  World::TickObjects();
+                  Input::lastTick   = Input::currentTime;
+                  World::shouldTick = false;
+               } else if (Input::lastTick + (1.0 / TICKS_PER_SECOND) <= Input::currentTime) {
+                  World::TickObjects();
+                  Input::lastTick = Input::lastTick + (1.0 / TICKS_PER_SECOND);
+               }
+            }
          }
 
-         ImGui::Render();
-         ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass.get());
+         // Pre-compute pass
+         { World::PreComputeObjects(); }
 
-         // The render pass and command encoder will be ended and submitted in their destructors
+         // Compute pass
+         {
+            ComputePass computePass(encoder, targetView);
+            World::ComputeObjects(renderer, computePass);
+         }
+
+         // Render pass
+         {
+            RenderPass renderPass(encoder, targetView);
+
+            // Start the Dear ImGui frame
+            ImGui_ImplWGPU_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            World::RenderObjects(renderer, renderPass);
+            renderer.DrawDebug(renderPass);
+
+            // Performance info
+            {
+               ImGui::PushFont(application.pixelify);
+               ImGui::Begin("Performance Info");
+               ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / application.getImGuiIO().Framerate,
+                           application.getImGuiIO().Framerate);
+               ImGui::End();
+               ImGui::PopFont();
+            }
+
+            ImGui::Render();
+            ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass.get());
+
+            // The render pass will be ended and submitted in its destructor
+         }
+
+         // The command encoder will be ended and submitted in their destructors
+         application.encoder = nullptr;
       }
       renderer.FinishFrame();
       targetView.release();
@@ -285,7 +304,7 @@ auto getUncapturedErrorCallbackHandle(wgpu::Device& device) {
 #ifdef _MSC_VER
       __debugbreak();
 #else
-      assert(false);
+      std::terminate();
 #endif
    });
 }
@@ -505,14 +524,18 @@ int main(void) {
    Application& application = Application::get();
    Renderer     renderer    = Renderer();
 
-   World::LoadMap("SpaceShip.txt");
-   World::gameobjects.push_back(std::make_unique<Fog>());
-
-   audio().Song.play();
+   {
+      CommandEncoder encoder(application.getDevice());
+      application.encoder = &encoder.get();
+      World::LoadMap("SpaceShip.txt");
+      World::gameobjects.push_back(std::make_unique<Fog>());
+      application.encoder = nullptr;
+   }
 
    Input::currentTime       = glfwGetTime();
    Input::realTimeLastFrame = Input::currentTime;
    Input::lastTick          = Input::currentTime;
+
    // audio().Song.play();
 
    // Not Emscripten-friendly
