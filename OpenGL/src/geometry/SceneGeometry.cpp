@@ -27,7 +27,7 @@ SceneGeometry::WallResult SceneGeometry::computeWallPaths() {
       for (size_t i = 0; i < path.size(); i++) {
          const auto& p1 = path[i];
          const auto& p2 = path[(i + 1) % path.size()];
-         segments.emplace_back(glm::vec2(p1.x, p1.y), glm::vec2(p2.x, p2.y));
+         segments.push_back(Segment(glm::vec2(p1.x, p1.y), glm::vec2(p2.x, p2.y)));
       }
    }
    result.bvh = BVH::build(segments);
