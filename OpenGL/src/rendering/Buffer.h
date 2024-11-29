@@ -95,7 +95,7 @@ public:
 
    // Method to upload data to the buffer
    void upload(const std::vector<T>& data) {
-      if (data.size() > count_) {
+      if (data.size() > capacity_) {
          expandBuffer(data.size() * elementStride());
       }
 
