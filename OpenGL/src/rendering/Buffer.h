@@ -207,6 +207,7 @@ private:
       newBufferDesc.size                   = newSize;
       newBufferDesc.usage                  = usage_ | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
       newBufferDesc.mappedAtCreation       = false;
+      newBufferDesc.label                  = (name + " (gen " + std::to_string(generation) + ")").c_str();
 
       wgpu::Buffer newBuffer = device_.createBuffer(newBufferDesc);
       if (!newBuffer) {
@@ -226,7 +227,9 @@ private:
       }
 
       // Copy existing data from old buffer to new buffer
-      encoder->copyBufferToBuffer(buffer_, 0, newBuffer, 0, capacityBytes());
+      auto bytes_to_copy = sizeBytes();
+      std::cout << "Copying " << bytes_to_copy << " bytes from old buffer to new buffer" << std::endl;
+      encoder->copyBufferToBuffer(buffer_, 0, newBuffer, 0, bytes_to_copy);
 
       generation++;
 

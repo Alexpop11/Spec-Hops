@@ -89,7 +89,10 @@
         "print": "cpp",
         "filesystem": "cpp",
         "forward_list": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "cfenv": "cpp",
+        "regex": "cpp",
+        "valarray": "cpp"
     },
     "files.exclude": {
         "build": true,
