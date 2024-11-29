@@ -66,15 +66,18 @@ void Particles::compute(Renderer& renderer, ComputePass& computePass) {
 }
 
 void Particles::update() {
-   std::random_device rd;
-   std::mt19937       gen(rd()); // Mersenne Twister generator
+   // add a particle if the p key is pressed
+   if (Input::keys_pressed[GLFW_KEY_P]) {
+      std::random_device rd;
+      std::mt19937       gen(rd()); // Mersenne Twister generator
 
-   // Define distribution from 0 to 1
-   std::uniform_real_distribution<> vel_dist(-0.5, 0.5);
-   std::uniform_real_distribution<> color_dist(0.0, 1.0);
+      // Define distribution from 0 to 1
+      std::uniform_real_distribution<> vel_dist(-0.5, 0.5);
+      std::uniform_real_distribution<> color_dist(0.0, 1.0);
 
-   auto random_vel = glm::vec2(vel_dist(gen), vel_dist(gen)) * 2.0f;
-   addParticle(position, random_vel, glm::vec4(color_dist(gen), color_dist(gen), color_dist(gen), 1.0f));
+      auto random_vel = glm::vec2(vel_dist(gen), vel_dist(gen)) * 2.0f;
+      addParticle(position, random_vel, glm::vec4(color_dist(gen), color_dist(gen), color_dist(gen), 1.0f));
+   }
 }
 
 void Particles::addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color) {
