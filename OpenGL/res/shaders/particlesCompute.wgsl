@@ -99,6 +99,7 @@ struct Ray {
 struct SegmentIntersection {
     hit      : bool,
     position : vec2<f32>,
+    normal   : vec2<f32>,
     t        : f32,
 };
 
