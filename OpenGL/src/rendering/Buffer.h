@@ -207,7 +207,8 @@ private:
       newBufferDesc.size                   = newSize;
       newBufferDesc.usage                  = usage_ | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
       newBufferDesc.mappedAtCreation       = false;
-      newBufferDesc.label                  = (name + " (gen " + std::to_string(generation) + ")").c_str();
+      std::string label                    = name + " (gen " + std::to_string(generation) + ")";
+      newBufferDesc.label                  = label.c_str();
 
       wgpu::Buffer newBuffer = device_.createBuffer(newBufferDesc);
       if (!newBuffer) {
