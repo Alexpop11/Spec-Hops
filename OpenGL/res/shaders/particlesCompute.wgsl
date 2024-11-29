@@ -135,33 +135,52 @@ fn compute_main(@builtin(global_invocation_id) id : vec3<u32>) {
     let newPosition = particle.position + particleBuffer[index].velocity * world.deltaTime;
 
     // Check for collision with walls
-    // let collision = traverseBVH(particle.position, newPosition);
-    let collision = collidesWithWalls(particle.position, newPosition);
+    let intersection = findWallCollision(particle.position, newPosition);
     
-    if (collision) {
-        // Particle has collided with a wall
-        // particleBuffer[index].color = vec4<f32>(1.0, 0.0, 0.0, 1.0); // Set color to red
-        particleBuffer[index].velocity = vec2<f32>(0.0, 0.0);
-    }
-    else 
-    {
-        // Update particle position
+    if (intersection.hit) {
+        // Bounce coefficient (1.0 = perfect bounce, 0.0 = full stop)
+        let bounce = 0.8;
+        
+        // Calculate reflection vector
+        let v = particleBuffer[index].velocity;
+        let n = intersection.normal;
+        let reflected = v - 2.0 * dot2D(v, n) * n;
+        
+        // Update velocity with bounce effect
+        let newVelocity = reflected * bounce;
+        particleBuffer[index].velocity = newVelocity;
+        
+        // Place particle at intersection point
+        particleBuffer[index].position = intersection.position + newVelocity * world.deltaTime;
+    } else {
+        // No collision, update particle position normally
         particleBuffer[index].position = newPosition;
     }
 }
 
-fn collidesWithWalls(particlePosition : vec2<f32>, newPosition : vec2<f32>) -> bool {
+fn findWallCollision(particlePosition : vec2<f32>, newPosition : vec2<f32>) -> SegmentIntersection {
+    var closest : SegmentIntersection;
+    closest.hit = false;
+    closest.t = 999999.0;
 
+    let particlePath = Segment(particlePosition, newPosition);
+    
     for (var i: u32 = 0; i < arrayLength(&segments); i++) {
-        let segment = segments[i];
-        if (segmentsIntersect(segment, Segment(particlePosition, newPosition))) {
-            return true;
+        let wall = segments[i];
+        let intersection = segmentIntersection(wall, particlePath);
+        
+        if (intersection.hit && intersection.t < closest.t) {
+            closest = intersection;
         }
     }
-    return false;
+    
+    return closest;
 }
 
-fn segmentsIntersect(s1 : Segment, s2 : Segment) -> bool {
+fn segmentIntersection(s1 : Segment, s2 : Segment) -> SegmentIntersection {
+    var result : SegmentIntersection;
+    result.hit = false;
+    
     let p = s1.start;
     let r = s1.end - s1.start;
     let q = s2.start;
@@ -171,12 +190,20 @@ fn segmentsIntersect(s1 : Segment, s2 : Segment) -> bool {
     let q_p = q - p;
 
     if (abs(r_cross_s) < 1e-8) {
-        return false; // Lines are parallel
+        return result; // Lines are parallel
     }
 
     let t = cross2D(q_p, s) / r_cross_s;
     let u = cross2D(q_p, r) / r_cross_s;
 
-    return (t >= 0.0 && t <= 1.0) && (u >= 0.0 && u <= 1.0);
+    if (t >= 0.0 && t <= 1.0 && u >= 0.0 && u <= 1.0) {
+        result.hit = true;
+        result.t = t;
+        result.position = p + t * r;
+        result.normal = normalize(vec2<f32>(-r.y, r.x)); // Perpendicular to wall
+        return result;
+    }
+
+    return result;
 }
 
