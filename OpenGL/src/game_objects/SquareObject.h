@@ -10,6 +10,7 @@ public:
    virtual void render(Renderer& renderer, RenderPass& renderPass) override;
    virtual void update() override;
    glm::vec4    tintColor = glm::vec4(0.0f);
+   float        opacity   = 1;
 
    void       setTile(glm::ivec2 position) { tilePosition = position; }
    glm::ivec2 getTile() const { return tilePosition; }

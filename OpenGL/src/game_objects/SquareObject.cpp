@@ -30,7 +30,7 @@ SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, i
 
 void SquareObject::render(Renderer& renderer, RenderPass& renderPass) {
    this->vertexUniform.Update(SquareObjectVertexUniform{MVP()});
-   this->fragmentUniform.Update(SquareObjectFragmentUniform{tintColor});
+   this->fragmentUniform.Update(SquareObjectFragmentUniform{tintColor, opacity});
    BindGroup bindGroup =
       SquareObjectLayout::ToBindGroup(renderer.device, vertexUniform, fragmentUniform, texture.get(), renderer.sampler);
    renderPass.Draw(renderer.squareObject, *pointBuffer, *indexBuffer, bindGroup,

@@ -48,6 +48,19 @@ void Decal::tickUpdate() {
    tintColor.a = zeno(tintColor.a, 0.0, 1);
 }
 
-void Decal::fade() {
-   ShouldDestroy = true;
+
+void Decal::update() {
+    SquareObject::update();
+       if (fading) {
+          fade();
+       } else if (Input::currentTime >= decayTime) {
+          fading = true;
+       }
+}
+
+void Decal::fade() { // Fades the decal and if it hits 0 opacity it will delete that thang
+   opacity -= 0.0025;
+   if (opacity <= 0) {
+        ShouldDestroy = true;
+    }
 }

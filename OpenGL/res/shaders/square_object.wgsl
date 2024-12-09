@@ -5,8 +5,10 @@ struct VertexUniforms {
 
 // Fragment Uniforms
 struct FragmentUniforms {
-    u_Color: vec4<f32>
+    u_Color: vec4<f32>,
+    u_Opacity: f32,
 };
+
 
 // Vertex Input Structure
 struct VertexInput {
@@ -58,5 +60,6 @@ fn fragment_main(input: VertexOutput) -> FragmentOutput {
     let mixedColor = mix(texColor, fragmentUniforms.u_Color, fragmentUniforms.u_Color.a);
     // Set the final color, preserving the alpha from the texture
     output.color = vec4<f32>(mixedColor.rgb, texColor.a);
+    output.color.a *= fragmentUniforms.u_Opacity;
     return output;
 }

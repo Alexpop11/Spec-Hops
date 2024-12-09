@@ -61,6 +61,8 @@ struct SquareObjectVertexUniform {
 
 struct SquareObjectFragmentUniform {
    glm::vec4 u_Color;
+   float     u_Opacity; // at byte offset 16
+   float     _pad0[3];
 };
 
 using SquareObjectLayout = BindGroupLayout<
