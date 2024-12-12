@@ -65,7 +65,17 @@ AudioEngine::AudioEngine()
    , Zap(getSound("zap.wav"))
    , Impact(getSound("impact.wav"))
    , Scuff(getSound("scuff.wav"))
-   , Song(getSound("acid_splash.wav")) {
+   , Song(getSound("acid_splash.wav"))
+
+    // bunny dialogue
+
+    , Rabbit1(getSound("dialogue/rabbit/rabbit1.wav"))
+    , Rabbit2(getSound("dialogue/rabbit/rabbit2.wav"))
+    , Rabbit3(getSound("dialogue/rabbit/rabbit3.wav"))
+    , Rabbit4(getSound("dialogue/rabbit/rabbit4.wav"))
+    , Rabbit5(getSound("dialogue/rabbit/rabbit5.wav"))
+    , Rabbit6(getSound("dialogue/rabbit/rabbit6.wav"))
+    {
 
    Update(World::timeSpeed);
 }
@@ -88,6 +98,15 @@ void AudioEngine::Update(float newTimeSpeed) {
    Impact.setPitch(newTimeSpeed);
    Scuff.setPitch(newTimeSpeed);
    Song.setPitch(newTimeSpeed);
+
+   // bunny dialogue
+   rabbit1.setPitch(newTimeSpeed);
+   rabbit2.setPitch(newTimeSpeed);
+   rabbit3.setPitch(newTimeSpeed);
+   rabbit4.setPitch(newTimeSpeed);
+   rabbit5.setPitch(newTimeSpeed);
+   rabbit6.setPitch(newTimeSpeed);
+   
 }
 
 void AudioEngine::play(Sound& sound) {

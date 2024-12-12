@@ -12,6 +12,9 @@
 #include "../rendering/RenderPass.h"
 #include "../rendering/ComputePass.h"
 
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_wgpu.h"
+
 enum class DrawPriority {
    Background,
    Floor,
@@ -38,8 +41,10 @@ public:
    virtual void compute(Renderer& renderer, ComputePass& computePass);
    virtual void update();
    virtual void tickUpdate();
+   virtual void mini_talk(std::string text, std::string voice_selection);
 
    std::string  name;
+   std::string  voice;
    DrawPriority drawPriority;
    glm::vec2    position;
    float        rotation = 0;

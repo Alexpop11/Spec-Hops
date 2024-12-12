@@ -23,6 +23,19 @@ void GameObject::render(Renderer& renderer, RenderPass& renderPass) {
 void GameObject::pre_compute() {}
 void GameObject::compute(Renderer& renderer, ComputePass& computePass) {}
 
+void GameObject::mini_talk(std::string text, std::string voice_selection = "none") { // This function creates a text object above the object and plays audio if the object has voice clips
+    if (voice_selection == "none") {
+        if (voice != "") {
+                     voice_selection = voice;
+    
+      }
+   }
+   //ImGui::Begin("HEYYYY!!");
+   //ImGui::Text("grrr im a wabbit");
+   //ImGui::End();
+   //ImGui::PopFont();
+}
+
 glm::mat4 GameObject::getLocalTransform() const {
    return CalculateModel(position, rotation, scale);
 }

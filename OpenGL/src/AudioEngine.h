@@ -61,6 +61,14 @@ public:
    Sound Impact;
    Sound Scuff;
    Sound Song;
+   
+   // bunny dialogue
+   Sound Rabbit1;
+   Sound Rabbit2;
+   Sound Rabbit3;
+   Sound Rabbit4;
+   Sound Rabbit5;
+   Sound Rabbit6;
 };
 
 AudioEngine& audio();
