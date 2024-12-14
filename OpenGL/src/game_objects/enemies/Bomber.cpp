@@ -2,7 +2,7 @@
 #include "../../AudioEngine.h"
 
 Bomber::Bomber(const std::string& name, float x, float y)
-   : Character(name, x, y, "enemy.png") {
+   : Character(name, x, y, "bomber.png") {
    drawPriority = DrawPriority::Character;
    health       = 1;
 }
@@ -50,14 +50,17 @@ void Bomber::update() {
 void Bomber::tickUpdate() {
 
    // Check for nearby players
-   auto nearbyPlayers = World::where<Player>(
-      [&](const Player& player) { return (std::abs(getTile().x - player.getTile().x) + std::abs(getTile().y - player.getTile().y) < 14); });
+   auto nearbyPlayers = World::where<Player>([&](const Player& player) {
+      return (std::abs(getTile().x - player.getTile().x) + std::abs(getTile().y - player.getTile().y) < 14);
+   });
 
    // Check for nearby bombs
-   auto nearbyBombs = World::where<Bomb>(
-      [&](const Bomb& bomb) { return (std::abs(getTile().x - bomb.getTile().x) + std::abs(getTile().y - bomb.getTile().y) < 3); });
-   auto nearbyBullets = World::where<Bullet>(
-      [&](const Bullet& bullet) { return (std::abs(getTile().x - bullet.getTile().x) + std::abs(getTile().y - bullet.getTile().y) < 3); });
+   auto nearbyBombs   = World::where<Bomb>([&](const Bomb& bomb) {
+      return (std::abs(getTile().x - bomb.getTile().x) + std::abs(getTile().y - bomb.getTile().y) < 3);
+   });
+   auto nearbyBullets = World::where<Bullet>([&](const Bullet& bullet) {
+      return (std::abs(getTile().x - bullet.getTile().x) + std::abs(getTile().y - bullet.getTile().y) < 3);
+   });
 
    // Move to player
    if (!nearbyBombs.empty()) {
@@ -70,7 +73,8 @@ void Bomber::tickUpdate() {
       auto bullet = nearbyBullets[0];
       // Move away from bullet
 
-      if (bullet->direction_x + bullet->getTile().x == getTile().x && bullet->direction_y + bullet->getTile().y == getTile().y) {
+      if (bullet->direction_x + bullet->getTile().x == getTile().x &&
+          bullet->direction_y + bullet->getTile().y == getTile().y) {
          if (bullet->direction_x != 0) {
             move(getTile().x, getTile().y + (getTile().y > bullet->getTile().y ? 1 : -1));
          } else {
