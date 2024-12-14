@@ -63,6 +63,10 @@ struct SquareObjectFragmentUniform {
    glm::vec4 u_Color;
    float     u_Opacity; // at byte offset 16
    float     _pad0[3];
+
+   SquareObjectFragmentUniform(glm::vec4 u_Color, float u_Opacity)
+      : u_Color(u_Color)
+      , u_Opacity(u_Opacity) {}
 };
 
 using SquareObjectLayout = BindGroupLayout<

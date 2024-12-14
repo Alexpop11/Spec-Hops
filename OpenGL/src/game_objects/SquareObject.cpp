@@ -24,13 +24,13 @@ SquareObject::SquareObject(const std::string& name, DrawPriority drawPriority, i
       },
       wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index))),
    vertexUniform(UniformBufferView<SquareObjectVertexUniform>::create(SquareObjectVertexUniform{MVP()})),
-   fragmentUniform(UniformBufferView<SquareObjectFragmentUniform>::create(
-      SquareObjectFragmentUniform{glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)})),
+   fragmentUniform(
+      UniformBufferView<SquareObjectFragmentUniform>::create(SquareObjectFragmentUniform(tintColor, opacity))),
    texture(Texture::create(texturePath)) {}
 
 void SquareObject::render(Renderer& renderer, RenderPass& renderPass) {
    this->vertexUniform.Update(SquareObjectVertexUniform{MVP()});
-   this->fragmentUniform.Update(SquareObjectFragmentUniform{tintColor, opacity});
+   this->fragmentUniform.Update(SquareObjectFragmentUniform(tintColor, opacity));
    BindGroup bindGroup =
       SquareObjectLayout::ToBindGroup(renderer.device, vertexUniform, fragmentUniform, texture.get(), renderer.sampler);
    renderPass.Draw(renderer.squareObject, *pointBuffer, *indexBuffer, bindGroup,

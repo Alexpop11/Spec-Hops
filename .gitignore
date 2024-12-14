@@ -409,3 +409,5 @@ build_analysis
 .env
 
 build_xcode
+
+.DS_Store
