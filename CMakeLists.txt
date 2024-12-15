@@ -21,7 +21,7 @@ if(NOT MSVC)
       add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wlogical-op;-Wstrict-null-sentinel>")
    endif()
 else()
-   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:/W4;/Zc:__cplusplus>")
+   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:/W4;/Zc:__cplusplus;/EHsc>")
 endif()
 
 add_subdirectory(OpenGL)
