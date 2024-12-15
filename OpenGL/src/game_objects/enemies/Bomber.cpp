@@ -2,7 +2,7 @@
 #include "../../AudioEngine.h"
 
 Bomber::Bomber(const std::string& name, float x, float y)
-   : Character(name, x, y, "bomber.png") {
+   : Character(name, x, y, "bomberOld.png") {
    drawPriority = DrawPriority::Character;
    health       = 1;
 }
