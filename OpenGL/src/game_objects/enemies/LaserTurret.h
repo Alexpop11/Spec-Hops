@@ -6,7 +6,7 @@
 #include "TurretHead.h"
 class LaserTurret : public Character {
 public:
-   Turret(const std::string& name, float x, float y);
+   LaserTurret(const std::string& name, float x, float y);
    virtual void update() override;
    virtual void tickUpdate() override;
    int          aimDirection_x = 0;
