@@ -4,7 +4,7 @@
 #include "../../World.h"
 #include "../Bullet.h"
 #include "TurretHead.h"
-class Turret : public Character {
+class LaserTurret : public Character {
 public:
    Turret(const std::string& name, float x, float y);
    virtual void update() override;
