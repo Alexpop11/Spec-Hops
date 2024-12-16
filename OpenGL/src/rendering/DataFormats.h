@@ -179,13 +179,10 @@ struct hash<ParticleVertex> {
 } // namespace std
 
 struct ParticleWorldInfo {
-   float     deltaTime; // at byte offset 0
-   float     _pad0;
-   glm::vec2 mousePos; // at byte offset 8
+   float deltaTime; // at byte offset 0
 
-   ParticleWorldInfo(float deltaTime, glm::vec2 mousePos)
-      : deltaTime(deltaTime)
-      , mousePos(mousePos) {}
+   ParticleWorldInfo(float deltaTime)
+      : deltaTime(deltaTime) {}
 };
 
 using ParticleLayout = BindGroupLayout<

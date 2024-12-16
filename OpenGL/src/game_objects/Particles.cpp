@@ -58,7 +58,7 @@ void Particles::pre_compute() {
 }
 
 void Particles::compute(Renderer& renderer, ComputePass& computePass) {
-   worldInfo.Update(ParticleWorldInfo(Input::deltaTime, Renderer::MousePos()));
+   worldInfo.Update(ParticleWorldInfo(Input::deltaTime));
    BindGroup bindGroup =
       ParticleComputeLayout::ToBindGroup(renderer.device, std::forward_as_tuple(*particleBuffer, 0), worldInfo,
                                          std::forward_as_tuple(segmentBuffer, 0), std::forward_as_tuple(bvhBuffer, 0));
