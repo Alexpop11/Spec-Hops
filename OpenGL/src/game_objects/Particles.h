@@ -7,7 +7,8 @@
 
 class Particles : public GameObject {
 public:
-   Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position, size_t particleCount, float initialSpeed = 2.0f);
+   Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position, size_t particleCount,
+             float initialSpeed = 2.0f);
    virtual void render(Renderer& renderer, RenderPass& renderPass) override;
    virtual void update() override;
    virtual void pre_compute() override;
@@ -25,6 +26,7 @@ private:
    UniformBufferView<ParticleVertexUniform> vertexUniform;
    UniformBufferView<ParticleWorldInfo>     worldInfo;
    size_t                                   particleCount;
+   float                                    initialSpeed;
 
 private:
 protected:

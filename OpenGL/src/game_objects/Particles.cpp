@@ -34,7 +34,8 @@ Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::ve
         "bvh"))
    , vertexUniform(UniformBufferView<ParticleVertexUniform>::create(ParticleVertexUniform{VP()}))
    , worldInfo(UniformBufferView<ParticleWorldInfo>::create(ParticleWorldInfo(0.01f)))
-   , particleCount(particleCount) {}
+   , particleCount(particleCount)
+   , initialSpeed(initialSpeed) {}
 
 void Particles::render(Renderer& renderer, RenderPass& renderPass) {
    if (particles.empty())
