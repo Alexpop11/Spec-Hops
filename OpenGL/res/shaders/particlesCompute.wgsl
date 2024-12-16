@@ -6,6 +6,8 @@ struct Particle {
     position : vec2<f32>,  // World space position
     velocity : vec2<f32>,
     color    : vec4<f32>,
+    age      : f32,
+    lifetime : f32,
 };
 
 struct Segment {
@@ -144,6 +146,9 @@ fn compute_main(@builtin(global_invocation_id) id : vec3<u32>) {
         // No collision, update particle position normally
         particleBuffer[index].position = newPosition;
     }
+    
+    // Update age
+    particleBuffer[index].age += world.deltaTime;
 }
 
 fn findWallCollision(particlePosition : vec2<f32>, newPosition : vec2<f32>) -> SegmentIntersection {

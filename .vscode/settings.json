@@ -92,7 +92,8 @@
         "ranges": "cpp",
         "cfenv": "cpp",
         "regex": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "*.inc": "cpp"
     },
     "files.exclude": {
         "build": true,

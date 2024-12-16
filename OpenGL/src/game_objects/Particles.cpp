@@ -4,7 +4,8 @@
 
 #include <random>
 
-Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position, size_t particleCount, float initialSpeed)
+Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position, size_t particleCount,
+                     float initialSpeed, float lifetime)
    : GameObject(name, drawPriority, position)
    , particles(std::vector<Particle>())
    , particleBuffer(std::make_shared<Buffer<Particle>>(
@@ -35,7 +36,8 @@ Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::ve
    , vertexUniform(UniformBufferView<ParticleVertexUniform>::create(ParticleVertexUniform{VP()}))
    , worldInfo(UniformBufferView<ParticleWorldInfo>::create(ParticleWorldInfo(0.01f)))
    , particleCount(particleCount)
-   , initialSpeed(initialSpeed) {}
+   , initialSpeed(initialSpeed)
+   , lifetime(lifetime) {}
 
 void Particles::render(Renderer& renderer, RenderPass& renderPass) {
    if (particles.empty())
@@ -87,12 +89,14 @@ void Particles::update() {
          random_vel *= initialSpeed; // Scale velocity by parameter
 
          addParticle(position + pos_offset, random_vel,
-                     glm::vec4(color_dist(gen), color_dist(gen), color_dist(gen), 1.0f));
+                     glm::vec4(color_dist(gen), color_dist(gen), color_dist(gen), 1.0f), 0.0f, lifetime);
       }
    }
 }
 
-void Particles::addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color) {
-   particles.push_back({pos, vel, color});
+void Particles::addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color, float age,
+                            float lifetime) {
+
+   particles.emplace_back(pos, vel, color, age, lifetime);
    particleViews.push_back(particleBuffer->Add(particles.back()));
 }

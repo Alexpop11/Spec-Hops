@@ -8,12 +8,13 @@
 class Particles : public GameObject {
 public:
    Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position, size_t particleCount,
-             float initialSpeed = 2.0f);
+             float initialSpeed = 2.0f, float lifetime = 2.0f);
    virtual void render(Renderer& renderer, RenderPass& renderPass) override;
    virtual void update() override;
    virtual void pre_compute() override;
    virtual void compute(Renderer& renderer, ComputePass& computePass) override;
-   void         addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color);
+   void         addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color, 
+                           float age, float lifetime);
 
 private:
    std::vector<Particle>                    particles;
@@ -27,6 +28,7 @@ private:
    UniformBufferView<ParticleWorldInfo>     worldInfo;
    size_t                                   particleCount;
    float                                    initialSpeed;
+   float                                    lifetime;
 
 private:
 protected:

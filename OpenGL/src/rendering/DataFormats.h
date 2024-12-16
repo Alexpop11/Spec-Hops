@@ -152,6 +152,16 @@ struct Particle {
    glm::vec2 position;
    glm::vec2 velocity;
    glm::vec4 color;
+   float     age;
+   float     lifetime;
+   float     _pad0[2];
+
+   Particle(glm::vec2 position, glm::vec2 velocity, glm::vec4 color, float age, float lifetime)
+      : position(position)
+      , velocity(velocity)
+      , color(color)
+      , age(age)
+      , lifetime(lifetime) {}
 
    typedef InstanceBufferLayout<glm::vec2> Layout;
 };
