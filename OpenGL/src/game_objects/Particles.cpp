@@ -4,7 +4,7 @@
 
 #include <random>
 
-Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position, size_t particleCount)
+Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position, size_t particleCount, float initialSpeed)
    : GameObject(name, drawPriority, position)
    , particles(std::vector<Particle>())
    , particleBuffer(std::make_shared<Buffer<Particle>>(
@@ -83,7 +83,7 @@ void Particles::update() {
          // Random position offset from center
          glm::vec2 pos_offset(pos_dist(gen), pos_dist(gen));
          glm::vec2 random_vel(vel_dist(gen), vel_dist(gen));
-         random_vel *= 2.0f; // Scale velocity
+         random_vel *= initialSpeed; // Scale velocity by parameter
 
          addParticle(position + pos_offset, random_vel,
                      glm::vec4(color_dist(gen), color_dist(gen), color_dist(gen), 1.0f));
