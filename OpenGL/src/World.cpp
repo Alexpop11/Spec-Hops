@@ -55,7 +55,7 @@ void World::LoadMap(const std::filesystem::path& map_path) {
                gameobjects.push_back(std::make_shared<Player>("Coolbox", (float)x, (float)y));
                gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));
                gameobjects.push_back(
-                  std::make_shared<Particles>("Floor", DrawPriority::Character, glm::vec2(x, y), 1000, 8.0f, 4.0f));
+                  std::make_shared<Particles>("Floor", DrawPriority::Character, glm::vec2(x, y), 1000, 8.0f, 8.0f));
             }
             if (c == 'f') { // floor
                gameobjects.push_back(std::make_shared<Tile>("Floor", (float)x, (float)y));

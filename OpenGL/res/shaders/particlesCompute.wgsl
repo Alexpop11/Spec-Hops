@@ -129,7 +129,7 @@ fn compute_main(@builtin(global_invocation_id) id : vec3<u32>) {
     
     if (intersection.hit) {
         // Bounce coefficient (1.0 = perfect bounce, 0.0 = full stop)
-        let bounce = 0.8;
+        let bounce = 0.2;
         
         // Calculate reflection vector
         let v = particleBuffer[index].velocity;
@@ -146,7 +146,7 @@ fn compute_main(@builtin(global_invocation_id) id : vec3<u32>) {
         // No collision, update particle position normally
         particleBuffer[index].position = newPosition;
     }
-    
+
     // Update age
     particleBuffer[index].age += world.deltaTime;
 }

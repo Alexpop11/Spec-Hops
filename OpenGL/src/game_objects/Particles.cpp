@@ -76,6 +76,7 @@ void Particles::update() {
       std::uniform_real_distribution<> pos_dist(-1.0, 1.0);
       std::uniform_real_distribution<> vel_dist(-0.5, 0.5);
       std::uniform_real_distribution<> color_dist(0.0, 1.0);
+      std::uniform_real_distribution<> lifetime_dist(lifetime * 0.7f, lifetime * 1.3f); // 30% variation
 
       // Reserve space for better performance
       particles.reserve(particleCount);
@@ -88,8 +89,9 @@ void Particles::update() {
          glm::vec2 random_vel(vel_dist(gen), vel_dist(gen));
          random_vel *= initialSpeed; // Scale velocity by parameter
 
+         float random_lifetime = lifetime_dist(gen);
          addParticle(position + pos_offset, random_vel,
-                     glm::vec4(color_dist(gen), color_dist(gen), color_dist(gen), 1.0f), 0.0f, lifetime);
+                     glm::vec4(color_dist(gen), color_dist(gen), color_dist(gen), 1.0f), 0.0f, random_lifetime);
       }
    }
 }
