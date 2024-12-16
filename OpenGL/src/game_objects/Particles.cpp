@@ -36,7 +36,7 @@ Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::ve
       {}, wgpu::bothBufferUsages(wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Storage),
       "bvh")),
    vertexUniform(UniformBufferView<ParticleVertexUniform>::create(ParticleVertexUniform{VP()})),
-   worldInfo(UniformBufferView<ParticleWorldInfo>::create(ParticleWorldInfo(0.0f, glm::vec2(0.0f)))) {}
+   worldInfo(UniformBufferView<ParticleWorldInfo>::create(ParticleWorldInfo(0.01f))) {}
 
 void Particles::render(Renderer& renderer, RenderPass& renderPass) {
    if (particles.empty())
