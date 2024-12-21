@@ -430,6 +430,13 @@ ImFont* load_font(std::filesystem::path res_path, ImGuiIO* io, const std::string
 
 bool Application::initialized = false;
 
+#ifdef __EMSCRIPTEN__
+EM_JS(void, print_memory_consumption, (), {
+   console.log('Current heap size:', HEAP8.length);
+   console.log('Memory used:', HEAPU8.buffer.byteLength);
+});
+#endif
+
 // Initialize everything and return true if it went all right
 Application::Application()
    : res_path(getResPath())
@@ -468,6 +475,9 @@ Application::Application()
       assert(false);
    } else {
       std::cout << "Application initialized" << std::endl;
+#ifdef __EMSCRIPTEN__
+      print_memory_consumption();
+#endif
    }
 
    initialized = true;
