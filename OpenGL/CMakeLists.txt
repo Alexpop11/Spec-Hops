@@ -99,6 +99,7 @@ if (EMSCRIPTEN)
 	target_link_options(${PROJECT_NAME} PRIVATE
 		-sASYNCIFY
 		--preload-file "${CMAKE_CURRENT_SOURCE_DIR}/res"
+        -sALLOW_MEMORY_GROWTH=1
         --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/../web/template.html
 	)
     # TODO: It would be cool to add  -fno-exceptions -fno-rtti
