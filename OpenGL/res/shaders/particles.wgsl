@@ -2,6 +2,8 @@ struct Particle {
     @location(1) position: vec2<f32>,  // World space position
     @location(2) velocity: vec2<f32>,
     @location(3) color: vec4<f32>,
+    @location(4) age: f32,
+    @location(5) lifetime: f32,
 };
 
 struct VertexInput {
@@ -34,7 +36,10 @@ fn vertex_main(vertex: VertexInput, particle: Particle) -> VertexOutput {
     
     // Transform from world space to clip space using world_to_clip matrix
     output.Position = vertexUniforms.world_to_clip * vec4<f32>(world_pos, 0.0, 1.0);
-    output.color = particle.color;
+    // Calculate opacity based on remaining lifetime
+    var finalColor = particle.color;
+    finalColor.a *= 1.0 - clamp(particle.age / particle.lifetime, 0.0, 1.0);
+    output.color = finalColor;
     return output;
 }
 

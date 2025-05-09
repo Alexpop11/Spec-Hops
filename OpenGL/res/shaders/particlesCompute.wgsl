@@ -1,12 +1,13 @@
 struct WorldInfo {
     deltaTime : f32,
-    mousePos  : vec2<f32>,
 };
 
 struct Particle {
     position : vec2<f32>,  // World space position
     velocity : vec2<f32>,
     color    : vec4<f32>,
+    age      : f32,
+    lifetime : f32,
 };
 
 struct Segment {
@@ -120,18 +121,7 @@ fn compute_main(@builtin(global_invocation_id) id : vec3<u32>) {
 
     let particle = &particleBuffer[index];
 
-    // Calculate direction to mouse
-    let toMouse = world.mousePos - particle.position;
-    let distanceSquared = max(dot2D(toMouse, toMouse), MIN_DISTANCE_SQUARED);
-
-    // Calculate gravitational force (F = G * m1 * m2 / r^2)
-    // Since mass is uniform we can simplify
-    let force = normalize(toMouse) * G / distanceSquared;
-
-    // Update velocity (a = F/m, simplified since mass = 1)
-    particleBuffer[index].velocity += force * world.deltaTime;
-
-    // New position based on velocity
+    // New position based on current velocity
     let newPosition = particle.position + particleBuffer[index].velocity * world.deltaTime;
 
     // Check for collision with walls
@@ -139,7 +129,7 @@ fn compute_main(@builtin(global_invocation_id) id : vec3<u32>) {
     
     if (intersection.hit) {
         // Bounce coefficient (1.0 = perfect bounce, 0.0 = full stop)
-        let bounce = 0.8;
+        let bounce = 0.2;
         
         // Calculate reflection vector
         let v = particleBuffer[index].velocity;
@@ -156,6 +146,9 @@ fn compute_main(@builtin(global_invocation_id) id : vec3<u32>) {
         // No collision, update particle position normally
         particleBuffer[index].position = newPosition;
     }
+
+    // Update age
+    particleBuffer[index].age += world.deltaTime;
 }
 
 fn findWallCollision(particlePosition : vec2<f32>, newPosition : vec2<f32>) -> SegmentIntersection {

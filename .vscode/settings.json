@@ -92,11 +92,11 @@
         "ranges": "cpp",
         "cfenv": "cpp",
         "regex": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "*.inc": "cpp"
     },
     "files.exclude": {
         "build": true,
-        "OpenGL/vendor": true,
     },
     "C_Cpp.default.cppStandard": "c++20"
 }

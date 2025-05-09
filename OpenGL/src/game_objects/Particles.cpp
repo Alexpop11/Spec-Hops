@@ -4,39 +4,40 @@
 
 #include <random>
 
-Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position)
+Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position, size_t particleCount,
+                     float initialSpeed, float lifetime)
    : GameObject(name, drawPriority, position)
-   , particles(std::vector<Particle>{
-        Particle{position + glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f)},
-        Particle{position + glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)}
-}),
-   particleBuffer(
-      std::make_shared<Buffer<Particle>>(particles,
-                                         wgpu::bothBufferUsages(wgpu::BufferUsage::Vertex, wgpu::BufferUsage::CopyDst,
-                                                                wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::Storage),
-                                         "Particles")),
-   pointBuffer(Buffer<ParticleVertex>::create(
-      {
-         ParticleVertex{glm::vec2(-0.5f, -0.5f) * (1.0f / 16.0f)}, // 0
-         ParticleVertex{glm::vec2(0.5f, -0.5f) * (1.0f / 16.0f)},  // 1
-         ParticleVertex{glm::vec2(0.5f, 0.5f) * (1.0f / 16.0f)},   // 2
-         ParticleVertex{glm::vec2(-0.5f, 0.5f) * (1.0f / 16.0f)},  // 3
-      },
-      wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Vertex))),
-   indexBuffer(IndexBuffer::create(
-      {
-         0, 1, 2, // Triangle #0 connects points #0, #1 and #2
-         0, 2, 3  // Triangle #1 connects points #0, #2 and #3
-      },
-      wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index))),
-   segmentBuffer(Buffer<Segment>(
-      {}, wgpu::bothBufferUsages(wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Storage),
-      "segments")),
-   bvhBuffer(Buffer<BvhNode>(
-      {}, wgpu::bothBufferUsages(wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Storage),
-      "bvh")),
-   vertexUniform(UniformBufferView<ParticleVertexUniform>::create(ParticleVertexUniform{VP()})),
-   worldInfo(UniformBufferView<ParticleWorldInfo>::create(ParticleWorldInfo(0.0f, glm::vec2(0.0f)))) {}
+   , particles(std::vector<Particle>())
+   , particleBuffer(std::make_shared<Buffer<Particle>>(
+        particles,
+        wgpu::bothBufferUsages(wgpu::BufferUsage::Vertex, wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::CopySrc,
+                               wgpu::BufferUsage::Storage),
+        "Particles"))
+   , pointBuffer(Buffer<ParticleVertex>::create(
+        {
+           ParticleVertex{glm::vec2(-0.5f, -0.5f) * (1.0f / 16.0f)}, // 0
+           ParticleVertex{glm::vec2(0.5f, -0.5f) * (1.0f / 16.0f)},  // 1
+           ParticleVertex{glm::vec2(0.5f, 0.5f) * (1.0f / 16.0f)},   // 2
+           ParticleVertex{glm::vec2(-0.5f, 0.5f) * (1.0f / 16.0f)},  // 3
+        },
+        wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Vertex)))
+   , indexBuffer(IndexBuffer::create(
+        {
+           0, 1, 2, // Triangle #0 connects points #0, #1 and #2
+           0, 2, 3  // Triangle #1 connects points #0, #2 and #3
+        },
+        wgpu::bothBufferUsages(wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Index)))
+   , segmentBuffer(Buffer<Segment>(
+        {}, wgpu::bothBufferUsages(wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Storage),
+        "segments"))
+   , bvhBuffer(Buffer<BvhNode>(
+        {}, wgpu::bothBufferUsages(wgpu::BufferUsage::CopySrc, wgpu::BufferUsage::CopyDst, wgpu::BufferUsage::Storage),
+        "bvh"))
+   , vertexUniform(UniformBufferView<ParticleVertexUniform>::create(ParticleVertexUniform{VP()}))
+   , worldInfo(UniformBufferView<ParticleWorldInfo>::create(ParticleWorldInfo(0.01f)))
+   , particleCount(particleCount)
+   , initialSpeed(initialSpeed)
+   , lifetime(lifetime) {}
 
 void Particles::render(Renderer& renderer, RenderPass& renderPass) {
    if (particles.empty())
@@ -58,7 +59,7 @@ void Particles::pre_compute() {
 }
 
 void Particles::compute(Renderer& renderer, ComputePass& computePass) {
-   worldInfo.Update(ParticleWorldInfo(Input::deltaTime, Renderer::MousePos()));
+   worldInfo.Update(ParticleWorldInfo(Input::deltaTime));
    BindGroup bindGroup =
       ParticleComputeLayout::ToBindGroup(renderer.device, std::forward_as_tuple(*particleBuffer, 0), worldInfo,
                                          std::forward_as_tuple(segmentBuffer, 0), std::forward_as_tuple(bvhBuffer, 0));
@@ -66,21 +67,38 @@ void Particles::compute(Renderer& renderer, ComputePass& computePass) {
 }
 
 void Particles::update() {
-   // add a particle if the p key is pressed
-   if (Input::keys_pressed[GLFW_KEY_P]) {
+   // Initialize particles if we haven't yet
+   if (particles.empty()) {
       std::random_device rd;
       std::mt19937       gen(rd()); // Mersenne Twister generator
 
-      // Define distribution from 0 to 1
+      // Define distributions
+      std::uniform_real_distribution<> pos_dist(-1.0, 1.0);
       std::uniform_real_distribution<> vel_dist(-0.5, 0.5);
       std::uniform_real_distribution<> color_dist(0.0, 1.0);
+      std::uniform_real_distribution<> lifetime_dist(lifetime * 0.7f, lifetime * 1.3f); // 30% variation
 
-      auto random_vel = glm::vec2(vel_dist(gen), vel_dist(gen)) * 2.0f;
-      addParticle(position, random_vel, glm::vec4(color_dist(gen), color_dist(gen), color_dist(gen), 1.0f));
+      // Reserve space for better performance
+      particles.reserve(particleCount);
+      particleViews.reserve(particleCount);
+
+      // Create all particles
+      for (size_t i = 0; i < particleCount; ++i) {
+         // Random position offset from center
+         glm::vec2 pos_offset(pos_dist(gen), pos_dist(gen));
+         glm::vec2 random_vel(vel_dist(gen), vel_dist(gen));
+         random_vel *= initialSpeed; // Scale velocity by parameter
+
+         float random_lifetime = lifetime_dist(gen);
+         addParticle(position + pos_offset, random_vel,
+                     glm::vec4(color_dist(gen), color_dist(gen), color_dist(gen), 1.0f), 0.0f, random_lifetime);
+      }
    }
 }
 
-void Particles::addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color) {
-   particles.push_back({pos, vel, color});
+void Particles::addParticle(const glm::vec2& pos, const glm::vec2& vel, const glm::vec4& color, float age,
+                            float lifetime) {
+
+   particles.emplace_back(pos, vel, color, age, lifetime);
    particleViews.push_back(particleBuffer->Add(particles.back()));
 }

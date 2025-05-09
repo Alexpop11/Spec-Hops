@@ -152,6 +152,16 @@ struct Particle {
    glm::vec2 position;
    glm::vec2 velocity;
    glm::vec4 color;
+   float     age;
+   float     lifetime;
+   float     _pad0[2];
+
+   Particle(glm::vec2 position, glm::vec2 velocity, glm::vec4 color, float age, float lifetime)
+      : position(position)
+      , velocity(velocity)
+      , color(color)
+      , age(age)
+      , lifetime(lifetime) {}
 
    typedef InstanceBufferLayout<glm::vec2> Layout;
 };
@@ -179,13 +189,10 @@ struct hash<ParticleVertex> {
 } // namespace std
 
 struct ParticleWorldInfo {
-   float     deltaTime; // at byte offset 0
-   float     _pad0;
-   glm::vec2 mousePos; // at byte offset 8
+   float deltaTime; // at byte offset 0
 
-   ParticleWorldInfo(float deltaTime, glm::vec2 mousePos)
-      : deltaTime(deltaTime)
-      , mousePos(mousePos) {}
+   ParticleWorldInfo(float deltaTime)
+      : deltaTime(deltaTime) {}
 };
 
 using ParticleLayout = BindGroupLayout<

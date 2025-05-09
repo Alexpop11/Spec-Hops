@@ -32,13 +32,14 @@ endif()
 file(GLOB_RECURSE res_files "res/*")
 
 # Add WebGPU
-# Also adds Add GLFW
+# Also adds GLFW
 FetchContent_Declare(
   webgpu
   GIT_REPOSITORY https://github.com/anchpop/WebGPU-distribution.git
-  GIT_TAG        257f230bdad880339eef961b7ff5974a04e30dc5
+  GIT_TAG        2f6b3ec866a0c579782b759ef79649dae57ffc9b
 )
 FetchContent_MakeAvailable(webgpu)
+
 
 add_subdirectory(${VENDOR_DIR}/glfw3webgpu)
 
