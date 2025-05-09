@@ -124,7 +124,7 @@ jobs:
           submodules: recursive
 
       - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v11
+        uses: mymindstorm/setup-emsdk@v14
 
       - name: Install dependencies
         run: |
@@ -155,10 +155,9 @@ jobs:
         if: github.event_name == 'release'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './web_build'
+          path: "./web_build"
 
       - name: Deploy to GitHub Pages
         id: deployment
         if: github.event_name == 'release'
         uses: actions/deploy-pages@v4
-
