@@ -249,8 +249,6 @@ wgpu::RequiredLimits getRequiredLimits(wgpu::Adapter& adapter) {
 
    // We use at most 2 vertex attribute for now
    requiredLimits.limits.maxVertexAttributes = 2;
-   // We also never transfer more than 3 components between stages
-   requiredLimits.limits.maxInterStageShaderComponents = 3;
    // We should also tell that we use 1 vertex buffers
    requiredLimits.limits.maxVertexBuffers = 1;
    // Maximum size of a buffer is 6 vertices of 2 float each
