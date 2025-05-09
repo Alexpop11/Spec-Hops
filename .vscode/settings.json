@@ -97,7 +97,6 @@
     },
     "files.exclude": {
         "build": true,
-        "OpenGL/vendor": true,
     },
     "C_Cpp.default.cppStandard": "c++20"
 }
