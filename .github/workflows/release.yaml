@@ -46,6 +46,14 @@ jobs:
           git submodule update --init --recursive
           git submodule status
 
+      - name: Cache native build
+        uses: actions/cache@v4
+        with:
+          path: build # will be created on first run
+          key: ${{ matrix.output_name }}-build-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
+          restore-keys: |
+            ${{ matrix.output_name }}-build-
+
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -126,11 +134,22 @@ jobs:
       - name: Setup Emscripten
         uses: mymindstorm/setup-emsdk@v14
 
+      - name: Verify Emscripten version
+        run: emcc -v
+
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libwayland-dev libxkbcommon-dev xorg-dev libglu1-mesa-dev
           sudo apt-get install libxrandr-dev libxinerama-dev libxcursor-dev mesa-common-dev libx11-xcb-dev pkg-config nodejs npm
+
+      - name: Cache web build
+        uses: actions/cache@v4
+        with:
+          path: build_emscripten
+          key: web-build-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
+          restore-keys: |
+            web-build-
 
       - name: Configure and Build with Emscripten
         run: |
