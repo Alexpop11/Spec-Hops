@@ -40,6 +40,22 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(webgpu)
 
+# Force Dawn-related targets to use Release optimizations
+get_property(all_targets DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
+foreach(target ${all_targets})
+    get_target_property(target_type ${target} TYPE)
+    if(NOT target_type STREQUAL "INTERFACE_LIBRARY")
+        get_target_property(target_name ${target} NAME)
+        if(target_name MATCHES "dawn|webgpu")
+            if(MSVC)
+                target_compile_options(${target} PRIVATE /O2 /DNDEBUG)
+            else()
+                target_compile_options(${target} PRIVATE -O3 -DNDEBUG)
+            endif()
+        endif()
+    endif()
+endforeach()
+
 
 add_subdirectory(${VENDOR_DIR}/glfw3webgpu)
 
