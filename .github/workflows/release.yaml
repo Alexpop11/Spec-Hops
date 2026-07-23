@@ -152,16 +152,11 @@ jobs:
           sudo apt-get install -y cmake ninja-build libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libwayland-dev libxkbcommon-dev xorg-dev libglu1-mesa-dev
           sudo apt-get install libxrandr-dev libxinerama-dev libxcursor-dev mesa-common-dev libx11-xcb-dev pkg-config nodejs npm
 
-      - name: Cache web build
-        uses: actions/cache@v6
-        with:
-          path: build_emscripten
-          # Emscripten version is in the key so bumping the toolchain evicts any
-          # build dir configured against the previous version's absolute paths.
-          key: web-build-emscripten-${{ env.EMSCRIPTEN_VERSION }}-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
-          restore-keys: |
-            web-build-emscripten-${{ env.EMSCRIPTEN_VERSION }}-
-
+      # NOTE: the emscripten build dir is intentionally NOT cached. setup-emsdk
+      # installs the toolchain under a fresh per-run temp path, and CMake bakes
+      # that absolute emcc path into build_emscripten/CMakeCache.txt, so a
+      # restored dir points at a previous run's now-deleted emsdk and fails to
+      # configure. A clean web configure is cheap enough to just run every time.
       - name: Configure and Build with Emscripten
         run: |
           emcmake cmake -S . -B build_emscripten -DCMAKE_BUILD_TYPE=Release
