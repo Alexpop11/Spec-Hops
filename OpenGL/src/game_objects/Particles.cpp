@@ -5,7 +5,7 @@
 #include <random>
 
 Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position, size_t particleCount,
-                     float initialSpeed, float lifetime)
+                     float initialSpeed, float lifetime, bool autoDestroy, bool interactive)
    : GameObject(name, drawPriority, position)
    , particles(std::vector<Particle>())
    , particleBuffer(std::make_shared<Buffer<Particle>>(
@@ -37,7 +37,10 @@ Particles::Particles(const std::string& name, DrawPriority drawPriority, glm::ve
    , worldInfo(UniformBufferView<ParticleWorldInfo>::create(ParticleWorldInfo(0.01f)))
    , particleCount(particleCount)
    , initialSpeed(initialSpeed)
-   , lifetime(lifetime) {}
+   , lifetime(lifetime)
+   , spawnTime(0.0f)
+   , autoDestroy(autoDestroy)
+   , interactive(interactive) {}
 
 void Particles::render(Renderer& renderer, RenderPass& renderPass) {
    if (particles.empty())
@@ -69,6 +72,7 @@ void Particles::compute(Renderer& renderer, ComputePass& computePass) {
 void Particles::update() {
    // Initialize particles if we haven't yet
    if (particles.empty()) {
+      spawnTime = Input::currentTime;
       std::random_device rd;
       std::mt19937       gen(rd()); // Mersenne Twister generator
 
@@ -93,6 +97,22 @@ void Particles::update() {
          addParticle(position + pos_offset, random_vel,
                      glm::vec4(color_dist(gen), color_dist(gen), color_dist(gen), 1.0f), 0.0f, random_lifetime);
       }
+   } else if (autoDestroy && Input::currentTime - spawnTime > lifetime * 1.3f) {
+      // All particles have faded out by now, clean up the burst
+      ShouldDestroy = true;
+   }
+
+   // Just for fun: shoot a particle out whenever P is pressed
+   if (interactive && Input::keys_pressed[GLFW_KEY_P]) {
+      std::random_device rd;
+      std::mt19937       gen(rd()); // Mersenne Twister generator
+
+      std::uniform_real_distribution<> vel_dist(-0.5, 0.5);
+      std::uniform_real_distribution<> color_dist(0.0, 1.0);
+
+      glm::vec2 random_vel = glm::vec2(vel_dist(gen), vel_dist(gen)) * initialSpeed;
+      addParticle(position, random_vel, glm::vec4(color_dist(gen), color_dist(gen), color_dist(gen), 1.0f), 0.0f,
+                  lifetime);
    }
 }
 

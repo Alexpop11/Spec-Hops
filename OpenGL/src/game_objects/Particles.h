@@ -8,7 +8,7 @@
 class Particles : public GameObject {
 public:
    Particles(const std::string& name, DrawPriority drawPriority, glm::vec2 position, size_t particleCount,
-             float initialSpeed = 2.0f, float lifetime = 2.0f);
+             float initialSpeed = 2.0f, float lifetime = 2.0f, bool autoDestroy = true, bool interactive = false);
    virtual void render(Renderer& renderer, RenderPass& renderPass) override;
    virtual void update() override;
    virtual void pre_compute() override;
@@ -29,6 +29,9 @@ private:
    size_t                                   particleCount;
    float                                    initialSpeed;
    float                                    lifetime;
+   float                                    spawnTime;
+   bool                                     autoDestroy;
+   bool                                     interactive;
 
 private:
 protected:

@@ -4,6 +4,7 @@
 #include "Tile.h"
 #include "AudioEngine.h"
 #include "Decal.h"
+#include "Particles.h"
 
 Bomb::Bomb(const std::string& name, float x, float y)
    : Entity(name, DrawPriority::Bomb, x, y, "bomb.png") {
@@ -40,6 +41,8 @@ void Bomb::explode() {
    audio().Bomb_Sound.play();
    World::gameobjectstoadd.push_back(std::make_unique<Decal>("ExplosionDecal", getTile().x, getTile().y, "crater"));
    World::gameobjectstoadd.push_back(std::make_unique<Decal>("ExplosionDecal", getTile().x, getTile().y, "explosion"));
+   World::gameobjectstoadd.push_back(std::make_unique<Particles>("ExplosionParticles", DrawPriority::CharacterAccent,
+                                                                  glm::vec2(getTile().x, getTile().y), 40, 6.0f, 0.5f));
    ShouldDestroy = true;
 }
 
