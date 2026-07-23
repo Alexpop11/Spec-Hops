@@ -62,6 +62,12 @@ void Particles::pre_compute() {
 }
 
 void Particles::compute(Renderer& renderer, ComputePass& computePass) {
+   // Nothing to simulate until the particles are populated (the first update()).
+   // Binding the empty particle buffer would be a zero-size binding, which is a
+   // fatal validation error under WebGPU. Mirrors the guard in render().
+   if (particles.empty())
+      return;
+
    worldInfo.Update(ParticleWorldInfo(Input::deltaTime));
    BindGroup bindGroup =
       ParticleComputeLayout::ToBindGroup(renderer.device, std::forward_as_tuple(*particleBuffer, 0), worldInfo,
