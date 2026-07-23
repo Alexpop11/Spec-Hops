@@ -17,11 +17,21 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  # Single source of truth for the Emscripten version. Pinned to match the
+  # WebGPU-distribution snapshot vendored in this project (see the build tree's
+  # _deps/webgpu-src/emscripten-git-tag.txt). Newer Emscripten dropped the
+  # bundled <webgpu/webgpu.h> that the snapshot's -sUSE_WEBGPU path relies on,
+  # in favor of --use-port=emdawnwebgpu. Also feeds the web cache key so a
+  # version change invalidates any stale toolchain-configured build dir.
+  EMSCRIPTEN_VERSION: "3.1.66"
+
 jobs:
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
@@ -37,7 +47,7 @@ jobs:
 
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -47,12 +57,15 @@ jobs:
           git submodule status
 
       - name: Cache native build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: build # will be created on first run
-          key: ${{ matrix.output_name }}-build-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
+          # The -v2 namespace evicts caches configured with the old pinned VS17
+          # generator; a restored CMakeCache.txt from a different generator would
+          # otherwise conflict with the runner's current default VS generator.
+          key: ${{ matrix.output_name }}-build-v2-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
           restore-keys: |
-            ${{ matrix.output_name }}-build-
+            ${{ matrix.output_name }}-build-v2-
 
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -73,17 +86,11 @@ jobs:
 
       - name: Configure CMake (Windows)
         if: matrix.os == 'windows-latest'
-        run: |
-          mkdir build
-          cd build
-          cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release ..
+        run: cmake -S . -B build -A x64 -DCMAKE_BUILD_TYPE=Release
 
       - name: Configure CMake (Others)
         if: matrix.os != 'windows-latest'
-        run: |
-          mkdir build
-          cd build
-          cmake -GNinja -DCMAKE_BUILD_TYPE=Release ${{ matrix.os == 'macos-latest' && format('-DCMAKE_OSX_ARCHITECTURES={0}', matrix.arch) || '' }} ..
+        run: cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release ${{ matrix.os == 'macos-latest' && format('-DCMAKE_OSX_ARCHITECTURES={0}', matrix.arch) || '' }}
 
       - name: Build
         run: |
@@ -127,12 +134,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
       - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v14
+        uses: mymindstorm/setup-emsdk@v16
+        with:
+          version: ${{ env.EMSCRIPTEN_VERSION }}
 
       - name: Verify Emscripten version
         run: emcc -v
@@ -144,18 +153,19 @@ jobs:
           sudo apt-get install libxrandr-dev libxinerama-dev libxcursor-dev mesa-common-dev libx11-xcb-dev pkg-config nodejs npm
 
       - name: Cache web build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: build_emscripten
-          key: web-build-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
+          # Emscripten version is in the key so bumping the toolchain evicts any
+          # build dir configured against the previous version's absolute paths.
+          key: web-build-emscripten-${{ env.EMSCRIPTEN_VERSION }}-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
           restore-keys: |
-            web-build-
+            web-build-emscripten-${{ env.EMSCRIPTEN_VERSION }}-
 
       - name: Configure and Build with Emscripten
         run: |
-          mkdir build_emscripten && cd build_emscripten
-          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
-          emmake make
+          emcmake cmake -S . -B build_emscripten -DCMAKE_BUILD_TYPE=Release
+          emmake make -C build_emscripten
 
       - name: Prepare Web Build
         run: |
@@ -168,15 +178,15 @@ jobs:
 
       - name: Setup Pages
         if: github.event_name == 'release'
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload artifact
         if: github.event_name == 'release'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: "./web_build"
 
       - name: Deploy to GitHub Pages
         id: deployment
         if: github.event_name == 'release'
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
